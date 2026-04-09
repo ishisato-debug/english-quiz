@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>えいごべんきょう</title>
+    <style>
+        body {
+            font-family: 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+            text-align: center;
+            background-color: #fffaf0;
+            background-image: radial-gradient(#ffdfba 1px, transparent 1px);
+            background-size: 20px 20px;
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        h1 {
+            color: #ff69b4;
+            font-size: 28px;
+            margin-bottom: 40px;
+            text-shadow: 1px 1px white;
+        }
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+        .menu-btn {
+            display: block;
+            width: 100%;
+            padding: 30px 20px;
+            font-size: 22px;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.15);
+            transition: 0.1s;
+        }
+        .menu-btn:active { box-shadow: none; transform: translateY(8px); }
+        .btn-quiz {
+            background-color: #ff69b4;
+            color: white;
+        }
+        .btn-karuta {
+            background-color: #4db8ff;
+            color: white;
+        }
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.85;
+            margin-top: 6px;
+        }
+    </style>
+</head>
+<body>
+    <h1>✨ えいごべんきょう ✨</h1>
+    <div class="menu">
+        <a class="menu-btn btn-quiz" href="quiz.html">
+            am / is / are クイズ<br>
+            <span class="subtitle">be動詞をえらぼう！</span>
+        </a>
+        <a class="menu-btn btn-karuta" href="karuta.html">
+            えいごかるた<br>
+            <span class="subtitle">96このたんごをおぼえよう！</span>
+        </a>
+    </div>
+</body>
+</html>
