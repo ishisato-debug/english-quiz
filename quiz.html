@@ -30,10 +30,9 @@
             justify-content: space-between;
         }
         .sentence-box {
-            /* clamp: 最小16px、画面幅の4%、最大28px */
-            font-size: clamp(16px, 4vw, 28px);
+            font-size: clamp(20px, 5vw, 32px);
             font-weight: bold;
-            line-height: 2;
+            line-height: 2.2;
             margin: 20px 0;
             flex-grow: 1;
             display: flex;
@@ -42,12 +41,11 @@
             justify-content: center;
             padding: 0 5px;
         }
-        /* 各文は折り返しOK。ただし中央揃えで表示 */
         .sentence-unit {
             display: block;
-            word-break: keep-all; /* 単語の途中で切らない */
+            word-break: keep-all;
             overflow-wrap: break-word;
-            margin: 4px 0;
+            margin: 6px 0;
             max-width: 100%;
         }
         /* 空欄（カッコ）だけは絶対に分割しない */
@@ -187,6 +185,15 @@
             };
             playNote(659.25, ctx.currentTime, 0.3);
             playNote(523.25, ctx.currentTime + 0.15, 0.5);
+            // 「ピンポン！」と読み上げ
+            setTimeout(() => {
+                const u = new SpeechSynthesisUtterance('ピンポン！');
+                u.lang = 'ja-JP';
+                u.rate = 1.1;
+                u.pitch = 1.3;
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(u);
+            }, 400);
         }
 
         function playBubu() {
@@ -243,8 +250,14 @@
             const blank = `<span class="blank-wrapper">(&nbsp;&nbsp;&nbsp;)</span>`;
             let rawText = q.q ? `${blank} ${q.p}` : `${q.s} ${blank} ${q.p}`;
 
-            const sentences = rawText.match(/.*?[.!?](?!\s*(?:Smith|Jones|Brown|Green|White))/g) || [rawText];
-            const html = sentences.map(s => `<span class="sentence-unit">${s.trim()}</span>`).join('');
+            // Ms./Mr.などの略語ピリオドを一時退避してから文分割
+            const escaped = rawText.replace(/\b(Ms|Mr|Mrs|Dr)\./g, '$1\u2024');
+            const sentences = escaped.match(/[^.!?]*[.!?]+/g) || [escaped];
+            const html = sentences
+                .map(s => s.replace(/\u2024/g, '.').trim())
+                .filter(s => s.length > 0)
+                .map(s => `<span class="sentence-unit">${s}</span>`)
+                .join('');
 
             document.getElementById('sentence').innerHTML = html;
             document.getElementById('feedback').innerText = '';
