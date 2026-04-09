@@ -22,15 +22,16 @@
             border-radius: 40px;
             padding: 20px;
             box-shadow: 0 10px 0 #ffb6c1;
-            max-width: 900px; /* 横幅を十分に確保 */
+            max-width: 900px;
             margin: 0 auto;
-            min-height: 450px;
+            min-height: 420px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
         .sentence-box {
-            font-size: 28px;
+            /* clamp: 最小16px、画面幅の4%、最大28px */
+            font-size: clamp(16px, 4vw, 28px);
             font-weight: bold;
             line-height: 2;
             margin: 20px 0;
@@ -39,35 +40,39 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            padding: 0 5px;
         }
-        /* 一文を定義するクラス：途中で絶対に改行させない */
+        /* 各文は折り返しOK。ただし中央揃えで表示 */
         .sentence-unit {
-            white-space: nowrap;
             display: block;
-            width: fit-content;
-            margin: 5px 0;
+            word-break: keep-all; /* 単語の途中で切らない */
+            overflow-wrap: break-word;
+            margin: 4px 0;
+            max-width: 100%;
         }
+        /* 空欄（カッコ）だけは絶対に分割しない */
         .blank-wrapper {
             color: #ff1493;
-            margin: 0 10px;
+            margin: 0 6px;
             display: inline-block;
+            white-space: nowrap;
         }
         .btn-group {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
             align-items: center;
         }
         .choice-container {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 12px;
             width: 100%;
         }
         .choice-btn {
             padding: 15px 0;
-            width: 110px;
-            font-size: 30px;
+            width: 100px;
+            font-size: 26px;
             font-weight: bold;
             cursor: pointer;
             border: none;
@@ -85,8 +90,8 @@
             background-color: #ffefd5;
             border: 3px solid #ffa500;
             border-radius: 50px;
-            padding: 10px 30px;
-            font-size: 20px;
+            padding: 10px 28px;
+            font-size: 18px;
             font-weight: bold;
             cursor: pointer;
             color: #d2691e;
@@ -95,26 +100,26 @@
         .nav-container {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 12px;
             margin-top: 15px;
         }
         .nav-btn {
-            padding: 10px 15px;
+            padding: 10px 14px;
             background-color: #fff;
             border: 2px solid #ffb6c1;
             border-radius: 15px;
             color: #ff69b4;
             font-weight: bold;
             cursor: pointer;
+            font-size: 14px;
         }
 
-        #feedback { font-size: 80px; height: 85px; margin-top: 5px; }
+        #feedback { font-size: 70px; height: 80px; margin-top: 5px; }
 
-        /* 終了画面用のスタイル */
-        .clear-msg { font-size: 40px; color: #ff1493; margin-bottom: 20px; font-weight: bold; }
+        .clear-msg { font-size: 36px; color: #ff1493; margin-bottom: 20px; font-weight: bold; }
         .reset-btn {
-            padding: 20px 40px;
-            font-size: 24px;
+            padding: 18px 36px;
+            font-size: 22px;
             font-weight: bold;
             background-color: #ff69b4;
             color: white;
@@ -155,9 +160,21 @@
         let quizList = [];
         let currentIndex = 0;
 
-        // 効果音（ピンポーン）を復活
+        // AudioContextをグローバルで1つだけ保持（iOS対応）
+        let audioCtx = null;
+        function getAudioCtx() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            // iOSではユーザー操作後にresumeが必要
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
         function playDingDong() {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const ctx = getAudioCtx();
             const playNote = (freq, startTime, duration) => {
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
@@ -168,13 +185,12 @@
                 osc.connect(gain); gain.connect(ctx.destination);
                 osc.start(startTime); osc.stop(startTime + duration);
             };
-            playNote(659.25, ctx.currentTime, 0.3); // E5
-            playNote(523.25, ctx.currentTime + 0.15, 0.5); // C5
+            playNote(659.25, ctx.currentTime, 0.3);
+            playNote(523.25, ctx.currentTime + 0.15, 0.5);
         }
 
-        // 不正解の音（ブブー）も念のため追加
         function playBubu() {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const ctx = getAudioCtx();
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.type = 'sawtooth';
@@ -212,7 +228,6 @@
             const footer = document.getElementById('footer-info');
 
             if (currentIndex >= quizList.length) {
-                // 終了画面の表示
                 card.innerHTML = `
                     <div class="sentence-box">
                         <div class="clear-msg">🌟 よくできました 🌟</div>
@@ -225,12 +240,10 @@
             }
 
             const q = quizList[currentIndex];
-            const blank = `<span class="blank-wrapper">( &nbsp;&nbsp; )</span>`;
+            const blank = `<span class="blank-wrapper">(&nbsp;&nbsp;&nbsp;)</span>`;
             let rawText = q.q ? `${blank} ${q.p}` : `${q.s} ${blank} ${q.p}`;
 
-            // 改行ロジック：句点（. ?）で分割。ただしMs.のような敬称直後は除外
             const sentences = rawText.match(/.*?[.!?](?!\s*(?:Smith|Jones|Brown|Green|White))/g) || [rawText];
-
             const html = sentences.map(s => `<span class="sentence-unit">${s.trim()}</span>`).join('');
 
             document.getElementById('sentence').innerHTML = html;
@@ -242,26 +255,19 @@
             const q = quizList[currentIndex];
             const f = document.getElementById('feedback');
             if (choice === q.a) {
-                playDingDong(); // 正解音を再生
+                playDingDong();
                 f.innerText = '⭕️'; f.style.color = 'red';
             } else {
-                playBubu(); // 不正解音を再生
+                playBubu();
                 f.innerText = '❌'; f.style.color = 'blue';
             }
         }
 
         function nextQuestion() {
-            if (currentIndex < quizList.length) {
-                currentIndex++;
-                updateDisplay();
-            }
+            if (currentIndex < quizList.length) { currentIndex++; updateDisplay(); }
         }
-
         function prevQuestion() {
-            if (currentIndex > 0) {
-                currentIndex--;
-                updateDisplay();
-            }
+            if (currentIndex > 0) { currentIndex--; updateDisplay(); }
         }
 
         function repeatVoice() {
