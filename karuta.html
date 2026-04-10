@@ -319,7 +319,6 @@ function nextWord() {
   if (historyIndex < history.length - 1) {
     historyIndex++;
     showWord(history[historyIndex], historyIndex);
-    speak(history[historyIndex]);
     return;
   }
   // 新しい単語を出す
@@ -337,14 +336,12 @@ function nextWord() {
   history.push(word);
   historyIndex++;
   showWord(word, historyIndex);
-  speak(word);
 }
 
 function backWord() {
   if (historyIndex > 0) {
     historyIndex--;
     showWord(history[historyIndex], historyIndex);
-    speak(history[historyIndex]);
     updateUI();
   }
 }
