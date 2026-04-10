@@ -157,9 +157,64 @@
     </div>
 
     <script>
-        const friends = ['Sena', 'Riho', 'Miona', 'Hana', 'Itsuki', 'Haru', 'Allen', 'Souta'];
+        const characters = ['Sena', 'Riho', 'Hana', 'Miona', 'So', 'Sosuke', 'Sota', 'Itsuki', 'Odai', 'Ruki', 'Haru', 'Sara', 'Allen'];
+        const msNames = ['Ms. Nene', 'Ms. Mika', 'Ms. Nodoka'];
         let quizList = [];
         let currentIndex = 0;
+
+        function pickRandom(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+        function pickTwoDifferent(arr) {
+            const shuffled = [...arr].sort(() => Math.random() - 0.5);
+            return [shuffled[0], shuffled[1]];
+        }
+
+        // PDFの例文をもとにしたテンプレート（p = be動詞の後ろに続く語句）
+        const templates = [
+            // is: 人名1人が主語 ─ PDFの例文から
+            { type: 'single', a: 'is', p: 'an art teacher.' },           // kakomon第3回: Mr. Yamada
+            { type: 'single', a: 'is', p: 'a music teacher.' },          // kakomon2第2回: Mr. Brown
+            { type: 'single', a: 'is', p: 'a musician.' },               // kakomon3第1回: Henry
+            { type: 'single', a: 'is', p: 'a junior high school student.' }, // kakomon2第2回: Jack
+            { type: 'single', a: 'is', p: 'in the gym.' },               // kakomon3第1回
+            { type: 'single', a: 'is', p: 'in the science club.' },
+            { type: 'single', a: 'is', p: 'on the volleyball team.' },   // kakomon第3回: Fred's brother
+            { type: 'single', a: 'is', p: 'Canadian.' },                 // kakomon第3回: Steve
+            { type: 'single', a: 'is', p: 'from Australia.' },
+            { type: 'single', a: 'is', p: 'a high school student.' },
+            // is: Ms.名前が主語
+            { type: 'ms', a: 'is', p: 'a doctor. She works at a hospital.' },
+            // are: 2人の名前が主語 ─ PDFの例文から
+            { type: 'pair', a: 'are', p: 'good friends. They like tennis.' }, // kakomon第3回: Keiko and Megumi
+            { type: 'pair', a: 'are', p: 'classmates.' },
+            { type: 'pair', a: 'are', p: 'from Canada.' },                // kakomon3第1回: Tim and Lucy
+            { type: 'pair', a: 'are', p: 'friends.' },
+            { type: 'pair', a: 'are', p: 'on the volleyball team.' },
+            // am: Iが主語 ─ PDFの例文から
+            { type: 'fixed', s: 'I', a: 'am', p: 'from Australia. How about you?', full: 'I am from Australia. How about you?' },
+            { type: 'fixed', s: 'I', a: 'am', p: 'very busy from Monday to Friday.', full: 'I am very busy from Monday to Friday.' }, // kakomon第3回
+            // are: Youが主語
+            { type: 'fixed', s: 'You', a: 'are', p: 'hungry.', full: 'You are hungry.' },
+            // 疑問文（areが先頭）
+            { type: 'fixed', s: '', a: 'are', p: 'you Canadian? Yes, I am.', q: true, full: 'Are you Canadian? Yes, I am.' }, // kakomon第3回
+        ];
+
+        function buildQuizItem(t) {
+            if (t.type === 'single') {
+                const name = pickRandom(characters);
+                return { s: name, a: t.a, p: t.p, full: `${name} ${t.a} ${t.p}` };
+            } else if (t.type === 'ms') {
+                const ms = pickRandom(msNames);
+                return { s: ms, a: t.a, p: t.p, full: `${ms} ${t.a} ${t.p}` };
+            } else if (t.type === 'pair') {
+                const [n1, n2] = pickTwoDifferent(characters);
+                const s = `${n1} and ${n2}`;
+                return { s, a: t.a, p: t.p, full: `${s} ${t.a} ${t.p}` };
+            } else {
+                return { s: t.s, a: t.a, p: t.p, q: t.q, full: t.full };
+            }
+        }
 
         // AudioContextをグローバルで1つだけ保持（iOS対応）
         let audioCtx = null;
@@ -226,23 +281,10 @@
 
         function initQuiz() {
             currentIndex = 0;
-            quizList = [
-                { s: 'You', a: 'are', p: 'hungry.', full: 'You are hungry.' },
-                { s: 'My father', a: 'is', p: 'a cook.', full: 'My father is a cook.' },
-                { s: 'They', a: 'are', p: 'friends.', full: 'They are friends.' },
-                { s: 'Ken and Ann', a: 'are', p: 'classmates.', full: 'Ken and Ann are classmates.' },
-                { s: 'I', a: 'am', p: 'from Australia. How about you?', full: 'I am from Australia. How about you?' },
-                { s: 'Her name', a: 'is', p: 'Meg.', full: 'Her name is Meg.' },
-                { s: 'Ms. Smith', a: 'is', p: 'a doctor. She works at a hospital.', full: 'Ms. Smith is a doctor. She works at a hospital.' },
-                { s: '', a: 'are', p: 'you Paul? Yes, I am.', q: true, full: 'Are you Paul? Yes, I am.' },
-                { s: '', a: 'is', p: 'your brother a high school student? No, he isn\'t.', q: true, full: 'Is your brother a high school student? No, he is not.' }
-            ];
-
-            friends.forEach(name => {
-                quizList.push({ s: name, a: 'is', p: 'in the science club.', full: name + ' is in the science club.' });
-            });
-
-            quizList.sort(() => Math.random() - 0.5);
+            // テンプレートから全問を生成し、ランダムに10問選ぶ
+            const allItems = templates.map(buildQuizItem);
+            allItems.sort(() => Math.random() - 0.5);
+            quizList = allItems.slice(0, 10);
             updateDisplay();
         }
 
