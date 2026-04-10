@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>えいごべんきょう</title>
     <style>
         body {
@@ -92,6 +95,21 @@
         .btn-r1 { background-color: #ff9d00; }
         .btn-r2 { background-color: #4db8ff; }
         .btn-r3 { background-color: #c780ff; }
+        .reload-btn {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            background: rgba(255,255,255,0.9);
+            border: 2px solid #ffb6c1;
+            border-radius: 20px;
+            color: #ff69b4;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 8px 12px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
     </style>
 </head>
 <body>
@@ -134,5 +152,6 @@
             document.getElementById('kakomonMenu').classList.toggle('open');
         }
     </script>
+    <button class="reload-btn" onclick="location.reload(true)">🔄 最新の状態にする</button>
 </body>
 </html>
