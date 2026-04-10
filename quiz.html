@@ -173,40 +173,40 @@
         // PDFの例文をもとにしたテンプレート（p = be動詞の後ろに続く語句）
         const templates = [
             // is: Ms.名前が主語（文脈的に大人が主語の文）
-            { type: 'ms', a: 'is', p: 'an art teacher at our school.' },
-            { type: 'ms', a: 'is', p: 'a music teacher. She plays the trumpet very well.' }, // kakomon2第2回: Mr. Brown
+            { type: 'ms', a: 'is', p: 'an art teacher.' },           // kakomon第3回: Mr. Yamada
+            { type: 'ms', a: 'is', p: 'a music teacher.' },          // kakomon2第2回: Mr. Brown
             { type: 'ms', a: 'is', p: 'a doctor. She works at a hospital.' },
             // is: 13人の登場人物が主語（子供・若者向けの文）
-            { type: 'single', a: 'is', p: 'a great musician.' },
-            { type: 'single', a: 'is', p: 'in junior high school.' },
-            { type: 'single', a: 'is', p: 'in the gym right now.' },
-            { type: 'single', a: 'is', p: 'in the science club at school.' },
-            { type: 'single', a: 'is', p: 'on the school volleyball team.' },
-            { type: 'single', a: 'is', p: 'from Canada.' },
+            { type: 'single', a: 'is', p: 'a musician.' },               // kakomon3第1回: Henry
+            { type: 'single', a: 'is', p: 'a junior high school student.' }, // kakomon2第2回: Jack
+            { type: 'single', a: 'is', p: 'in the gym.' },               // kakomon3第1回
+            { type: 'single', a: 'is', p: 'in the science club.' },
+            { type: 'single', a: 'is', p: 'on the volleyball team.' },   // kakomon第3回: Fred's brother
+            { type: 'single', a: 'is', p: 'Canadian.' },                 // kakomon第3回: Steve
             { type: 'single', a: 'is', p: 'from Australia.' },
-            { type: 'single', a: 'is', p: 'in high school now.' },
+            { type: 'single', a: 'is', p: 'a high school student.' },
             // are: 2人の名前が主語 ─ PDFの例文から
-            { type: 'pair', a: 'are', p: 'good friends. They love playing tennis together.' },
-            { type: 'pair', a: 'are', p: 'in the same class.' },
-            { type: 'pair', a: 'are', p: 'both from Canada.' },
-            { type: 'pair', a: 'are', p: 'best friends.' },
+            { type: 'pair', a: 'are', p: 'good friends. They like tennis.' }, // kakomon第3回: Keiko and Megumi
+            { type: 'pair', a: 'are', p: 'classmates.' },
+            { type: 'pair', a: 'are', p: 'from Canada.' },                // kakomon3第1回: Tim and Lucy
+            { type: 'pair', a: 'are', p: 'friends.' },
             // am: Iが主語 ─ PDFの例文から
             { type: 'fixed', s: 'I', a: 'am', p: 'from Australia. How about you?', full: 'I am from Australia. How about you?' },
-            { type: 'fixed', s: 'I', a: 'am', p: 'really busy from Monday to Friday.', full: 'I am really busy from Monday to Friday.' },
+            { type: 'fixed', s: 'I', a: 'am', p: 'very busy from Monday to Friday.', full: 'I am very busy from Monday to Friday.' }, // kakomon第3回
             // are: Youが主語
-            { type: 'fixed', s: 'You', a: 'are', p: 'a good English speaker!', full: 'You are a good English speaker!' },
-            { type: 'fixed', s: 'You', a: 'are', p: 'from Canada, right?', full: 'You are from Canada, right?' },
+            { type: 'fixed', s: 'You', a: 'are', p: 'hungry.', full: 'You are hungry.' },
+            { type: 'fixed', s: 'You', a: 'are', p: 'Canadian.', full: 'You are Canadian.' },
             // He / She (ランダム)
-            { type: 'he_she', a: 'is', p: 'in the gym right now.' },
-            { type: 'he_she', a: 'is', p: 'a great musician.' },
+            { type: 'he_she', a: 'is', p: 'in the gym.' },
+            { type: 'he_she', a: 'is', p: 'a musician.' },
             { type: 'he_she', a: 'is', p: 'on the volleyball team.' },
-            { type: 'he_she', a: 'is', p: 'from Canada.' },
+            { type: 'he_she', a: 'is', p: 'Canadian.' },
             // They
-            { type: 'they', a: 'are', p: 'in the same class.' },
-            { type: 'they', a: 'are', p: 'both from Canada.' },
-            { type: 'they', a: 'are', p: 'best friends.' },
+            { type: 'they', a: 'are', p: 'classmates.' },
+            { type: 'they', a: 'are', p: 'from Canada.' },
+            { type: 'they', a: 'are', p: 'good friends.' },
             // 疑問文（areが先頭）
-            { type: 'fixed', s: '', a: 'are', p: 'you from Canada? Yes, I am.', q: true, full: 'Are you from Canada? Yes, I am.' },
+            { type: 'fixed', s: '', a: 'are', p: 'you Canadian? Yes, I am.', q: true, full: 'Are you Canadian? Yes, I am.' }, // kakomon第3回
         ];
 
         function buildQuizItem(t) {
