@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英検5級リーディング②</title>
+    <style>
+        body {
+            font-family: 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+            text-align: center;
+            background-color: #fffaf0;
+            background-image: radial-gradient(#ffdfba 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #ff69b4;
+            font-size: 28px;
+            text-shadow: 1px 1px white;
+            margin-bottom: 10px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border: 5px solid #ffb6c1;
+            border-radius: 40px;
+            padding: 20px;
+            box-shadow: 0 10px 0 #ffb6c1;
+            max-width: 650px;
+            margin: 0 auto;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .sentence-box {
+            font-size: 28px;
+            font-weight: bold;
+            line-height: 1.8;
+            margin: 20px 0;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            text-align: left;
+            width: 100%;
+        }
+        .sentence-box .line {
+            display: flex;
+            align-items: baseline;
+            width: 100%;
+            white-space: normal;
+        }
+        .speaker-label {
+            flex-shrink: 0;
+            white-space: nowrap;
+            padding-right: 0.2em;
+        }
+        .speaker-text {
+            flex: 1;
+            word-break: break-word;
+        }
+        .blank {
+            display: inline-block;
+            border-bottom: 3px solid #333;
+            min-width: 60px;
+            margin: 0 4px;
+        }
+        .btn-group {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            max-width: 400px;
+            margin: 0 auto 20px;
+        }
+        .choice-btn {
+            padding: 15px;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            border-radius: 20px;
+            color: white;
+            box-shadow: 0 6px #999;
+            transition: 0.1s;
+        }
+        .choice-btn:active {
+            box-shadow: none;
+            transform: translateY(6px);
+        }
+        .btn-1 { background-color: #ff9d00; }
+        .btn-2 { background-color: #4db8ff; }
+        .btn-3 { background-color: #c780ff; }
+        .btn-4 { background-color: #ff6666; }
+
+        #feedback {
+            font-size: 80px;
+            height: 90px;
+            margin-top: 10px;
+            line-height: 1;
+        }
+        .nav-btn {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #fff;
+            border: 2px solid #ffb6c1;
+            border-radius: 15px;
+            color: #ff69b4;
+            font-weight: bold;
+            margin: 0 6px;
+        }
+        #restart-btn {
+            display: none;
+            margin-top: 12px;
+            padding: 12px 28px;
+            font-size: 20px;
+            cursor: pointer;
+            background-color: #ff69b4;
+            border: none;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 6px #c94f8a;
+        }
+        #restart-btn:active {
+            box-shadow: none;
+            transform: translateY(6px);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>✨ 英検5級リーディング② ✨</h1>
+
+    <div class="card">
+        <div id="sentence" class="sentence-box"></div>
+
+        <div id="feedback"></div>
+
+        <div class="btn-group">
+            <button class="choice-btn btn-1" onclick="check(1)">1</button>
+            <button class="choice-btn btn-2" onclick="check(2)">2</button>
+            <button class="choice-btn btn-3" onclick="check(3)">3</button>
+            <button class="choice-btn btn-4" onclick="check(4)">4</button>
+        </div>
+
+        <div>
+            <button class="nav-btn" onclick="location.href='index.html'">🏠 ホーム</button>
+            <button class="nav-btn" onclick="prevQuestion()">🔙 まえへ</button>
+            <button class="nav-btn" onclick="speak()">🔊 おんせい</button>
+            <button class="nav-btn" onclick="nextQuestion()">つぎへ 🔜</button>
+        </div>
+        <div style="margin-top: 15px; color: #ff69b4; font-weight: bold;">あと <span id="remaining">0</span> もん</div>
+        <button id="restart-btn" onclick="restart()">🔄 さいしょにもどる</button>
+    </div>
+
+    <script>
+        // 問題データ（英検5級 過去問3回分 4ページ）
+        const quizData = [
+            // ── 第3回 ──
+            { sentences: ["Teacher: Let's start today's English lesson. ( [BLANK] )", 'Student: OK, Ms. Peterson.'], a: 3, choices: ['See you tomorrow.', "We're going to school.", 'Please open your book.', 'You can go home.'] },
+            { sentences: ['Woman: Excuse me. What time does the next train come?', 'Man: ( [BLANK] )'], a: 3, choices: ['Yes, it does.', "It's good.", "At five o'clock.", 'For one hour.'] },
+            { sentences: ['Mother: Bob, come here and help me with dinner.', "Boy: ( [BLANK] ) Mom. I'm coming."], a: 1, choices: ['All right,', "It's ready,", 'You can drink it,', "No, I can't,"] },
+            { sentences: ['Girl: What class do you like?', 'Boy: ( [BLANK] )'], a: 1, choices: ['Science.', 'I go to school.', 'After lunch.', "It's my homework."] },
+            { sentences: ['Teacher: Please close the windows, Jack. ( [BLANK] )', 'Student: Yes, Ms. Carter.'], a: 3, choices: ['Good morning.', 'Here you are.', "It's cold.", "It's today."] },
+            // ── 第2回 ──
+            { sentences: ["Boy: Where are my pajamas, Mom?", 'Mother: ( [BLANK] )'], a: 3, choices: ["It's big.", 'Five dollars.', 'On your bed.', 'After dinner.'] },
+            { sentences: ['Mother: What drink do you want?', 'Girl: ( [BLANK] )'], a: 3, choices: ['Two eggs.', 'Yes, at night.', 'Orange juice, please.', 'Every weekend.'] },
+            { sentences: ['Girl: Allan, your pink T-shirt is nice.', 'Boy: ( [BLANK] ) Brenda.'], a: 1, choices: ['Thanks,', 'Good job,', "You're welcome,", "They're interesting,"] },
+            { sentences: ['Girl: When do you study English, Taro?', 'Boy: ( [BLANK] ) Then I watch TV.'], a: 3, choices: ['I like it.', 'In my room.', 'After dinner.', 'For three hours.'] },
+            { sentences: ['Boy: Can you come to my house today, Lisa?', "Girl: No, I can't. ( [BLANK] )"], a: 2, choices: ["That's a good idea.", 'I have a violin lesson.', 'Come in, please.', "It's not mine."] },
+            // ── 第1回 ──
+            { sentences: ['Boy: Do you have any sisters?', 'Girl: No, but ( [BLANK] )'], a: 2, choices: ["it's my birthday.", 'I have two brothers.', 'this is my room.', 'I like tennis.'] },
+            { sentences: ["Boy: What's the date today?", 'Mother: ( [BLANK] )'], a: 1, choices: ["It's April 29.", "It's nine o'clock.", 'I love spring.', 'Next Monday.'] },
+            { sentences: ['Girl: What do you do on weekends, Bob?', 'Boy: ( [BLANK] )'], a: 3, choices: ["No, I don't.", 'Good idea.', 'I play soccer.', "Sorry, I can't."] },
+            { sentences: ["Boy 1: Let's play badminton at the park, Brad.", 'Boy 2: ( [BLANK] )'], a: 1, choices: ["Yes, let's.", 'Yes, I am.', "It's you.", "It's short."] },
+            { sentences: ["Teacher: Hi, I'm Tom. I'm your new English teacher.", 'Girl: Hello, Tom. ( [BLANK] )'], a: 4, choices: ['I think so.', "You're welcome.", 'I do, too.', 'Nice to meet you.'] },
+        ];
+
+        // N問ランダム抽出
+        function shuffleAndPick(array, n) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr.slice(0, n);
+        }
+
+        let shuffledData = shuffleAndPick(quizData, 5);
+        let currentIndex = 0;
+
+        // ピンポーン
+        function playDingDong() {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(659.25, ctx.currentTime);
+            osc.frequency.setValueAtTime(523.25, ctx.currentTime + 0.15);
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.5);
+        }
+
+        // ブブー
+        function playBubu() {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(110, ctx.currentTime);
+            gain.gain.setValueAtTime(0.05, ctx.currentTime);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.2);
+        }
+
+        // [BLANK] をHTML表示用の下線スパンに変換（途中で改行しないようにnowrapで囲む）
+        function renderSentence(text) {
+            const blankHtml = '<span style="white-space:nowrap">( <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span> )</span>';
+            let rendered = text.replace('( [BLANK] )', blankHtml).replace('[BLANK]', blankHtml);
+            // "Speaker: text" パターンを検出して話者ラベルと本文を分割
+            const m = rendered.match(/^([\w.]+(?:\s[\w.]+)?:\s)([\s\S]*)$/);
+            if (m) {
+                return `<span class="speaker-label">${m[1]}</span><span class="speaker-text">${m[2]}</span>`;
+            }
+            return `<span class="speaker-text">${rendered}</span>`;
+        }
+
+        function updateDisplay() {
+            const q = shuffledData[currentIndex];
+
+            const html = q.sentences.map(s => `<span class="line">${renderSentence(s)}</span>`).join('<br>');
+            document.getElementById('sentence').innerHTML = html;
+
+            document.getElementById('feedback').innerText = '';
+            document.getElementById('remaining').innerText = shuffledData.length - currentIndex - 1;
+            document.getElementById('restart-btn').style.display = 'none';
+
+            const buttons = document.querySelectorAll('.choice-btn');
+            for (let i = 0; i < 4; i++) {
+                buttons[i].innerText = `${i + 1}. ${q.choices[i]}`;
+            }
+        }
+
+        function check(choice) {
+            const q = shuffledData[currentIndex];
+            const feedbackEl = document.getElementById('feedback');
+            if (choice === q.a) {
+                playDingDong();
+                feedbackEl.innerText = '⭕️';
+                feedbackEl.style.color = '#ff1493';
+            } else {
+                playBubu();
+                feedbackEl.innerText = '❌';
+                feedbackEl.style.color = '#1e90ff';
+            }
+        }
+
+        function nextQuestion() {
+            if (currentIndex < shuffledData.length - 1) {
+                currentIndex++;
+                updateDisplay();
+            } else {
+                document.getElementById('feedback').innerText = '🎉';
+                document.getElementById('remaining').innerText = '0';
+                document.getElementById('restart-btn').style.display = 'inline-block';
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateDisplay();
+            }
+        }
+
+        function restart() {
+            shuffledData = shuffleAndPick(quizData, 5);
+            currentIndex = 0;
+            updateDisplay();
+        }
+
+        // 音読（Web Speech API）
+        function speak() {
+            const q = shuffledData[currentIndex];
+            const answer = q.choices[q.a - 1];
+            const text = q.sentences.map(s => s.replace('( [BLANK] )', answer).replace('[BLANK]', answer)).join(' ');
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.85;
+            speechSynthesis.cancel();
+            speechSynthesis.speak(utterance);
+        }
+
+        // 初期表示
+        updateDisplay();
+    </script>
+</body>
+</html>
