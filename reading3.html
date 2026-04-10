@@ -148,8 +148,15 @@
         .nav-area {
             display: flex;
             justify-content: center;
-            flex-wrap: wrap;
-            gap: 8px;
+            gap: 12px;
+        }
+        .nav-speak {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .home-area {
+            text-align: center;
+            margin-top: 20px;
         }
         .nav-btn {
             padding: 10px 18px;
@@ -197,14 +204,16 @@
             <button class="choice-btn btn-4" onclick="check(4)">4</button>
         </div>
 
+        <div class="nav-speak"><button class="nav-btn" onclick="speak()">🔊 おんせい</button></div>
         <div class="nav-area">
-            <button class="nav-btn" onclick="location.href='index.html'">🏠 ホーム</button>
             <button class="nav-btn" onclick="prevQuestion()">🔙 まえへ</button>
-            <button class="nav-btn" onclick="speak()">🔊 おんせい</button>
             <button class="nav-btn" onclick="nextQuestion()">つぎへ 🔜</button>
         </div>
         <div style="color: #ff69b4; font-weight: bold; margin-top: 4px;">あと <span id="remaining">0</span> もん</div>
         <button id="restart-btn" onclick="restart()">🔄 さいしょにもどる</button>
+    </div>
+    <div class="home-area">
+        <button class="nav-btn" onclick="location.href='index.html'">🏠 ホーム</button>
     </div>
 
     <script>

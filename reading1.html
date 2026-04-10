@@ -35,7 +35,7 @@
             justify-content: space-between;
         }
         .sentence-box {
-            font-size: 28px;
+            font-size: clamp(18px, 4.5vw, 28px);
             font-weight: bold;
             line-height: 1.8;
             margin: 20px 0;
@@ -101,7 +101,20 @@
             margin-top: 10px;
             line-height: 1;
         }
-        .nav-btn {
+        .nav-speak {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .nav-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+        .home-area {
+            text-align: center;
+            margin-top: 20px;
+        }
+                .nav-btn {
             padding: 10px 20px;
             font-size: 18px;
             cursor: pointer;
@@ -148,13 +161,17 @@
         </div>
 
         <div>
-            <button class="nav-btn" onclick="location.href='index.html'">🏠 ホーム</button>
-            <button class="nav-btn" onclick="prevQuestion()">🔙 まえへ</button>
-            <button class="nav-btn" onclick="speak()">🔊 おんせい</button>
-            <button class="nav-btn" onclick="nextQuestion()">つぎへ 🔜</button>
+            <div class="nav-speak"><button class="nav-btn" onclick="speak()">🔊 おんせい</button></div>
+            <div class="nav-row">
+                <button class="nav-btn" onclick="prevQuestion()">🔙 まえへ</button>
+                <button class="nav-btn" onclick="nextQuestion()">つぎへ 🔜</button>
+            </div>
         </div>
         <div style="margin-top: 15px; color: #ff69b4; font-weight: bold;">あと <span id="remaining">0</span> もん</div>
         <button id="restart-btn" onclick="restart()">🔄 さいしょにもどる</button>
+    </div>
+    <div class="home-area">
+        <button class="nav-btn" onclick="location.href='index.html'">🏠 ホーム</button>
     </div>
 
     <script>
