@@ -78,7 +78,7 @@
     font-weight: bold;
     color: #333;
     letter-spacing: 0.05em;
-    word-break: break-all;
+    white-space: nowrap;
   }
 
   #word-display.placeholder {
@@ -245,10 +245,24 @@ function updateUI() {
   document.getElementById('btn-back').disabled = historyIndex <= 0;
 }
 
+function fitFontSize() {
+  const wd = document.getElementById('word-display');
+  const card = document.getElementById('word-card');
+  const maxWidth = card.clientWidth - 60;
+  let size = 64;
+  wd.style.fontSize = size + 'px';
+  while (wd.scrollWidth > maxWidth && size > 16) {
+    size -= 2;
+    wd.style.fontSize = size + 'px';
+  }
+}
+
 function showWord(word, index) {
   const wd = document.getElementById('word-display');
   wd.classList.remove('placeholder');
+  wd.style.whiteSpace = 'nowrap';
   wd.textContent = word;
+  fitFontSize();
   document.getElementById('word-number').textContent = (index + 1) + ' / ' + totalCount;
   document.getElementById('card-hint').textContent = '🔊 タップで音声';
   document.getElementById('finished-msg').style.display = 'none';
