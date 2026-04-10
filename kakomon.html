@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>かこもん（英検5級）</title>
+    <style>
+        body {
+            font-family: 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+            text-align: center;
+            background-color: #fffaf0;
+            background-image: radial-gradient(#ffdfba 1px, transparent 1px);
+            background-size: 20px 20px;
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        h1 {
+            color: #c780ff;
+            font-size: 28px;
+            margin-bottom: 40px;
+            text-shadow: 1px 1px white;
+        }
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+        .menu-btn {
+            display: block;
+            width: 100%;
+            padding: 30px 20px;
+            font-size: 22px;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 30px;
+            color: white;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.15);
+            transition: 0.1s;
+            box-sizing: border-box;
+        }
+        .menu-btn:active { box-shadow: none; transform: translateY(8px); }
+        .btn-r1 { background-color: #ff9d00; box-shadow: 0 8px 0 #c07000; }
+        .btn-r2 { background-color: #4db8ff; box-shadow: 0 8px 0 #2a90d4; }
+        .btn-r3 { background-color: #c780ff; box-shadow: 0 8px 0 #9050cc; }
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.85;
+            margin-top: 6px;
+        }
+        .home-area {
+            text-align: center;
+            margin-top: 40px;
+        }
+        .nav-btn {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #fff;
+            border: 2px solid #ffb6c1;
+            border-radius: 15px;
+            color: #ff69b4;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <h1>📚 かこもん（英検5級）</h1>
+    <div class="menu">
+        <a class="menu-btn btn-r1" href="reading1.html">
+            リーディング①<br>
+            <span class="subtitle">単語・文法の穴埋め（15問）</span>
+        </a>
+        <a class="menu-btn btn-r2" href="reading2.html">
+            リーディング②<br>
+            <span class="subtitle">会話の応答文（5問）</span>
+        </a>
+        <a class="menu-btn btn-r3" href="reading3.html">
+            リーディング③<br>
+            <span class="subtitle">語句の並べ替え（5問）</span>
+        </a>
+    </div>
+    <div class="home-area">
+        <a class="nav-btn" href="index.html">🏠 ホーム</a>
+    </div>
+</body>
+</html>

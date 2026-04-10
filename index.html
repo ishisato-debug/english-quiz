@@ -65,33 +65,6 @@
             margin-top: 6px;
         }
 
-        /* かこもんサブメニュー */
-        .kakomon-wrap {
-            width: 100%;
-        }
-        .sub-menu {
-            display: none;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 12px;
-        }
-        .sub-menu.open {
-            display: flex;
-        }
-        .sub-btn {
-            display: block;
-            width: 100%;
-            padding: 18px 20px;
-            font-size: 20px;
-            font-weight: bold;
-            text-decoration: none;
-            border-radius: 20px;
-            color: white;
-            box-shadow: 0 6px 0 rgba(0,0,0,0.15);
-            transition: 0.1s;
-            box-sizing: border-box;
-        }
-        .sub-btn:active { box-shadow: none; transform: translateY(6px); }
         .btn-r1 { background-color: #ff9d00; }
         .btn-r2 { background-color: #4db8ff; }
         .btn-r3 { background-color: #c780ff; }
@@ -122,33 +95,11 @@
         </a>
 
         <!-- かこもんセクション -->
-        <div class="kakomon-wrap">
-            <button class="menu-btn btn-kakomon" onclick="toggleKakomon()">
-                📚 かこもん（英検5級）<br>
-                <span class="subtitle">過去問でれんしゅうしよう！</span>
-            </button>
-            <div class="sub-menu" id="kakomonMenu">
-                <a class="sub-btn btn-r1" href="reading1.html">
-                    リーディング①<br>
-                    <span class="subtitle" style="color:rgba(255,255,255,0.85)">単語・文法の穴埋め（15問）</span>
-                </a>
-                <a class="sub-btn btn-r2" href="reading2.html">
-                    リーディング②<br>
-                    <span class="subtitle" style="color:rgba(255,255,255,0.85)">会話の応答文（5問）</span>
-                </a>
-                <a class="sub-btn btn-r3" href="reading3.html">
-                    リーディング③<br>
-                    <span class="subtitle" style="color:rgba(255,255,255,0.85)">語句の並べ替え（5問）</span>
-                </a>
-            </div>
-        </div>
+        <a class="menu-btn btn-kakomon" href="kakomon.html">
+            📚 かこもん（英検5級）<br>
+            <span class="subtitle">過去問でれんしゅうしよう！</span>
+        </a>
     </div>
-
-    <script>
-        function toggleKakomon() {
-            document.getElementById('kakomonMenu').classList.toggle('open');
-        }
-    </script>
     <p class="notice">※ iPhoneのホーム画面から起動するとアプリが更新されない場合があります。<br>その際はブラウザから直接 <a href="https://ishisato-debug.github.io/english-quiz/">ishisato-debug.github.io/english-quiz</a> を開いてください。</p>
 </body>
 </html>
