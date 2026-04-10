@@ -154,57 +154,7 @@
   }
   #btn-reset:active { transform: scale(0.95); }
 
-  /* じどうモード */
-  #auto-section {
-    background: white;
-    border-radius: 20px;
-    padding: 20px 28px;
-    width: 100%;
-    max-width: 480px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-    margin-bottom: 16px;
-  }
-
-  #auto-section label {
-    font-size: 1.3rem;
-    color: #555;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    margin-bottom: 12px;
-  }
-
-  #auto-toggle {
-    width: 52px;
-    height: 28px;
-    accent-color: #ff8c42;
-    cursor: pointer;
-    transform: scale(1.6);
-    margin-right: 8px;
-  }
-
-  #interval-wrap {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.1rem;
-    color: #777;
-  }
-
-  #interval-slider {
-    flex: 1;
-    accent-color: #ff8c42;
-    height: 6px;
-  }
-
-  #interval-label {
-    font-weight: bold;
-    color: #ff8c42;
-    min-width: 40px;
-  }
-
-  #finished-msg {
+#finished-msg {
     display: none;
     font-size: 1.8rem;
     color: #4a90d9;
@@ -251,18 +201,6 @@
 
 <button id="btn-reset" onclick="resetAll()">はじめから 🔄</button>
 
-<div id="auto-section">
-  <label>
-    <input type="checkbox" id="auto-toggle" onchange="toggleAuto()">
-    じどうモード（Auto）
-  </label>
-  <div id="interval-wrap">
-    ⏱ かんかく：
-    <input type="range" id="interval-slider" min="3" max="15" value="6" step="1" oninput="updateInterval()">
-    <span id="interval-label">6びょう</span>
-  </div>
-</div>
-
 <div id="finished-msg">🎉 ぜんぶ よんだよ！おつかれさま！<br>「はじめから」をおしてね</div>
 
 <div style="text-align:center; margin-top:24px;">
@@ -276,9 +214,6 @@ const totalCount = allWords.length;
 let pool = [];       // まだ出ていない単語プール
 let history = [];    // 表示した単語の履歴
 let historyIndex = -1;
-let autoTimer = null;
-let intervalSec = 6;
-
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -333,7 +268,6 @@ function nextWord() {
     document.getElementById('word-number').textContent = '';
     document.getElementById('card-hint').textContent = '';
     document.getElementById('finished-msg').style.display = 'block';
-    stopAuto();
     updateUI();
     return;
   }
@@ -362,37 +296,8 @@ function resetAll() {
   document.getElementById('word-number').textContent = '';
   document.getElementById('card-hint').textContent = '';
   document.getElementById('finished-msg').style.display = 'none';
-  stopAuto();
-  document.getElementById('auto-toggle').checked = false;
   window.speechSynthesis && window.speechSynthesis.cancel();
   updateUI();
-}
-
-function toggleAuto() {
-  if (document.getElementById('auto-toggle').checked) {
-    startAuto();
-  } else {
-    stopAuto();
-  }
-}
-
-function startAuto() {
-  stopAuto();
-  nextWord();
-  autoTimer = setInterval(() => {
-    if (pool.length === 0 && historyIndex >= history.length - 1) { stopAuto(); return; }
-    nextWord();
-  }, intervalSec * 1000);
-}
-
-function stopAuto() {
-  if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
-}
-
-function updateInterval() {
-  intervalSec = parseInt(document.getElementById('interval-slider').value);
-  document.getElementById('interval-label').textContent = intervalSec + 'びょう';
-  if (document.getElementById('auto-toggle').checked) startAuto();
 }
 
 // 初期化
