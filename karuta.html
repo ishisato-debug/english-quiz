@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>えいごかるた</title>
+<title>えいたんご</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -32,20 +32,45 @@
     margin-bottom: 20px;
   }
 
+  #progress-bar-wrap {
+    width: 100%;
+    max-width: 480px;
+    height: 12px;
+    background: #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  #progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #ff8c42, #ffd54f);
+    border-radius: 8px;
+    transition: width 0.4s;
+    width: 0%;
+  }
+
   #word-card {
     background: white;
     border-radius: 30px;
     box-shadow: 0 8px 30px rgba(0,0,0,0.12);
     width: 100%;
     max-width: 480px;
-    padding: 50px 30px;
+    padding: 50px 30px 36px;
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     min-height: 200px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    user-select: none;
+  }
+  #word-card:active {
+    transform: scale(0.97);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
   }
 
   #word-display {
@@ -62,60 +87,70 @@
     margin-top: 12px;
   }
 
-  .btn-row {
+  #card-hint {
+    font-size: 0.85rem;
+    color: #bbb;
+    margin-top: 10px;
+  }
+
+  /* back / next ボタン行 */
+  .nav-row {
     display: flex;
     gap: 16px;
-    flex-wrap: wrap;
-    justify-content: center;
     width: 100%;
     max-width: 480px;
     margin-bottom: 16px;
   }
 
-  button {
+  .nav-row button {
+    flex: 1;
+    font-size: 1.6rem;
+    font-weight: bold;
+    padding: 20px 0;
     border: none;
-    border-radius: 20px;
+    border-radius: 24px;
     cursor: pointer;
     font-family: inherit;
-    font-weight: bold;
     transition: transform 0.1s, box-shadow 0.1s;
-    line-height: 1.3;
+    line-height: 1.2;
   }
-  button:active { transform: scale(0.95); }
+  .nav-row button:active { transform: scale(0.95); }
+
+  #btn-back {
+    background: #90caf9;
+    color: white;
+    box-shadow: 0 6px 0 #42a5f5;
+  }
+  #btn-back:disabled {
+    background: #ddd;
+    box-shadow: 0 6px 0 #bbb;
+    cursor: default;
+  }
 
   #btn-next {
     background: #ff8c42;
     color: white;
-    font-size: 2rem;
-    padding: 24px 40px;
-    width: 100%;
-    max-width: 480px;
     box-shadow: 0 6px 0 #c85e1a;
-    border-radius: 24px;
-    margin-bottom: 16px;
   }
-  #btn-next:hover { background: #ff9f5e; }
 
-  #btn-repeat {
-    background: #4fc3f7;
-    color: white;
-    font-size: 1.4rem;
-    padding: 18px 28px;
-    flex: 1;
-    box-shadow: 0 4px 0 #0288d1;
-  }
-  #btn-repeat:hover { background: #81d4fa; }
-
+  /* はじめから */
   #btn-reset {
     background: #aed581;
     color: white;
-    font-size: 1.4rem;
-    padding: 18px 28px;
-    flex: 1;
-    box-shadow: 0 4px 0 #689f38;
+    font-size: 1.3rem;
+    font-weight: bold;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 24px;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 5px 0 #689f38;
+    transition: transform 0.1s;
+    margin-bottom: 16px;
   }
-  #btn-reset:hover { background: #c5e1a5; }
+  #btn-reset:active { transform: scale(0.95); }
 
+  /* じどうモード */
   #auto-section {
     background: white;
     border-radius: 20px;
@@ -174,33 +209,18 @@
     font-weight: bold;
   }
 
-  #progress-bar-wrap {
-    width: 100%;
-    max-width: 480px;
-    height: 12px;
-    background: #e0e0e0;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    overflow: hidden;
-  }
-
-  #progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #ff8c42, #ffd54f);
-    border-radius: 8px;
-    transition: width 0.4s;
-    width: 0%;
-  }
-
   #btn-home {
     background: #fff;
     color: #ff69b4;
     border: 2px solid #ffb6c1;
     font-size: 1.1rem;
+    font-weight: bold;
     padding: 10px 22px;
     border-radius: 20px;
     margin-bottom: 16px;
     box-shadow: none;
+    cursor: pointer;
+    font-family: inherit;
   }
 </style>
 </head>
@@ -214,23 +234,18 @@
   <div id="progress-bar"></div>
 </div>
 
-<div id="word-card">
-  <div id="word-display">ここに たんごが でるよ！</div>
+<div id="word-card" onclick="speakCurrent()">
+  <div id="word-display">Next をおしてスタート！</div>
   <div id="word-number"></div>
+  <div id="card-hint"></div>
 </div>
 
-<button id="btn-next" onclick="nextWord()">
-  つぎの たんご 🔊<br><span style="font-size:1.2rem">Next Word</span>
-</button>
-
-<div class="btn-row">
-  <button id="btn-repeat" onclick="repeatWord()">
-    もういちど 🔁<br><span style="font-size:0.9rem">Repeat</span>
-  </button>
-  <button id="btn-reset" onclick="resetAll()">
-    はじめから 🔄<br><span style="font-size:0.9rem">Reset</span>
-  </button>
+<div class="nav-row">
+  <button id="btn-back" onclick="backWord()" disabled>◀ Back</button>
+  <button id="btn-next" onclick="nextWord()">Next ▶</button>
 </div>
+
+<button id="btn-reset" onclick="resetAll()">はじめから 🔄</button>
 
 <div id="auto-section">
   <label>
@@ -251,13 +266,14 @@
 </div>
 
 <script>
-const words = "black/blanket/clock/club/broom/bride/crab/crocodile/fly/flag/globe/glass/frog/Friday/green/grass/plate/play/slide/sleep/drum/dress/truck/tree/smile/smoke/snake/snow/spoon/spot/swing/swim/stop/test/stamp/fast/shell/fish/ship/brush/chick/lunch/watch/catch/phone/dolphin/whale/white/this/that/mather/father/three/teeth/think/bath/duck/rocket/queen/quilt/king/long/bank/pink/wind/hand/tent/paint/belt/adult/lamp/camp/skunk/desk/scale/school/spray/spring/string/strong/splash/splint/squid/square/rice/city/ice cream/cell phone/giraffe/orange/giant/cage/rose/jeans/cheese/legs".split('/');
+const allWords = "black/blanket/clock/club/broom/bride/crab/crocodile/fly/flag/globe/glass/frog/Friday/green/grass/plate/play/slide/sleep/drum/dress/truck/tree/smile/smoke/snake/snow/spoon/spot/swing/swim/stop/test/stamp/fast/shell/fish/ship/brush/chick/lunch/watch/catch/phone/dolphin/whale/white/this/that/mather/father/three/teeth/think/bath/duck/rocket/queen/quilt/king/long/bank/pink/wind/hand/tent/paint/belt/adult/lamp/camp/skunk/desk/scale/school/spray/spring/string/strong/splash/splint/squid/square/rice/city/ice cream/cell phone/giraffe/orange/giant/cage/rose/jeans/cheese/legs".split('/');
 
-let remaining = [...words];
-let currentWord = null;
+const totalCount = allWords.length;
+let pool = [];       // まだ出ていない単語プール
+let history = [];    // 表示した単語の履歴
+let historyIndex = -1;
 let autoTimer = null;
 let intervalSec = 6;
-let totalCount = words.length;
 
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -277,44 +293,74 @@ function speak(text) {
   window.speechSynthesis.speak(utter);
 }
 
+function speakCurrent() {
+  if (historyIndex >= 0 && history.length > 0) {
+    speak(history[historyIndex]);
+  }
+}
+
 function updateUI() {
-  document.getElementById('remaining').textContent = remaining.length;
-  const done = totalCount - remaining.length;
-  document.getElementById('progress-bar').style.width = (done / totalCount * 100) + '%';
+  const remaining = totalCount - history.length;
+  document.getElementById('remaining').textContent = remaining;
+  document.getElementById('progress-bar').style.width = (history.length / totalCount * 100) + '%';
+  document.getElementById('btn-back').disabled = historyIndex <= 0;
+}
+
+function showWord(word, index) {
+  document.getElementById('word-display').textContent = word;
+  document.getElementById('word-number').textContent = (index + 1) + ' / ' + totalCount;
+  document.getElementById('card-hint').textContent = '🔊 タップで音声';
+  document.getElementById('finished-msg').style.display = 'none';
+  updateUI();
 }
 
 function nextWord() {
-  if (remaining.length === 0) {
-    document.getElementById('word-display').textContent = '🎉 おわり！';
-    document.getElementById('word-number').textContent = '';
-    document.getElementById('finished-msg').style.display = 'block';
-    stopAuto();
+  // 履歴の途中にいる場合は前に進む
+  if (historyIndex < history.length - 1) {
+    historyIndex++;
+    showWord(history[historyIndex], historyIndex);
+    speak(history[historyIndex]);
     return;
   }
-  const idx = Math.floor(Math.random() * remaining.length);
-  currentWord = remaining.splice(idx, 1)[0];
-  const done = totalCount - remaining.length;
-  document.getElementById('word-display').textContent = currentWord;
-  document.getElementById('word-number').textContent = done + ' / ' + totalCount;
-  document.getElementById('finished-msg').style.display = 'none';
-  updateUI();
-  speak(currentWord);
+  // 新しい単語を出す
+  if (pool.length === 0) {
+    document.getElementById('word-display').textContent = '🎉 おわり！';
+    document.getElementById('word-number').textContent = '';
+    document.getElementById('card-hint').textContent = '';
+    document.getElementById('finished-msg').style.display = 'block';
+    stopAuto();
+    updateUI();
+    return;
+  }
+  const idx = Math.floor(Math.random() * pool.length);
+  const word = pool.splice(idx, 1)[0];
+  history.push(word);
+  historyIndex++;
+  showWord(word, historyIndex);
+  speak(word);
 }
 
-function repeatWord() {
-  if (currentWord) speak(currentWord);
+function backWord() {
+  if (historyIndex > 0) {
+    historyIndex--;
+    showWord(history[historyIndex], historyIndex);
+    speak(history[historyIndex]);
+    updateUI();
+  }
 }
 
 function resetAll() {
-  remaining = shuffle([...words]);
-  currentWord = null;
-  document.getElementById('word-display').textContent = 'ここに たんごが でるよ！';
+  pool = shuffle([...allWords]);
+  history = [];
+  historyIndex = -1;
+  document.getElementById('word-display').textContent = 'Next をおしてスタート！';
   document.getElementById('word-number').textContent = '';
+  document.getElementById('card-hint').textContent = '';
   document.getElementById('finished-msg').style.display = 'none';
-  updateUI();
   stopAuto();
   document.getElementById('auto-toggle').checked = false;
   window.speechSynthesis && window.speechSynthesis.cancel();
+  updateUI();
 }
 
 function toggleAuto() {
@@ -329,7 +375,7 @@ function startAuto() {
   stopAuto();
   nextWord();
   autoTimer = setInterval(() => {
-    if (remaining.length === 0) { stopAuto(); return; }
+    if (pool.length === 0 && historyIndex >= history.length - 1) { stopAuto(); return; }
     nextWord();
   }, intervalSec * 1000);
 }
@@ -344,8 +390,8 @@ function updateInterval() {
   if (document.getElementById('auto-toggle').checked) startAuto();
 }
 
-// 初期シャッフル
-shuffle(remaining);
+// 初期化
+pool = shuffle([...allWords]);
 updateUI();
 </script>
 </body>
