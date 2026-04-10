@@ -315,7 +315,10 @@
         function speak() {
             const q = shuffledData[currentIndex];
             const answer = q.choices[q.a - 1];
-            const text = q.sentences.map(s => s.replace('( [BLANK] )', answer).replace('[BLANK]', answer)).join(' ');
+            const text = q.sentences
+                .map(s => s.replace('( [BLANK] )', answer).replace('[BLANK]', answer))
+                .map(s => s.replace(/^[A-Za-z][A-Za-z0-9\s.]*:\s+/, ''))  // "Teacher: " などのラベルを除去
+                .join(' ');
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'en-US';
             utterance.rate = 0.85;
