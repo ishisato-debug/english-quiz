@@ -81,6 +81,10 @@
     word-break: break-all;
   }
 
+  #word-display.placeholder {
+    font-size: 2.2rem;
+  }
+
   #word-number {
     font-size: 1rem;
     color: #aaa;
@@ -235,7 +239,7 @@
 </div>
 
 <div id="word-card" onclick="speakCurrent()">
-  <div id="word-display">ここにたんごがでてくるよ！</div>
+  <div id="word-display" class="placeholder">ここに<br>たんごが<br>でてくるよ！</div>
   <div id="word-number"></div>
   <div id="card-hint"></div>
 </div>
@@ -307,7 +311,9 @@ function updateUI() {
 }
 
 function showWord(word, index) {
-  document.getElementById('word-display').textContent = word;
+  const wd = document.getElementById('word-display');
+  wd.classList.remove('placeholder');
+  wd.textContent = word;
   document.getElementById('word-number').textContent = (index + 1) + ' / ' + totalCount;
   document.getElementById('card-hint').textContent = '🔊 タップで音声';
   document.getElementById('finished-msg').style.display = 'none';
@@ -350,7 +356,9 @@ function resetAll() {
   pool = shuffle([...allWords]);
   history = [];
   historyIndex = -1;
-  document.getElementById('word-display').textContent = 'Next をおしてスタート！';
+  const wdReset = document.getElementById('word-display');
+  wdReset.classList.add('placeholder');
+  wdReset.textContent = 'ここにたんごがでてくるよ！';
   document.getElementById('word-number').textContent = '';
   document.getElementById('card-hint').textContent = '';
   document.getElementById('finished-msg').style.display = 'none';
