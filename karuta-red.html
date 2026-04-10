@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>えいたんごpurple</title>
+<title>えいたんごred</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
     font-family: 'Hiragino Maru Gothic ProN', 'Comic Sans MS', sans-serif;
-    background: linear-gradient(135deg, #e0f7fa, #f9fbe7);
+    background: linear-gradient(135deg, #ffe0e0, #fff9f9);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -20,7 +20,7 @@
 
   h1 {
     font-size: 2.2rem;
-    color: #9c27b0;
+    color: #e53935;
     margin-bottom: 10px;
     text-align: center;
     letter-spacing: 0.1em;
@@ -44,7 +44,7 @@
 
   #progress-bar {
     height: 100%;
-    background: linear-gradient(90deg, #c780ff, #e040fb);
+    background: linear-gradient(90deg, #ff4f4f, #ff8a80);
     border-radius: 8px;
     transition: width 0.4s;
     width: 0%;
@@ -132,9 +132,9 @@
   }
 
   #btn-next {
-    background: #c780ff;
+    background: #ff4f4f;
     color: white;
-    box-shadow: 0 6px 0 #7b1fa2;
+    box-shadow: 0 6px 0 #b71c1c;
   }
 
   /* はじめから */
@@ -157,7 +157,7 @@
 #finished-msg {
     display: none;
     font-size: 1.8rem;
-    color: #4a90d9;
+    color: #e53935;
     text-align: center;
     margin-top: 10px;
     font-weight: bold;
@@ -165,8 +165,8 @@
 
   #btn-home {
     background: #fff;
-    color: #ff69b4;
-    border: 2px solid #ffb6c1;
+    color: #ff4f4f;
+    border: 2px solid #ffcdd2;
     font-size: 1.1rem;
     font-weight: bold;
     padding: 10px 22px;
@@ -180,7 +180,7 @@
 </head>
 <body>
 
-<h1>💜 えいたんごpurple</h1>
+<h1>❤️ えいたんごred</h1>
 
 <div id="progress-wrap">のこり <span id="remaining">96</span> / 96 まい</div>
 
@@ -208,12 +208,13 @@
 </div>
 
 <script>
-const allWords = "black/blanket/clock/club/broom/bride/crab/crocodile/fly/flag/globe/glass/frog/Friday/green/grass/plate/play/slide/sleep/drum/dress/truck/tree/smile/smoke/snake/snow/spoon/spot/swing/swim/stop/test/stamp/fast/shell/fish/ship/brush/chick/lunch/watch/catch/phone/dolphin/whale/white/this/that/mather/father/three/teeth/think/bath/duck/rocket/queen/quilt/king/long/bank/pink/wind/hand/tent/paint/belt/adult/lamp/camp/skunk/desk/scale/school/spray/spring/string/strong/splash/splint/squid/square/rice/city/ice cream/cell phone/giraffe/orange/giant/cage/rose/jeans/cheese/legs".split('/');
+const allWords = "car/farm/park/star/bird/girl/nurse/purple/teacher/sister/doctor/tractor/mouse/house/cow/coin/soil/toy/boy/book/foot/bush/pull/sauce/August/prawn/draw/ball/tall/water/walk/horse/fork/roar/board/square/share/chair/hair/bread/head/bear/pear/ear/clear/deer/cheer/acorn/baby/elevator/lady/he/she/tiger/child/cold/hotel/uniform/music/panda/gorilla/banana/umbrella/chicken/pencil/lemon/surprise/monkey/love/son/honey/knife/knee/write/wrong/lamb/comb/glove/live/rhino/rhubarb/castle/whistle/station/competition/picture/nature/measure/treasure/excursion/television/famous/dangerous/beautiful/helpful".split('/');
 
 const totalCount = allWords.length;
-let pool = [];       // まだ出ていない単語プール
-let history = [];    // 表示した単語の履歴
+let pool = [];
+let history = [];
 let historyIndex = -1;
+
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -256,13 +257,11 @@ function showWord(word, index) {
 }
 
 function nextWord() {
-  // 履歴の途中にいる場合は前に進む
   if (historyIndex < history.length - 1) {
     historyIndex++;
     showWord(history[historyIndex], historyIndex);
     return;
   }
-  // 新しい単語を出す
   if (pool.length === 0) {
     document.getElementById('word-display').textContent = '🎉 おわり！';
     document.getElementById('word-number').textContent = '';
