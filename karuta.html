@@ -307,7 +307,9 @@ function resetAll() {
   historyIndex = -1;
   const wdReset = document.getElementById('word-display');
   wdReset.classList.add('placeholder');
-  wdReset.textContent = 'ここにたんごがでてくるよ！';
+  wdReset.style.whiteSpace = '';
+  wdReset.style.fontSize = '';
+  wdReset.innerHTML = 'ここに<br>たんごが<br>でてくるよ！';
   document.getElementById('word-number').textContent = '';
   document.getElementById('card-hint').textContent = '';
   document.getElementById('finished-msg').style.display = 'none';
