@@ -157,7 +157,7 @@
     </div>
 
     <script>
-        const characters = ['Sena', 'Riho', 'Hana', 'Miona', 'So', 'Sosuke', 'Sota', 'Itsuki', 'Odai', 'Ruki', 'Haru', 'Sara', 'Allen'];
+        const characters = ['Sena', 'Riho', 'Hana', 'Miona', 'Sou', 'Sosuke', 'Sota', 'Itsuki', 'Odai', 'Ruki', 'Haru', 'Sara', 'Allen'];
         const msNames = ['Ms. Nene', 'Ms. Mika', 'Ms. Nodoka'];
         let quizList = [];
         let currentIndex = 0;
@@ -334,7 +334,8 @@
 
         function repeatVoice() {
             window.speechSynthesis.cancel();
-            const u = new SpeechSynthesisUtterance(quizList[currentIndex].full);
+            const text = quizList[currentIndex].full.replace(/\bMiona\b/g, 'Meeona');
+            const u = new SpeechSynthesisUtterance(text);
             u.lang = 'en-US';
             u.rate = 0.9;
             window.speechSynthesis.speak(u);
