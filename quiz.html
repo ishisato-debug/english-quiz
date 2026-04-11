@@ -212,7 +212,8 @@
         function buildQuizItem(t) {
             if (t.type === 'single') {
                 const name = pickRandom(characters);
-                return { s: name, a: t.a, p: t.p, full: `${name} ${t.a} ${t.p}` };
+                const p = (name === 'Hana' && t.p === 'on the volleyball team.') ? 'on the soccer team.' : t.p;
+                return { s: name, a: t.a, p, full: `${name} ${t.a} ${p}` };
             } else if (t.type === 'ms') {
                 const ms = pickRandom(msNames);
                 return { s: ms, a: t.a, p: t.p, full: `${ms} ${t.a} ${t.p}` };
