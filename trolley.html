@@ -260,12 +260,12 @@
         <div class="badge badge-progress">Q<span id="q-num">1</span> / <span id="q-total">10</span></div>
     </div>
 
-    <canvas id="gameCanvas" width="660" height="290"></canvas>
-
     <div class="question-card">
         <div id="question-text"></div>
         <div id="answer-reveal"></div>
     </div>
+
+    <canvas id="gameCanvas" width="660" height="310"></canvas>
 
     <div class="choice-area">
         <button class="choice-btn btn-left"  id="btn-left"  onclick="chooseAnswer('left')">
@@ -348,313 +348,372 @@ const quizData = [
 ];
 
 /* =============================================
-   CANVAS & DRAWING
+   CANVAS & DRAWING  (Perspective first-person view)
    ============================================= */
 const canvas = document.getElementById('gameCanvas');
 const C = canvas.getContext('2d');
 
-// Layout constants (in canvas pixels, canvas = 660 × 290)
-const CW = 660, CH = 290;
-const TRACK_Y   = 155;   // main track vertical center
-const FORK_X    = 330;   // where the track splits
-const TSTART_X  = 60;    // trolley start X
-const TWAIT_X   = 240;   // trolley waits here while player reads
-const LEFT_END  = { x: 590, y: 72  };  // left  (upper) fork endpoint
-const RIGHT_END = { x: 590, y: 238 };  // right (lower) fork endpoint
+// Perspective geometry (canvas = 660 × 310)
+const CW     = 660, CH = 310;
+const VP_X   = CW / 2;   // vanishing-point X (330)
+const VP_Y   = 90;        // horizon Y
+const RAIL_W = 88;        // half track-gauge at y = CH
+const FORK_T = 0.44;      // perspective depth (0=horizon, 1=camera) where fork starts
+const FORK_Y  = VP_Y + (CH - VP_Y) * FORK_T;   // ≈ 188 px
+const FORK_LX = VP_X - RAIL_W * FORK_T;         // left  rail at fork ≈ 291
+const FORK_RX = VP_X + RAIL_W * FORK_T;         // right rail at fork ≈ 369
+// Fork arm centres at bottom of canvas
+const L_MID = 195, R_MID = 465;
+const ARM_W = 30;  // half-gauge of each arm at y = CH
 
-// Trolley position (mutable)
-let tx = TSTART_X, ty = TRACK_Y, tAngle = 0, tAlpha = 1;
-let animId = null;
-let gamePhase = 'idle';  // 'moving' | 'idle' | 'animating'
+// Animation timing constants
+const SCROLL_SPEED    = 0.85; // track-cycles per second during the approach
+const APPROACH_CYCLES = 1.9;  // total cycles before the fork appears (~2.2 s)
 
-/* ---- helper: rounded rect path ---- */
+// Mutable state
+let scrollOff   = 0;        // accumulates; mod-1 used as crosstie phase
+let scrollReqId = null;     // rAF id for the scroll loop
+let gamePhase   = 'idle';   // 'moving' | 'idle' | 'animating'
+let canvasPhase = 'moving'; // 'moving' | 'atFork' | 'correct' | 'broken'
+
+/* ---- Helper: rounded rect path ---- */
 function roundRect(x, y, w, h, r) {
     C.beginPath();
-    C.moveTo(x + r, y);
-    C.lineTo(x + w - r, y);
-    C.quadraticCurveTo(x + w, y, x + w, y + r);
-    C.lineTo(x + w, y + h - r);
-    C.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    C.lineTo(x + r, y + h);
-    C.quadraticCurveTo(x, y + h, x, y + h - r);
-    C.lineTo(x, y + r);
-    C.quadraticCurveTo(x, y, x + r, y);
-    C.closePath();
+    C.moveTo(x+r, y); C.lineTo(x+w-r, y);
+    C.quadraticCurveTo(x+w, y, x+w, y+r); C.lineTo(x+w, y+h-r);
+    C.quadraticCurveTo(x+w, y+h, x+w-r, y+h); C.lineTo(x+r, y+h);
+    C.quadraticCurveTo(x, y+h, x, y+h-r); C.lineTo(x, y+r);
+    C.quadraticCurveTo(x, y, x+r, y); C.closePath();
 }
+function lerp(a, b, t) { return a + (b - a) * t; }
 
-/* ---- Draw sky + mountains + ground ---- */
+/* ---- Draw sky, clouds, mountains, ground ---- */
 function drawBG() {
-    // sky
-    const sky = C.createLinearGradient(0, 0, 0, CH);
-    sky.addColorStop(0, '#7EC8E3');
-    sky.addColorStop(1, '#C9EAF5');
+    // Sky
+    const sky = C.createLinearGradient(0, 0, 0, VP_Y);
+    sky.addColorStop(0, '#3A7FBD');
+    sky.addColorStop(1, '#87CEEB');
     C.fillStyle = sky;
-    C.fillRect(0, 0, CW, CH);
+    C.fillRect(0, 0, CW, VP_Y);
 
-    // far mountains
-    C.fillStyle = '#A8C8A0';
-    C.beginPath();
-    C.moveTo(0, CH);
-    C.lineTo(0, 200); C.lineTo(80, 145); C.lineTo(160, 185);
-    C.lineTo(250, 130); C.lineTo(340, 170); C.lineTo(430, 125);
-    C.lineTo(520, 155); C.lineTo(610, 130); C.lineTo(CW, 150);
-    C.lineTo(CW, CH);
-    C.closePath();
-    C.fill();
-
-    // ground
-    C.fillStyle = '#6DBF6D';
-    C.fillRect(0, 248, CW, CH - 248);
-    C.fillStyle = '#5AAD5A';
-    C.fillRect(0, 248, CW, 7);
-}
-
-/* ---- Draw a rail segment between two points with offset ---- */
-function drawRailSegment(x1, y1, x2, y2, offset) {
-    const dx = x2 - x1, dy = y2 - y1;
-    const len = Math.hypot(dx, dy);
-    const px = (-dy / len) * offset, py = (dx / len) * offset;
-    C.beginPath();
-    C.moveTo(x1 + px, y1 + py);
-    C.lineTo(x2 + px, y2 + py);
-    C.stroke();
-}
-
-/* ---- Draw crossties along a segment ---- */
-function drawCrossties(x1, y1, x2, y2, count, hw) {
-    const angle = Math.atan2(y2 - y1, x2 - x1) + Math.PI / 2;
-    for (let i = 1; i <= count; i++) {
-        const t = i / (count + 1);
-        const cx = x1 + (x2 - x1) * t;
-        const cy = y1 + (y2 - y1) * t;
-        C.beginPath();
-        C.moveTo(cx + Math.cos(angle) * hw, cy + Math.sin(angle) * hw);
-        C.lineTo(cx - Math.cos(angle) * hw, cy - Math.sin(angle) * hw);
-        C.stroke();
+    // Clouds
+    function cloud(cx, cy, r) {
+        C.fillStyle = 'rgba(255,255,255,0.88)';
+        [[0,0,1],[0.42,0.18,0.74],[-0.35,0.22,0.64],[0.1,0.42,0.8]].forEach(([dx,dy,s]) => {
+            C.beginPath(); C.arc(cx+dx*r, cy+dy*r, r*s, 0, Math.PI*2); C.fill();
+        });
     }
+    cloud(90, 28, 26); cloud(270, 18, 22); cloud(490, 32, 32); cloud(610, 22, 20);
+
+    // Mountains along horizon
+    C.fillStyle = '#9DC484';
+    C.beginPath(); C.moveTo(0, VP_Y);
+    [[0,0],[60,-22],[130,0],[210,-15],[290,-32],[370,-13],[455,-30],[540,-40],[630,-22],[CW,-17],[CW,VP_Y]]
+        .forEach(([x, dy]) => C.lineTo(x, VP_Y + dy));
+    C.closePath(); C.fill();
+
+    // Ground gradient (below horizon)
+    const grd = C.createLinearGradient(0, VP_Y, 0, CH);
+    grd.addColorStop(0, '#7ABD4A');
+    grd.addColorStop(1, '#4A8F2A');
+    C.fillStyle = grd;
+    C.fillRect(0, VP_Y, CW, CH - VP_Y);
 }
 
-/* ---- Draw full track scene ---- */
-function drawTracks() {
-    const RO = 7;   // rail offset (half gauge)
+/* ---- Draw perspective straight tracks (moving state) ---- */
+function drawStraightTracks(phase) {
+    // Gravel bed – perspective trapezoid
+    C.fillStyle = '#B09464';
+    C.beginPath();
+    C.moveTo(VP_X-3, VP_Y+5); C.lineTo(VP_X+3, VP_Y+5);
+    C.lineTo(VP_X+RAIL_W+42, CH); C.lineTo(VP_X-RAIL_W-42, CH);
+    C.closePath(); C.fill();
 
-    // ---------- main straight track ----------
-    C.strokeStyle = '#8B6914';
-    C.lineWidth = 9;
+    // Crossties with perspective spacing (t² → denser near horizon, sparser near camera)
+    // t starts at 0.025 (not 0) to keep crossties away from the vanishing point
+    const N = 15;
     C.lineCap = 'butt';
-    drawCrossties(0, TRACK_Y, FORK_X, TRACK_Y, 10, RO + 5);
+    for (let i = 0; i < N; i++) {
+        const raw = ((i / N) + (phase % 1.0)) % 1.0;
+        const t   = 0.025 + 0.975 * raw * raw;
+        const y   = VP_Y + (CH - VP_Y) * t;
+        const lx  = VP_X - RAIL_W * t;
+        const rx  = VP_X + RAIL_W * t;
+        const ext = RAIL_W * t * 0.10 + 2;
+        C.strokeStyle = '#7B5B3A';
+        C.lineWidth   = Math.max(1.5, 9 * t);
+        C.beginPath(); C.moveTo(lx-ext, y); C.lineTo(rx+ext, y); C.stroke();
+    }
 
-    C.strokeStyle = '#888';
-    C.lineWidth = 4;
-    C.lineCap = 'round';
-    drawRailSegment(0, TRACK_Y, FORK_X, TRACK_Y, -RO);
-    drawRailSegment(0, TRACK_Y, FORK_X, TRACK_Y,  RO);
+    // Rails (on top of crossties)
+    C.strokeStyle = '#C0C0C0'; C.lineWidth = 4; C.lineCap = 'round';
+    C.beginPath(); C.moveTo(VP_X, VP_Y+2); C.lineTo(VP_X-RAIL_W, CH); C.stroke();
+    C.beginPath(); C.moveTo(VP_X, VP_Y+2); C.lineTo(VP_X+RAIL_W, CH); C.stroke();
+}
 
-    // ---------- left (upper) fork ----------
-    C.strokeStyle = '#8B6914';
-    C.lineWidth = 7;
-    drawCrossties(FORK_X, TRACK_Y, LEFT_END.x, LEFT_END.y, 5, RO + 4);
-
-    C.strokeStyle = '#888';
-    C.lineWidth = 4;
-    drawRailSegment(FORK_X, TRACK_Y, LEFT_END.x, LEFT_END.y, -RO);
-    drawRailSegment(FORK_X, TRACK_Y, LEFT_END.x, LEFT_END.y,  RO);
-
-    // ---------- right (lower) fork ----------
-    C.strokeStyle = '#8B6914';
-    C.lineWidth = 7;
-    drawCrossties(FORK_X, TRACK_Y, RIGHT_END.x, RIGHT_END.y, 5, RO + 4);
-
-    C.strokeStyle = '#888';
-    C.lineWidth = 4;
-    drawRailSegment(FORK_X, TRACK_Y, RIGHT_END.x, RIGHT_END.y, -RO);
-    drawRailSegment(FORK_X, TRACK_Y, RIGHT_END.x, RIGHT_END.y,  RO);
-
-    // ---------- cliff markers ----------
-    for (const ep of [LEFT_END, RIGHT_END]) {
-        C.strokeStyle = '#555';
-        C.lineWidth = 3;
-        C.fillStyle = '#C0392B';
-        C.beginPath();
-        C.arc(ep.x + 14, ep.y, 10, 0, Math.PI * 2);
-        C.fill();
-        C.stroke();
-
-        C.fillStyle = 'white';
-        C.font = 'bold 12px sans-serif';
-        C.textAlign = 'center';
-        C.textBaseline = 'middle';
-        C.fillText('!', ep.x + 14, ep.y);
+/* ---- Crossties for one fork arm ---- */
+function drawArmCrossties(x0L, x0R, y0, x1L, x1R, y1, n) {
+    C.strokeStyle = '#7B5B3A'; C.lineCap = 'butt';
+    for (let i = 1; i <= n; i++) {
+        const p  = i / (n + 1);
+        const y  = y0 + (y1 - y0) * p;
+        const lx = x0L + (x1L - x0L) * p;
+        const rx = x0R + (x1R - x0R) * p;
+        C.lineWidth = Math.max(1.5, 7 * p);
+        C.beginPath(); C.moveTo(lx-3, y); C.lineTo(rx+3, y); C.stroke();
     }
 }
 
-/* ---- Draw a choice sign at the fork end ---- */
-function drawSign(side, text) {
-    const ep   = side === 'left' ? LEFT_END : RIGHT_END;
-    const aboveTrack = side === 'left'; // left fork goes upward → label above
-    const labelY = aboveTrack ? ep.y - 36 : ep.y + 36;
-    const labelX = ep.x - 15;
+/* ---- Draw the Y-fork scene (atFork state) ---- */
+function drawForkTracks() {
+    // Gravel bed – upper (pre-fork) section
+    C.fillStyle = '#B09464';
+    C.beginPath();
+    C.moveTo(VP_X-3, VP_Y+5); C.lineTo(VP_X+3, VP_Y+5);
+    C.lineTo(FORK_RX+22, FORK_Y); C.lineTo(FORK_LX-22, FORK_Y);
+    C.closePath(); C.fill();
 
-    C.font = 'bold 15px sans-serif';
-    const tw = C.measureText(text).width;
-    const sw = tw + 22, sh = 30;
-    const sx = labelX - sw / 2, sy = labelY - sh / 2;
+    // Left arm gravel
+    C.beginPath();
+    C.moveTo(FORK_LX-22, FORK_Y); C.lineTo(VP_X+6, FORK_Y);
+    C.lineTo(L_MID+ARM_W+16, CH); C.lineTo(L_MID-ARM_W-16, CH);
+    C.closePath(); C.fill();
 
-    // shadow
-    C.fillStyle = 'rgba(0,0,0,0.15)';
-    roundRect(sx + 3, sy + 3, sw, sh, 8);
-    C.fill();
+    // Right arm gravel
+    C.beginPath();
+    C.moveTo(VP_X-6, FORK_Y); C.lineTo(FORK_RX+22, FORK_Y);
+    C.lineTo(R_MID+ARM_W+16, CH); C.lineTo(R_MID-ARM_W-16, CH);
+    C.closePath(); C.fill();
 
-    // background
-    C.fillStyle = side === 'left' ? '#FF9D00' : '#4DB8FF';
-    C.strokeStyle = 'white';
-    C.lineWidth = 2.5;
-    roundRect(sx, sy, sw, sh, 8);
-    C.fill();
-    C.stroke();
+    // Upper-section crossties (pre-fork)
+    C.strokeStyle = '#7B5B3A'; C.lineCap = 'butt';
+    for (let i = 1; i <= 4; i++) {
+        const t  = FORK_T * (i / 5);
+        const y  = VP_Y + (CH - VP_Y) * t;
+        const lx = VP_X - RAIL_W * t;
+        const rx = VP_X + RAIL_W * t;
+        C.lineWidth = Math.max(1.5, 8 * t);
+        C.beginPath(); C.moveTo(lx-4, y); C.lineTo(rx+4, y); C.stroke();
+    }
 
-    // text
-    C.fillStyle = 'white';
-    C.textAlign = 'center';
-    C.textBaseline = 'middle';
-    C.font = 'bold 15px sans-serif';
-    C.fillText(text, labelX, labelY);
+    // Upper rails
+    C.strokeStyle = '#C0C0C0'; C.lineWidth = 4; C.lineCap = 'round';
+    C.beginPath(); C.moveTo(VP_X, VP_Y+2); C.lineTo(FORK_LX, FORK_Y); C.stroke();
+    C.beginPath(); C.moveTo(VP_X, VP_Y+2); C.lineTo(FORK_RX, FORK_Y); C.stroke();
+
+    // Left arm rails
+    C.beginPath(); C.moveTo(FORK_LX,   FORK_Y); C.lineTo(L_MID-ARM_W, CH); C.stroke();
+    C.beginPath(); C.moveTo(FORK_LX+9, FORK_Y); C.lineTo(L_MID+ARM_W, CH); C.stroke();
+
+    // Right arm rails
+    C.beginPath(); C.moveTo(FORK_RX-9, FORK_Y); C.lineTo(R_MID-ARM_W, CH); C.stroke();
+    C.beginPath(); C.moveTo(FORK_RX,   FORK_Y); C.lineTo(R_MID+ARM_W, CH); C.stroke();
+
+    // Crossties on each arm
+    drawArmCrossties(FORK_LX,   FORK_LX+9, FORK_Y, L_MID-ARM_W, L_MID+ARM_W, CH, 5);
+    drawArmCrossties(FORK_RX-9, FORK_RX,   FORK_Y, R_MID-ARM_W, R_MID+ARM_W, CH, 5);
+
+    // Choice signs at base of each arm
+    if (gs.leftChoice)  drawForkSign('left',  gs.leftChoice);
+    if (gs.rightChoice) drawForkSign('right', gs.rightChoice);
 }
 
-/* ---- Draw trolley at (x, y) with rotation and alpha ---- */
-function drawTrolley(x, y, angle, alpha) {
+/* ---- Choice sign at the base of a fork arm ---- */
+function drawForkSign(side, text) {
+    const mx  = side === 'left' ? L_MID : R_MID;
+    const my  = CH - 44;
+    const bgC = side === 'left' ? '#FF9D00' : '#4DB8FF';
+
+    C.font = 'bold 16px sans-serif';
+    const tw = C.measureText(text).width;
+    const sw = tw + 28, sh = 34;
+    const sx = mx - sw / 2, sy = my - sh / 2;
+
+    C.fillStyle = 'rgba(0,0,0,0.18)';
+    roundRect(sx+3, sy+3, sw, sh, 8); C.fill();
+
+    C.fillStyle = bgC; C.strokeStyle = 'white'; C.lineWidth = 2.5;
+    roundRect(sx, sy, sw, sh, 8); C.fill(); C.stroke();
+
+    C.fillStyle = 'white'; C.textAlign = 'center'; C.textBaseline = 'middle';
+    C.font = 'bold 16px sans-serif';
+    C.fillText(text, mx, my);
+}
+
+/* ---- Draw trolley from behind with child visible ---- */
+function drawTrolleyBack() {
     C.save();
-    C.globalAlpha = alpha;
-    C.translate(x, y);
-    C.rotate(angle);
+    C.translate(VP_X, CH);
 
-    // body
-    C.fillStyle = '#E91E63';
-    C.strokeStyle = '#880E4F';
-    C.lineWidth = 2;
-    roundRect(-24, -16, 48, 27, 6);
-    C.fill();
-    C.stroke();
+    // Trolley body (back view – only the top strip is visible above the frame)
+    C.fillStyle = '#E91E63'; C.strokeStyle = '#880E4F'; C.lineWidth = 2.5;
+    roundRect(-58, -54, 116, 52, 9); C.fill(); C.stroke();
 
-    // window
+    // Rear window strip
     C.fillStyle = '#FFFDE7';
-    roundRect(-17, -13, 34, 15, 4);
-    C.fill();
+    roundRect(-40, -49, 80, 30, 5); C.fill();
 
-    // bumper bar
-    C.fillStyle = '#880E4F';
-    C.fillRect(-27, 8, 54, 5);
-
-    // wheels
-    [-13, 13].forEach(wx => {
-        C.fillStyle = '#333';
-        C.beginPath();
-        C.arc(wx, 17, 8, 0, Math.PI * 2);
-        C.fill();
-
-        C.strokeStyle = '#777';
-        C.lineWidth = 2;
-        C.beginPath();
-        C.arc(wx, 17, 8, 0, Math.PI * 2);
-        C.stroke();
-
-        C.fillStyle = '#aaa';
-        C.beginPath();
-        C.arc(wx, 17, 3, 0, Math.PI * 2);
-        C.fill();
-    });
-
-    // chimney
+    // Chimney
     C.fillStyle = '#444';
-    roundRect(9, -24, 7, 12, 2);
-    C.fill();
+    roundRect(-42, -66, 9, 16, 2); C.fill();
 
-    // smoke puff
-    C.globalAlpha = alpha * 0.5;
-    C.fillStyle = '#ddd';
-    C.beginPath(); C.arc(14, -29, 5, 0, Math.PI * 2); C.fill();
-    C.beginPath(); C.arc(18, -34, 4, 0, Math.PI * 2); C.fill();
-    C.globalAlpha = alpha;
+    // Smoke puffs
+    C.globalAlpha = 0.55; C.fillStyle = '#DDD';
+    C.beginPath(); C.arc(-39, -72, 7, 0, Math.PI*2); C.fill();
+    C.beginPath(); C.arc(-34, -80, 5, 0, Math.PI*2); C.fill();
+    C.globalAlpha = 1;
+
+    // Child – peeking above the trolley back
+    // Body / shirt
+    C.fillStyle = '#42A5F5';
+    C.beginPath(); C.arc(0, -62, 13, Math.PI, 0, false); C.fill();
+
+    // Head
+    C.fillStyle = '#FFCC80';
+    C.beginPath(); C.arc(0, -74, 14, 0, Math.PI*2); C.fill();
+    C.strokeStyle = '#F57C00'; C.lineWidth = 1.5; C.stroke();
+
+    // Hair
+    C.fillStyle = '#5D4037';
+    C.beginPath(); C.arc(0, -82, 11, Math.PI, 0, false); C.fill();
+
+    // Eyes
+    C.fillStyle = '#333';
+    C.beginPath(); C.arc(-5, -72, 2.5, 0, Math.PI*2); C.fill();
+    C.beginPath(); C.arc( 5, -72, 2.5, 0, Math.PI*2); C.fill();
+
+    // Smile
+    C.strokeStyle = '#333'; C.lineWidth = 1.5;
+    C.beginPath(); C.arc(0, -70, 5, 0.1, Math.PI - 0.1); C.stroke();
 
     C.restore();
 }
 
-/* ---- Full scene redraw ---- */
-function drawScene(showSigns) {
+/* ---- Correct-answer overlay: tracks continue + big ○ ---- */
+function drawCorrectOverlay() {
+    drawStraightTracks(0);
+    drawTrolleyBack();
+
+    // Green ○ mark in the middle of the tracks
+    const cy = VP_Y + (CH - VP_Y) * 0.52;
+    C.strokeStyle = 'rgba(0,200,83,0.35)'; C.lineWidth = 22;
+    C.beginPath(); C.arc(VP_X, cy, 52, 0, Math.PI*2); C.stroke();
+    C.strokeStyle = '#00C853'; C.lineWidth = 10;
+    C.beginPath(); C.arc(VP_X, cy, 52, 0, Math.PI*2); C.stroke();
+}
+
+/* ---- Broken-tracks overlay: cliff + danger signs ---- */
+function drawBrokenOverlay() {
+    const breakT = 0.52;
+    const breakY = VP_Y + (CH - VP_Y) * breakT;
+    const bLX    = VP_X - RAIL_W * breakT;
+    const bRX    = VP_X + RAIL_W * breakT;
+
+    // Gravel up to break point
+    C.fillStyle = '#B09464';
+    C.beginPath();
+    C.moveTo(VP_X-3, VP_Y+5); C.lineTo(VP_X+3, VP_Y+5);
+    C.lineTo(bRX+20, breakY); C.lineTo(bLX-20, breakY);
+    C.closePath(); C.fill();
+
+    // Crossties up to break point
+    C.strokeStyle = '#7B5B3A'; C.lineCap = 'butt';
+    for (let i = 1; i <= 4; i++) {
+        const t  = breakT * (i / 5);
+        const y  = VP_Y + (CH - VP_Y) * t;
+        const lx = VP_X - RAIL_W * t;
+        const rx = VP_X + RAIL_W * t;
+        C.lineWidth = Math.max(1.5, 8 * t);
+        C.beginPath(); C.moveTo(lx-4, y); C.lineTo(rx+4, y); C.stroke();
+    }
+
+    // Rails up to break point
+    C.strokeStyle = '#C0C0C0'; C.lineWidth = 4; C.lineCap = 'round';
+    C.beginPath(); C.moveTo(VP_X, VP_Y+2); C.lineTo(bLX, breakY); C.stroke();
+    C.beginPath(); C.moveTo(VP_X, VP_Y+2); C.lineTo(bRX, breakY); C.stroke();
+
+    // Broken rail ends (splayed out, red)
+    C.strokeStyle = '#E53935'; C.lineWidth = 5; C.lineCap = 'round';
+    C.beginPath(); C.moveTo(bLX, breakY); C.lineTo(bLX-18, breakY+28); C.stroke();
+    C.beginPath(); C.moveTo(bRX, breakY); C.lineTo(bRX+18, breakY+28); C.stroke();
+
+    // Cliff ledge
+    C.fillStyle = '#6D4C41';
+    C.beginPath();
+    C.moveTo(bLX-44, breakY+10); C.lineTo(bRX+44, breakY+10);
+    C.lineTo(bRX+24, breakY+28); C.lineTo(bLX-24, breakY+28);
+    C.closePath(); C.fill();
+
+    // Void below cliff
+    const cliffVoidGradient = C.createLinearGradient(0, breakY+28, 0, CH);
+    cliffVoidGradient.addColorStop(0, '#1A2332'); cliffVoidGradient.addColorStop(1, '#000A14');
+    C.fillStyle = cliffVoidGradient;
+    C.fillRect(0, breakY+28, CW, CH - breakY - 28);
+
+    // Danger ✕ signs at the rail ends
+    function dangerX(x, y) {
+        C.strokeStyle = '#FF5252'; C.lineWidth = 4; C.lineCap = 'round';
+        C.beginPath(); C.moveTo(x-9, y-9); C.lineTo(x+9, y+9); C.stroke();
+        C.beginPath(); C.moveTo(x+9, y-9); C.lineTo(x-9, y+9); C.stroke();
+    }
+    dangerX(bLX-28, breakY - 18);
+    dangerX(bRX+28, breakY - 18);
+
+    // Trolley stopped at edge
+    drawTrolleyBack();
+}
+
+/* ---- Master scene draw ---- */
+function drawScene() {
     C.clearRect(0, 0, CW, CH);
     drawBG();
-    drawTracks();
-    if (showSigns && gs.leftChoice) {
-        drawSign('left',  gs.leftChoice);
-        drawSign('right', gs.rightChoice);
+    switch (canvasPhase) {
+        case 'moving':
+            drawStraightTracks(scrollOff % 1.0);
+            drawTrolleyBack();
+            break;
+        case 'atFork':
+            drawForkTracks();
+            drawTrolleyBack();
+            break;
+        case 'correct':
+            drawCorrectOverlay();
+            break;
+        case 'broken':
+            drawBrokenOverlay();
+            break;
     }
-    drawTrolley(tx, ty, tAngle, tAlpha);
 }
 
 /* =============================================
    ANIMATION HELPERS
    ============================================= */
-function easeInOut(t) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; }
-function lerp(a, b, t) { return a + (b - a) * t; }
-
-function cancelAnim() {
-    if (animId) { cancelAnimationFrame(animId); animId = null; }
+function stopScrollAnim() {
+    if (scrollReqId) { cancelAnimationFrame(scrollReqId); scrollReqId = null; }
 }
 
-/* Move trolley from current position to (ex, ey) over `ms` milliseconds */
-function moveTrolley(ex, ey, ms, targetAngle, onDone) {
-    const sx = tx, sy = ty, sa = tAngle;
-    const t0 = performance.now();
+/* Animate trolley approaching the fork, then call onForkReached */
+function startApproachAnim(onForkReached) {
+    canvasPhase = 'moving';
+    scrollOff   = 0;
+    let lastTime = null;
+
     function step(now) {
-        const p = Math.min((now - t0) / ms, 1);
-        const e = easeInOut(p);
-        tx = lerp(sx, ex, e);
-        ty = lerp(sy, ey, e);
-        tAngle = lerp(sa, targetAngle, Math.min(p * 2, 1));
-        drawScene(gamePhase === 'idle');
-        if (p < 1) { animId = requestAnimationFrame(step); }
-        else { onDone && onDone(); }
-    }
-    animId = requestAnimationFrame(step);
-}
-
-/* Fall off animation: trolley slides to end of fork then tumbles down */
-function fallTrolley(side, onDone) {
-    const ep = side === 'left' ? LEFT_END : RIGHT_END;
-    const trackAngle = Math.atan2(ep.y - TRACK_Y, ep.x - FORK_X);
-
-    // phase 1: slide to fork end
-    const sx1 = tx, sy1 = ty;
-    const t0 = performance.now();
-    const p1ms = 550;
-
-    function phase1(now) {
-        const p = Math.min((now - t0) / p1ms, 1);
-        tx = lerp(sx1, ep.x, easeInOut(p));
-        ty = lerp(sy1, ep.y, easeInOut(p));
-        tAngle = lerp(0, trackAngle, p);
-        drawScene(false);
-        if (p < 1) { animId = requestAnimationFrame(phase1); return; }
-
-        // phase 2: fall off screen
-        const t1 = performance.now();
-        const p2ms = 750;
-        const bx = tx, by = ty, ba = tAngle;
-
-        function phase2(now2) {
-            const p = Math.min((now2 - t1) / p2ms, 1);
-            tx     = bx + p * 55;
-            ty     = by + p * p * 140;   // gravity
-            tAngle = ba + p * Math.PI * 1.5; // spin
-            tAlpha = 1 - p;
-            drawScene(false);
-            if (p < 1) { animId = requestAnimationFrame(phase2); return; }
-            tAlpha = 1;
-            onDone && onDone();
+        if (!lastTime) lastTime = now;
+        const dt = (now - lastTime) / 1000;
+        lastTime = now;
+        scrollOff += SCROLL_SPEED * dt;
+        drawScene();
+        if (scrollOff < APPROACH_CYCLES) {
+            scrollReqId = requestAnimationFrame(step);
+        } else {
+            scrollReqId = null;
+            canvasPhase = 'atFork';
+            drawScene();
+            onForkReached && onForkReached();
         }
-        animId = requestAnimationFrame(phase2);
     }
-    animId = requestAnimationFrame(phase1);
+    scrollReqId = requestAnimationFrame(step);
 }
 
 /* =============================================
@@ -760,14 +819,12 @@ function setupQuestion() {
     document.getElementById('answer-reveal').style.display = 'none';
 
     setButtons(false);
-
-    // Reset trolley to start and animate to wait position
-    tx = TSTART_X; ty = TRACK_Y; tAngle = 0; tAlpha = 1;
+    stopScrollAnim();
     gamePhase = 'moving';
-    cancelAnim();
-    moveTrolley(TWAIT_X, TRACK_Y, 800, 0, () => {
+
+    // Animate trolley approaching the fork, then enable buttons
+    startApproachAnim(() => {
         gamePhase = 'idle';
-        drawScene(true);
         setButtons(true);
     });
 }
@@ -777,7 +834,7 @@ function chooseAnswer(side) {
     if (gs.busy || gamePhase !== 'idle') return;
     gs.busy = true;
     setButtons(false);
-    cancelAnim();
+    stopScrollAnim();
 
     const isCorrect = (side === gs.correctSide);
     gamePhase = 'animating';
@@ -788,9 +845,9 @@ function chooseAnswer(side) {
         gs.score++;
         document.getElementById('score-display').textContent = gs.score;
 
-        const ep = side === 'left' ? LEFT_END : RIGHT_END;
-        const angle = Math.atan2(ep.y - TRACK_Y, ep.x - FORK_X);
-        moveTrolley(ep.x + 50, ep.y, 900, angle, afterAnswer);
+        canvasPhase = 'correct';
+        drawScene();
+        setTimeout(afterAnswer, 1400);
     } else {
         playBuzz();
         showFeedback('❌');
@@ -799,7 +856,10 @@ function chooseAnswer(side) {
         const reveal = document.getElementById('answer-reveal');
         reveal.textContent = '✨ 正解は「' + correctWord + '」だよ！';
         reveal.style.display = 'block';
-        fallTrolley(side, afterAnswer);
+
+        canvasPhase = 'broken';
+        drawScene();
+        setTimeout(afterAnswer, 2200);
     }
 }
 
@@ -855,9 +915,10 @@ function showGameOver() {
 }
 
 /* ---- Initial canvas render (welcome screen) ---- */
-tx = TSTART_X; ty = TRACK_Y; tAngle = 0; tAlpha = 1;
+canvasPhase = 'moving';
+scrollOff = 0;
 gs.leftChoice = null; gs.rightChoice = null;
-drawScene(false);
+drawScene();
 </script>
 </body>
 </html>
