@@ -133,6 +133,13 @@
             font-weight: normal;
             font-size: 0.85em;
         }
+        #answer-reveal {
+            margin-top: 10px;
+            font-size: clamp(14px, 3vw, 18px);
+            font-weight: bold;
+            color: #ff6600;
+            display: none;
+        }
 
         /* Choice buttons */
         .choice-area {
@@ -257,6 +264,7 @@
 
     <div class="question-card">
         <div id="question-text"></div>
+        <div id="answer-reveal"></div>
     </div>
 
     <div class="choice-area">
@@ -749,6 +757,7 @@ function setupQuestion() {
     document.getElementById('left-choice').textContent  = gs.leftChoice;
     document.getElementById('right-choice').textContent = gs.rightChoice;
     document.getElementById('q-num').textContent = gs.currentIndex + 1;
+    document.getElementById('answer-reveal').style.display = 'none';
 
     setButtons(false);
 
@@ -785,6 +794,11 @@ function chooseAnswer(side) {
     } else {
         playBuzz();
         showFeedback('❌');
+        const currentQuestion = gs.questions[gs.currentIndex];
+        const correctWord = currentQuestion.choices[currentQuestion.a - 1];
+        const reveal = document.getElementById('answer-reveal');
+        reveal.textContent = '✨ 正解は「' + correctWord + '」だよ！';
+        reveal.style.display = 'block';
         fallTrolley(side, afterAnswer);
     }
 }
