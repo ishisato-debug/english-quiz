@@ -358,13 +358,13 @@ const CW     = 660, CH = 310;
 const VP_X   = CW / 2;   // vanishing-point X (330)
 const VP_Y   = 90;        // horizon Y
 const RAIL_W = 88;        // half track-gauge at y = CH
-const FORK_T = 0.44;      // perspective depth (0=horizon, 1=camera) where fork starts
-const FORK_Y  = VP_Y + (CH - VP_Y) * FORK_T;   // ≈ 188 px
-const FORK_LX = VP_X - RAIL_W * FORK_T;         // left  rail at fork ≈ 291
-const FORK_RX = VP_X + RAIL_W * FORK_T;         // right rail at fork ≈ 369
-// Fork arm centres at bottom of canvas
-const L_MID = 195, R_MID = 465;
-const ARM_W = 30;  // half-gauge of each arm at y = CH
+const FORK_T = 0.38;      // perspective depth (0=horizon, 1=camera) where fork starts
+const FORK_Y  = VP_Y + (CH - VP_Y) * FORK_T;   // ≈ 174 px
+const FORK_LX = VP_X - RAIL_W * FORK_T;         // left  rail at fork ≈ 297
+const FORK_RX = VP_X + RAIL_W * FORK_T;         // right rail at fork ≈ 363
+// Fork arm centres at bottom of canvas (widely separated for clear bifurcation)
+const L_MID = 145, R_MID = 515;
+const ARM_W = 32;  // half-gauge of each arm at y = CH
 
 // Animation timing constants
 const SCROLL_SPEED    = 0.85; // track-cycles per second during the approach
@@ -509,9 +509,27 @@ function drawForkTracks() {
     C.beginPath(); C.moveTo(FORK_RX-9, FORK_Y); C.lineTo(R_MID-ARM_W, CH); C.stroke();
     C.beginPath(); C.moveTo(FORK_RX,   FORK_Y); C.lineTo(R_MID+ARM_W, CH); C.stroke();
 
-    // Crossties on each arm
-    drawArmCrossties(FORK_LX,   FORK_LX+9, FORK_Y, L_MID-ARM_W, L_MID+ARM_W, CH, 5);
-    drawArmCrossties(FORK_RX-9, FORK_RX,   FORK_Y, R_MID-ARM_W, R_MID+ARM_W, CH, 5);
+    // Crossties on each arm (more ties for clearer fork)
+    drawArmCrossties(FORK_LX,   FORK_LX+9, FORK_Y, L_MID-ARM_W, L_MID+ARM_W, CH, 7);
+    drawArmCrossties(FORK_RX-9, FORK_RX,   FORK_Y, R_MID-ARM_W, R_MID+ARM_W, CH, 7);
+
+    // Grass island between the two diverging arms
+    C.fillStyle = '#5A9E32';
+    C.beginPath();
+    C.moveTo(FORK_LX + 9, FORK_Y + 6);
+    C.lineTo(FORK_RX - 9, FORK_Y + 6);
+    C.lineTo(R_MID - ARM_W - 2, CH);
+    C.lineTo(L_MID + ARM_W + 2, CH);
+    C.closePath(); C.fill();
+
+    // Junction diamond marker at the fork split point
+    C.fillStyle = '#8B6914'; C.strokeStyle = '#5C4200'; C.lineWidth = 2;
+    C.beginPath();
+    C.moveTo(VP_X, FORK_Y - 16);
+    C.lineTo(FORK_RX - 2, FORK_Y + 8);
+    C.lineTo(VP_X, FORK_Y + 18);
+    C.lineTo(FORK_LX + 2, FORK_Y + 8);
+    C.closePath(); C.fill(); C.stroke();
 
     // Choice signs at base of each arm
     if (gs.leftChoice)  drawForkSign('left',  gs.leftChoice);
@@ -634,8 +652,12 @@ function drawBrokenOverlay() {
 
     // Broken rail ends (splayed out, red)
     C.strokeStyle = '#E53935'; C.lineWidth = 5; C.lineCap = 'round';
-    C.beginPath(); C.moveTo(bLX, breakY); C.lineTo(bLX-18, breakY+28); C.stroke();
-    C.beginPath(); C.moveTo(bRX, breakY); C.lineTo(bRX+18, breakY+28); C.stroke();
+    C.beginPath(); C.moveTo(bLX, breakY); C.lineTo(bLX-22, breakY+32); C.stroke();
+    C.beginPath(); C.moveTo(bRX, breakY); C.lineTo(bRX+22, breakY+32); C.stroke();
+    // Extra bent/broken rail splinters
+    C.strokeStyle = '#B71C1C'; C.lineWidth = 3;
+    C.beginPath(); C.moveTo(bLX-4, breakY+5); C.lineTo(bLX-28, breakY+18); C.stroke();
+    C.beginPath(); C.moveTo(bRX+4, breakY+5); C.lineTo(bRX+28, breakY+18); C.stroke();
 
     // Cliff ledge
     C.fillStyle = '#6D4C41';
@@ -658,6 +680,22 @@ function drawBrokenOverlay() {
     }
     dangerX(bLX-28, breakY - 18);
     dangerX(bRX+28, breakY - 18);
+
+    // Large boulders blocking the track
+    function drawBoulder(cx, cy, rx, ry, angle, baseColor, hiColor) {
+        C.save(); C.translate(cx, cy); C.rotate(angle);
+        C.fillStyle = baseColor; C.strokeStyle = '#3D2D1A'; C.lineWidth = 2;
+        C.beginPath(); C.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); C.fill(); C.stroke();
+        C.fillStyle = hiColor;
+        C.beginPath(); C.ellipse(-rx * 0.28, -ry * 0.32, rx * 0.32, ry * 0.22, -0.3, 0, Math.PI * 2); C.fill();
+        C.restore();
+    }
+    const bldY = breakY - 10;
+    drawBoulder(VP_X - 18, bldY,      32, 22, -0.18, '#7A6655', 'rgba(255,255,255,0.15)');
+    drawBoulder(VP_X + 26, bldY + 6,  27, 18,  0.25, '#8A7260', 'rgba(255,255,255,0.12)');
+    drawBoulder(VP_X - 52, bldY + 8,  20, 14,  0.10, '#6A5548', 'rgba(255,255,255,0.10)');
+    drawBoulder(VP_X + 55, bldY + 2,  17, 12, -0.30, '#6F5E4E', 'rgba(255,255,255,0.10)');
+    drawBoulder(VP_X +  4, bldY - 18, 14, 10,  0.05, '#7D6B5B', 'rgba(255,255,255,0.12)');
 
     // Trolley stopped at edge
     drawTrolleyBack();
@@ -697,6 +735,7 @@ function startApproachAnim(onForkReached) {
     canvasPhase = 'moving';
     scrollOff   = 0;
     let lastTime = null;
+    startTrainSound();
 
     function step(now) {
         if (!lastTime) lastTime = now;
@@ -711,6 +750,31 @@ function startApproachAnim(onForkReached) {
             canvasPhase = 'atFork';
             drawScene();
             onForkReached && onForkReached();
+        }
+    }
+    scrollReqId = requestAnimationFrame(step);
+}
+
+/* Animate trolley moving forward briefly after answer, then call onDone */
+function startPostAnswerAnim(onDone) {
+    canvasPhase = 'moving';
+    let elapsed = 0;
+    let lastTime = null;
+    const POST_DURATION = 0.65;
+
+    function step(now) {
+        if (!lastTime) lastTime = now;
+        const dt = (now - lastTime) / 1000;
+        lastTime = now;
+        elapsed  += dt;
+        scrollOff += SCROLL_SPEED * dt;
+        drawScene();
+        if (elapsed < POST_DURATION) {
+            scrollReqId = requestAnimationFrame(step);
+        } else {
+            scrollReqId = null;
+            stopTrainSound();
+            onDone();
         }
     }
     scrollReqId = requestAnimationFrame(step);
@@ -745,6 +809,46 @@ function playBuzz() {
     g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.4);
     osc.connect(g); g.connect(a.destination);
     osc.start(); osc.stop(a.currentTime + 0.4);
+}
+
+/* Continuous train-running sound (looping noise buffer with rhythmic clacks) */
+let trainNoiseSource = null;
+function startTrainSound() {
+    stopTrainSound();
+    try {
+        const a = getAudio();
+        const sr = a.sampleRate;
+        // 1-second looping buffer: two "clack" pulses at t=0 and t=0.5
+        const buf = a.createBuffer(1, sr, sr);
+        const d   = buf.getChannelData(0);
+        [0, 0.5].forEach(offset => {
+            const si = Math.round(offset * sr);
+            const len = Math.round(sr * 0.055);
+            for (let i = 0; i < len && si + i < sr; i++) {
+                d[si + i] += (Math.random() * 2 - 1) * Math.exp(-i / (sr * 0.012)) * 0.45;
+            }
+        });
+        // Low-level rumble underneath
+        for (let i = 0; i < sr; i++) d[i] += (Math.random() * 2 - 1) * 0.018;
+
+        const src = a.createBufferSource();
+        src.buffer = buf; src.loop = true;
+
+        const lpf = a.createBiquadFilter();
+        lpf.type = 'lowpass'; lpf.frequency.value = 450;
+
+        const g = a.createGain(); g.gain.value = 0.32;
+
+        src.connect(lpf); lpf.connect(g); g.connect(a.destination);
+        src.start();
+        trainNoiseSource = src;
+    } catch(e) { /* audio not available */ }
+}
+function stopTrainSound() {
+    if (trainNoiseSource) {
+        try { trainNoiseSource.stop(); } catch(e) {}
+        trainNoiseSource = null;
+    }
 }
 
 /* =============================================
@@ -839,28 +943,29 @@ function chooseAnswer(side) {
     const isCorrect = (side === gs.correctSide);
     gamePhase = 'animating';
 
-    if (isCorrect) {
-        playDing();
-        showFeedback('⭕️');
-        gs.score++;
-        document.getElementById('score-display').textContent = gs.score;
-
-        canvasPhase = 'correct';
-        drawScene();
-        setTimeout(afterAnswer, 1400);
-    } else {
-        playBuzz();
-        showFeedback('❌');
-        const currentQuestion = gs.questions[gs.currentIndex];
-        const correctWord = currentQuestion.choices[currentQuestion.a - 1];
-        const reveal = document.getElementById('answer-reveal');
-        reveal.textContent = '✨ 正解は「' + correctWord + '」だよ！';
-        reveal.style.display = 'block';
-
-        canvasPhase = 'broken';
-        drawScene();
-        setTimeout(afterAnswer, 2200);
-    }
+    // Trolley moves forward briefly before revealing result
+    startPostAnswerAnim(() => {
+        if (isCorrect) {
+            gs.score++;
+            document.getElementById('score-display').textContent = gs.score;
+            canvasPhase = 'correct';
+            drawScene();
+            playDing();
+            showFeedback('⭕️');
+            setTimeout(afterAnswer, 1400);
+        } else {
+            const currentQuestion = gs.questions[gs.currentIndex];
+            const correctWord = currentQuestion.choices[currentQuestion.a - 1];
+            const reveal = document.getElementById('answer-reveal');
+            reveal.textContent = '✨ 正解は「' + correctWord + '」だよ！';
+            reveal.style.display = 'block';
+            canvasPhase = 'broken';
+            drawScene();
+            playBuzz();
+            showFeedback('❌');
+            setTimeout(afterAnswer, 2200);
+        }
+    });
 }
 
 function afterAnswer() {
@@ -884,6 +989,7 @@ function showScreen(id) {
 
 /* ---- Start / Restart ---- */
 function startGame() {
+    stopTrainSound();
     gs.questions    = shuffle(quizData).slice(0, TOTAL_Q);
     gs.currentIndex = 0;
     gs.score        = 0;
