@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>トロッコアドベンチャー</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+            background-color: #fffaf0;
+            background-image: radial-gradient(#ffdfba 1px, transparent 1px);
+            background-size: 20px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 10px 30px;
+        }
+
+        h1 {
+            color: #ff69b4;
+            font-size: clamp(22px, 5vw, 32px);
+            margin: 8px 0;
+            text-shadow: 1px 1px white;
+            text-align: center;
+        }
+
+        /* ---- Screens ---- */
+        .screen {
+            width: 100%;
+            max-width: 660px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+
+        /* Welcome */
+        #screen-welcome { gap: 20px; }
+
+        .welcome-card {
+            background: white;
+            border: 5px solid #ffb6c1;
+            border-radius: 30px;
+            padding: 28px 24px;
+            box-shadow: 0 8px 0 #ffb6c1;
+            text-align: center;
+            width: 100%;
+        }
+        .welcome-card h2 {
+            font-size: 22px;
+            color: #ff69b4;
+            margin-bottom: 16px;
+        }
+        .instructions {
+            text-align: left;
+            font-size: 16px;
+            line-height: 2.2;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        .start-btn {
+            padding: 18px 60px;
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 7px 0 #c94f8a;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .start-btn:active { box-shadow: none; transform: translateY(7px); }
+
+        /* Game header */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 0 4px;
+        }
+        .badge {
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 18px;
+            color: white;
+        }
+        .badge-score { background: #ff69b4; }
+        .badge-progress { background: #4db8ff; }
+
+        /* Canvas */
+        #gameCanvas {
+            width: 100%;
+            border-radius: 18px;
+            border: 4px solid #ffb6c1;
+            display: block;
+            background: #87CEEB;
+        }
+
+        /* Question card */
+        .question-card {
+            background: white;
+            border: 4px solid #ffb6c1;
+            border-radius: 22px;
+            padding: 14px 18px;
+            box-shadow: 0 6px 0 #ffb6c1;
+            width: 100%;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #question-text {
+            font-size: clamp(14px, 3.2vw, 20px);
+            font-weight: bold;
+            line-height: 1.9;
+            text-align: center;
+            color: #333;
+        }
+        #question-text .blank-word {
+            color: #ff1493;
+            border-bottom: 3px solid #ff1493;
+            padding: 0 4px;
+            white-space: nowrap;
+        }
+        #question-text .speaker {
+            color: #999;
+            font-weight: normal;
+            font-size: 0.85em;
+        }
+
+        /* Choice buttons */
+        .choice-area {
+            display: flex;
+            gap: 14px;
+            width: 100%;
+        }
+        .choice-btn {
+            flex: 1;
+            padding: 16px 8px;
+            font-size: clamp(16px, 3.5vw, 22px);
+            font-weight: bold;
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.1s, box-shadow 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 62px;
+        }
+        .choice-btn:active { transform: translateY(6px); }
+        .choice-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+        .btn-left  { background: linear-gradient(135deg, #ff9d00, #ff6600); box-shadow: 0 6px 0 #c05000; }
+        .btn-right { background: linear-gradient(135deg, #4db8ff, #0080ff); box-shadow: 0 6px 0 #0060cc; }
+        .btn-left:active  { box-shadow: none; }
+        .btn-right:active { box-shadow: none; }
+
+        /* Feedback overlay */
+        #feedback-overlay {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 110px;
+            animation: pop 0.3s ease-out;
+            z-index: 200;
+            pointer-events: none;
+        }
+        @keyframes pop {
+            0%  { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
+            60% { transform: translate(-50%, -50%) scale(1.2); }
+            100%{ transform: translate(-50%, -50%) scale(1);   opacity: 1; }
+        }
+
+        /* Game over */
+        #screen-gameover { gap: 20px; }
+        .gameover-card {
+            background: white;
+            border: 5px solid #ffb6c1;
+            border-radius: 30px;
+            padding: 30px 24px;
+            box-shadow: 0 8px 0 #ffb6c1;
+            text-align: center;
+            width: 100%;
+        }
+        #gameover-title { font-size: 28px; font-weight: bold; color: #ff69b4; margin-bottom: 10px; }
+        .final-score { font-size: 68px; font-weight: bold; color: #ff69b4; line-height: 1.1; }
+        .score-label { font-size: 18px; color: #999; margin-top: 4px; }
+        #score-message { font-size: 22px; font-weight: bold; color: #ff6600; margin: 12px 0 20px; }
+        .restart-btn {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            font-size: 22px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 7px 0 #c94f8a;
+            transition: transform 0.1s, box-shadow 0.1s;
+            margin-bottom: 12px;
+        }
+        .restart-btn:active { box-shadow: none; transform: translateY(7px); }
+        .home-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            font-size: 17px;
+            font-weight: bold;
+            background: white;
+            color: #ff69b4;
+            border: 3px solid #ffb6c1;
+            border-radius: 30px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🚃 トロッコアドベンチャー 🏔️</h1>
+
+<!-- Welcome Screen -->
+<div id="screen-welcome" class="screen">
+    <div class="welcome-card">
+        <h2>🎮 あそびかた</h2>
+        <div class="instructions">
+            🚃 トロッコにのって英語クイズにこたえよう！<br>
+            ❓ もんだいを読んで（&nbsp;&nbsp;&nbsp;）にはいる言葉をえらぼう<br>
+            ⬅️ ➡️ 正解のレールを左か右でえらぼう！<br>
+            ✅ 正解するとトロッコがすすむよ！<br>
+            ❌ まちがえると崖から落ちちゃうよ！<br>
+            🎯 全10問で何点とれるかな？
+        </div>
+        <button class="start-btn" onclick="startGame()">🚀 スタート！</button>
+    </div>
+</div>
+
+<!-- Game Screen -->
+<div id="screen-game" class="screen" style="display:none">
+    <div class="game-header">
+        <div class="badge badge-score">⭐ <span id="score-display">0</span>てん</div>
+        <div class="badge badge-progress">Q<span id="q-num">1</span> / <span id="q-total">10</span></div>
+    </div>
+
+    <canvas id="gameCanvas" width="660" height="290"></canvas>
+
+    <div class="question-card">
+        <div id="question-text"></div>
+    </div>
+
+    <div class="choice-area">
+        <button class="choice-btn btn-left"  id="btn-left"  onclick="chooseAnswer('left')">
+            ⬅️ <span id="left-choice">…</span>
+        </button>
+        <button class="choice-btn btn-right" id="btn-right" onclick="chooseAnswer('right')">
+            <span id="right-choice">…</span> ➡️
+        </button>
+    </div>
+</div>
+
+<!-- Game Over Screen -->
+<div id="screen-gameover" class="screen" style="display:none">
+    <div class="gameover-card">
+        <div id="gameover-title">🎉 ゲームクリア！</div>
+        <div class="score-label">あなたのスコア</div>
+        <div class="final-score"><span id="final-score">0</span> <span style="font-size:30px;color:#999">/ <span id="final-total">10</span></span></div>
+        <div id="score-message"></div>
+        <button class="restart-btn" onclick="startGame()">🔄 もう一度あそぶ</button>
+        <a class="home-btn" href="index.html">🏠 ホームにもどる</a>
+    </div>
+</div>
+
+<!-- Feedback overlay (⭕️ / ❌) -->
+<div id="feedback-overlay"></div>
+
+<script>
+/* =============================================
+   QUIZ DATA  (from reading1.html – 英検5級過去問3回分)
+   ============================================= */
+const quizData = [
+    // ── 第3回 ──
+    { sentences: ['Mr. Yamada is an art teacher.', 'He ( [BLANK] ) pictures of flowers in his free time.'], a: 2, choices: ['plays', 'draws', 'speaks', 'reads'] },
+    { sentences: ["It's ( [BLANK] ), so we can't have a picnic now."], a: 2, choices: ['cooking', 'raining', 'washing', 'sleeping'] },
+    { sentences: ["I'm very busy from Monday to Friday.", 'I always go shopping on ( [BLANK] ).'], a: 1, choices: ['Sunday', 'month', 'calendar', 'minute'] },
+    { sentences: ['A: Is it hot today?', 'B: No. It is cloudy and ( [BLANK] ) today.'], a: 1, choices: ['cool', 'young', 'easy', 'happy'] },
+    { sentences: ['A: Do you have any ( [BLANK] ), John?', 'B: Yes, I have a cat.'], a: 4, choices: ['cups', 'hats', 'cars', 'pets'] },
+    { sentences: ['A: Dad, please ( [BLANK] ) this wall.', "B: OK. But first, let's wash it."], a: 3, choices: ['swim', 'sleep', 'paint', 'play'] },
+    { sentences: ['A: Excuse me. I want some ( [BLANK] ) in my coffee.'], a: 4, choices: ['paper', 'sun', 'light', 'sugar'] },
+    { sentences: ['A: Fred, is your brother on the volleyball team?', "B: Yes, ( [BLANK] ) right."], a: 2, choices: ["we're", "that's", "she's", "I'm"] },
+    { sentences: ['A: Steve, are you Canadian?', "B: No. I'm ( [BLANK] ) America."], a: 2, choices: ['to', 'from', 'under', 'by'] },
+    { sentences: ['Julia likes her camera.', 'She often ( [BLANK] ) pictures.'], a: 3, choices: ['tells', 'does', 'takes', 'sings'] },
+    { sentences: ['A: I like tennis. What ( [BLANK] ) you, Rachel?', 'B: I do, too.'], a: 2, choices: ['over', 'about', 'down', 'after'] },
+    { sentences: ["Yuki's father often goes jogging ( [BLANK] ) the morning."], a: 2, choices: ['on', 'in', 'out', 'down'] },
+    { sentences: ['Keiko and Megumi are good friends.', '( [BLANK] ) like tennis.'], a: 1, choices: ['They', 'He', 'She', 'You'] },
+    { sentences: ["A: Everyone, let's clean ( [BLANK] ) classroom.", 'B: OK, Mr. White.'], a: 2, choices: ['we', 'our', 'us', 'ours'] },
+    { sentences: ['A: What is Scott doing now?', 'B: He is ( [BLANK] ) a doghouse.'], a: 2, choices: ['make', 'making', 'makes', 'made'] },
+    // ── 第2回 ──
+    { sentences: ["A: Yuka, let's sit down on the ( [BLANK] ) and watch TV.", 'B: OK.'], a: 2, choices: ['drink', 'floor', 'jump', 'breakfast'] },
+    { sentences: ['Mr. Hara has a big ( [BLANK] ) in his garden.', 'It has many oranges.'], a: 4, choices: ['plate', 'fork', 'kitchen', 'tree'] },
+    { sentences: ["A: Mom, I don't know this word. Can you help me?", "B: No, I can't. Use your ( [BLANK] ), Tom."], a: 3, choices: ['page', 'cup', 'dictionary', 'story'] },
+    { sentences: ['Mr. Brown is a music teacher.', 'He plays the ( [BLANK] ) very well.'], a: 1, choices: ['trumpet', 'cup', 'clock', 'pencil'] },
+    { sentences: ['A: This is my new computer.', "B: It's ( [BLANK] ). I want one, too."], a: 1, choices: ['great', 'cloudy', 'sure', 'delicious'] },
+    { sentences: ['Sally has a smart dog.', 'He can stand and ( [BLANK] ) a ball.'], a: 2, choices: ['eat', 'catch', 'cook', 'buy'] },
+    { sentences: ['A: Mom, please ( [BLANK] ) sandwiches for lunch.', 'B: OK, John.'], a: 2, choices: ['know', 'make', 'sit', 'study'] },
+    { sentences: ["A: I have a cold, so I can't play soccer with you today.", "B: I ( [BLANK] ). That's OK."], a: 3, choices: ['am', 'do', 'see', 'love'] },
+    { sentences: ["A: ( [BLANK] ) me. Where's the bathroom?", "B: It's over there."], a: 4, choices: ['Begin', 'Know', 'Call', 'Excuse'] },
+    { sentences: ['A: Goodbye, David.', 'B: Bye, Sam. ( [BLANK] ) a good day.'], a: 3, choices: ['Help', 'Take', 'Have', 'Hear'] },
+    { sentences: ['A: Welcome ( [BLANK] ) our sports club, Paul.', 'B: Thank you, Mr. Johnson.'], a: 4, choices: ['on', 'of', 'for', 'to'] },
+    { sentences: ['I play basketball ( [BLANK] ) school.', 'My brother and my friend play, too.'], a: 2, choices: ['from', 'at', 'of', 'with'] },
+    { sentences: ['Jack ( [BLANK] ) a junior high school student.', 'He goes to a high school.'], a: 3, choices: ["aren't", "doesn't", "isn't", "don't"] },
+    { sentences: ['A: This dress is very nice. ( [BLANK] ) is it?', "B: It's my mother's."], a: 3, choices: ['Who', 'Where', 'Whose', 'When'] },
+    { sentences: ["A: Bill, let's ( [BLANK] ) the homework together.", 'B: OK, Maria.'], a: 1, choices: ['check', 'checked', 'checks', 'checking'] },
+    // ── 第1回 ──
+    { sentences: ["A: What's Mike doing now?", "B: He's ( [BLANK] ) his dog in the garden."], a: 2, choices: ['reading', 'washing', 'making', 'sitting'] },
+    { sentences: ["A: It's very cold, Billy. ( [BLANK] ) a coat today.", 'B: OK, Mom.'], a: 2, choices: ['Listen', 'Wear', 'See', 'Watch'] },
+    { sentences: ["A: What's your favorite color, Amy?", "B: It's ( [BLANK] )."], a: 2, choices: ['clean', 'brown', 'tall', 'hard'] },
+    { sentences: ['I have a photo ( [BLANK] ).', 'I have many pictures of my family in it.'], a: 1, choices: ['album', 'pen', 'sun', 'dog'] },
+    { sentences: ['My brother and I ( [BLANK] ) to school by bus every day.'], a: 4, choices: ['talk', 'eat', 'see', 'come'] },
+    { sentences: ['Henry is a ( [BLANK] ).', 'He plays the guitar and the piano.'], a: 2, choices: ['rabbit', 'musician', 'jacket', 'team'] },
+    { sentences: ['A: Hi, Jane. Where is Ken?', "B: He's in the ( [BLANK] )."], a: 2, choices: ['watch', 'gym', 'banana', 'night'] },
+    { sentences: ['I love basketball.', 'I often watch basketball games ( [BLANK] ) TV with my brother.'], a: 2, choices: ['of', 'on', 'at', 'in'] },
+    { sentences: ['Tom has a ( [BLANK] ) of coffee every morning before he goes to school.'], a: 4, choices: ['corn', 'floor', 'window', 'cup'] },
+    { sentences: ['A: Do you play basketball, Bob?', 'B: Yes, a ( [BLANK] ).'], a: 1, choices: ['little', 'beautiful', 'fast', 'much'] },
+    { sentences: ['I get ( [BLANK] ) early every morning and go to the park.'], a: 2, choices: ['on', 'up', 'over', 'right'] },
+    { sentences: ['Janet ( [BLANK] ) swimming every Sunday with her sister.'], a: 1, choices: ['goes', 'asks', 'buys', 'drinks'] },
+    { sentences: ['A: Mom, can I ( [BLANK] ) a letter to Uncle Rob this afternoon?', 'B: Of course, Kenji.'], a: 3, choices: ['writes', 'wrote', 'write', 'writing'] },
+    { sentences: ['I know Tim and Lucy.', '( [BLANK] ) are Canadian.'], a: 2, choices: ['He', 'They', 'It', 'You'] },
+    { sentences: ["A: It's hot. Please ( [BLANK] ) the window.", 'B: OK, Mom.'], a: 2, choices: ['opens', 'open', 'opening', 'opened'] },
+];
+
+/* =============================================
+   CANVAS & DRAWING
+   ============================================= */
+const canvas = document.getElementById('gameCanvas');
+const C = canvas.getContext('2d');
+
+// Layout constants (in canvas pixels, canvas = 660 × 290)
+const CW = 660, CH = 290;
+const TRACK_Y   = 155;   // main track vertical center
+const FORK_X    = 330;   // where the track splits
+const TSTART_X  = 60;    // trolley start X
+const TWAIT_X   = 240;   // trolley waits here while player reads
+const LEFT_END  = { x: 590, y: 72  };  // left  (upper) fork endpoint
+const RIGHT_END = { x: 590, y: 238 };  // right (lower) fork endpoint
+
+// Trolley position (mutable)
+let tx = TSTART_X, ty = TRACK_Y, tAngle = 0, tAlpha = 1;
+let animId = null;
+let gamePhase = 'idle';  // 'moving' | 'idle' | 'animating'
+
+/* ---- helper: rounded rect path ---- */
+function roundRect(x, y, w, h, r) {
+    C.beginPath();
+    C.moveTo(x + r, y);
+    C.lineTo(x + w - r, y);
+    C.quadraticCurveTo(x + w, y, x + w, y + r);
+    C.lineTo(x + w, y + h - r);
+    C.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    C.lineTo(x + r, y + h);
+    C.quadraticCurveTo(x, y + h, x, y + h - r);
+    C.lineTo(x, y + r);
+    C.quadraticCurveTo(x, y, x + r, y);
+    C.closePath();
+}
+
+/* ---- Draw sky + mountains + ground ---- */
+function drawBG() {
+    // sky
+    const sky = C.createLinearGradient(0, 0, 0, CH);
+    sky.addColorStop(0, '#7EC8E3');
+    sky.addColorStop(1, '#C9EAF5');
+    C.fillStyle = sky;
+    C.fillRect(0, 0, CW, CH);
+
+    // far mountains
+    C.fillStyle = '#A8C8A0';
+    C.beginPath();
+    C.moveTo(0, CH);
+    C.lineTo(0, 200); C.lineTo(80, 145); C.lineTo(160, 185);
+    C.lineTo(250, 130); C.lineTo(340, 170); C.lineTo(430, 125);
+    C.lineTo(520, 155); C.lineTo(610, 130); C.lineTo(CW, 150);
+    C.lineTo(CW, CH);
+    C.closePath();
+    C.fill();
+
+    // ground
+    C.fillStyle = '#6DBF6D';
+    C.fillRect(0, 248, CW, CH - 248);
+    C.fillStyle = '#5AAD5A';
+    C.fillRect(0, 248, CW, 7);
+}
+
+/* ---- Draw a rail segment between two points with offset ---- */
+function drawRailSegment(x1, y1, x2, y2, offset) {
+    const dx = x2 - x1, dy = y2 - y1;
+    const len = Math.hypot(dx, dy);
+    const px = (-dy / len) * offset, py = (dx / len) * offset;
+    C.beginPath();
+    C.moveTo(x1 + px, y1 + py);
+    C.lineTo(x2 + px, y2 + py);
+    C.stroke();
+}
+
+/* ---- Draw crossties along a segment ---- */
+function drawCrossties(x1, y1, x2, y2, count, hw) {
+    const angle = Math.atan2(y2 - y1, x2 - x1) + Math.PI / 2;
+    for (let i = 1; i <= count; i++) {
+        const t = i / (count + 1);
+        const cx = x1 + (x2 - x1) * t;
+        const cy = y1 + (y2 - y1) * t;
+        C.beginPath();
+        C.moveTo(cx + Math.cos(angle) * hw, cy + Math.sin(angle) * hw);
+        C.lineTo(cx - Math.cos(angle) * hw, cy - Math.sin(angle) * hw);
+        C.stroke();
+    }
+}
+
+/* ---- Draw full track scene ---- */
+function drawTracks() {
+    const RO = 7;   // rail offset (half gauge)
+
+    // ---------- main straight track ----------
+    C.strokeStyle = '#8B6914';
+    C.lineWidth = 9;
+    C.lineCap = 'butt';
+    drawCrossties(0, TRACK_Y, FORK_X, TRACK_Y, 10, RO + 5);
+
+    C.strokeStyle = '#888';
+    C.lineWidth = 4;
+    C.lineCap = 'round';
+    drawRailSegment(0, TRACK_Y, FORK_X, TRACK_Y, -RO);
+    drawRailSegment(0, TRACK_Y, FORK_X, TRACK_Y,  RO);
+
+    // ---------- left (upper) fork ----------
+    C.strokeStyle = '#8B6914';
+    C.lineWidth = 7;
+    drawCrossties(FORK_X, TRACK_Y, LEFT_END.x, LEFT_END.y, 5, RO + 4);
+
+    C.strokeStyle = '#888';
+    C.lineWidth = 4;
+    drawRailSegment(FORK_X, TRACK_Y, LEFT_END.x, LEFT_END.y, -RO);
+    drawRailSegment(FORK_X, TRACK_Y, LEFT_END.x, LEFT_END.y,  RO);
+
+    // ---------- right (lower) fork ----------
+    C.strokeStyle = '#8B6914';
+    C.lineWidth = 7;
+    drawCrossties(FORK_X, TRACK_Y, RIGHT_END.x, RIGHT_END.y, 5, RO + 4);
+
+    C.strokeStyle = '#888';
+    C.lineWidth = 4;
+    drawRailSegment(FORK_X, TRACK_Y, RIGHT_END.x, RIGHT_END.y, -RO);
+    drawRailSegment(FORK_X, TRACK_Y, RIGHT_END.x, RIGHT_END.y,  RO);
+
+    // ---------- cliff markers ----------
+    for (const ep of [LEFT_END, RIGHT_END]) {
+        C.strokeStyle = '#555';
+        C.lineWidth = 3;
+        C.fillStyle = '#C0392B';
+        C.beginPath();
+        C.arc(ep.x + 14, ep.y, 10, 0, Math.PI * 2);
+        C.fill();
+        C.stroke();
+
+        C.fillStyle = 'white';
+        C.font = 'bold 12px sans-serif';
+        C.textAlign = 'center';
+        C.textBaseline = 'middle';
+        C.fillText('!', ep.x + 14, ep.y);
+    }
+}
+
+/* ---- Draw a choice sign at the fork end ---- */
+function drawSign(side, text) {
+    const ep   = side === 'left' ? LEFT_END : RIGHT_END;
+    const aboveTrack = side === 'left'; // left fork goes upward → label above
+    const labelY = aboveTrack ? ep.y - 36 : ep.y + 36;
+    const labelX = ep.x - 15;
+
+    C.font = 'bold 15px sans-serif';
+    const tw = C.measureText(text).width;
+    const sw = tw + 22, sh = 30;
+    const sx = labelX - sw / 2, sy = labelY - sh / 2;
+
+    // shadow
+    C.fillStyle = 'rgba(0,0,0,0.15)';
+    roundRect(sx + 3, sy + 3, sw, sh, 8);
+    C.fill();
+
+    // background
+    C.fillStyle = side === 'left' ? '#FF9D00' : '#4DB8FF';
+    C.strokeStyle = 'white';
+    C.lineWidth = 2.5;
+    roundRect(sx, sy, sw, sh, 8);
+    C.fill();
+    C.stroke();
+
+    // text
+    C.fillStyle = 'white';
+    C.textAlign = 'center';
+    C.textBaseline = 'middle';
+    C.font = 'bold 15px sans-serif';
+    C.fillText(text, labelX, labelY);
+}
+
+/* ---- Draw trolley at (x, y) with rotation and alpha ---- */
+function drawTrolley(x, y, angle, alpha) {
+    C.save();
+    C.globalAlpha = alpha;
+    C.translate(x, y);
+    C.rotate(angle);
+
+    // body
+    C.fillStyle = '#E91E63';
+    C.strokeStyle = '#880E4F';
+    C.lineWidth = 2;
+    roundRect(-24, -16, 48, 27, 6);
+    C.fill();
+    C.stroke();
+
+    // window
+    C.fillStyle = '#FFFDE7';
+    roundRect(-17, -13, 34, 15, 4);
+    C.fill();
+
+    // bumper bar
+    C.fillStyle = '#880E4F';
+    C.fillRect(-27, 8, 54, 5);
+
+    // wheels
+    [-13, 13].forEach(wx => {
+        C.fillStyle = '#333';
+        C.beginPath();
+        C.arc(wx, 17, 8, 0, Math.PI * 2);
+        C.fill();
+
+        C.strokeStyle = '#777';
+        C.lineWidth = 2;
+        C.beginPath();
+        C.arc(wx, 17, 8, 0, Math.PI * 2);
+        C.stroke();
+
+        C.fillStyle = '#aaa';
+        C.beginPath();
+        C.arc(wx, 17, 3, 0, Math.PI * 2);
+        C.fill();
+    });
+
+    // chimney
+    C.fillStyle = '#444';
+    roundRect(9, -24, 7, 12, 2);
+    C.fill();
+
+    // smoke puff
+    C.globalAlpha = alpha * 0.5;
+    C.fillStyle = '#ddd';
+    C.beginPath(); C.arc(14, -29, 5, 0, Math.PI * 2); C.fill();
+    C.beginPath(); C.arc(18, -34, 4, 0, Math.PI * 2); C.fill();
+    C.globalAlpha = alpha;
+
+    C.restore();
+}
+
+/* ---- Full scene redraw ---- */
+function drawScene(showSigns) {
+    C.clearRect(0, 0, CW, CH);
+    drawBG();
+    drawTracks();
+    if (showSigns && gs.leftChoice) {
+        drawSign('left',  gs.leftChoice);
+        drawSign('right', gs.rightChoice);
+    }
+    drawTrolley(tx, ty, tAngle, tAlpha);
+}
+
+/* =============================================
+   ANIMATION HELPERS
+   ============================================= */
+function easeInOut(t) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; }
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+function cancelAnim() {
+    if (animId) { cancelAnimationFrame(animId); animId = null; }
+}
+
+/* Move trolley from current position to (ex, ey) over `ms` milliseconds */
+function moveTrolley(ex, ey, ms, targetAngle, onDone) {
+    const sx = tx, sy = ty, sa = tAngle;
+    const t0 = performance.now();
+    function step(now) {
+        const p = Math.min((now - t0) / ms, 1);
+        const e = easeInOut(p);
+        tx = lerp(sx, ex, e);
+        ty = lerp(sy, ey, e);
+        tAngle = lerp(sa, targetAngle, Math.min(p * 2, 1));
+        drawScene(gamePhase === 'idle');
+        if (p < 1) { animId = requestAnimationFrame(step); }
+        else { onDone && onDone(); }
+    }
+    animId = requestAnimationFrame(step);
+}
+
+/* Fall off animation: trolley slides to end of fork then tumbles down */
+function fallTrolley(side, onDone) {
+    const ep = side === 'left' ? LEFT_END : RIGHT_END;
+    const trackAngle = Math.atan2(ep.y - TRACK_Y, ep.x - FORK_X);
+
+    // phase 1: slide to fork end
+    const sx1 = tx, sy1 = ty;
+    const t0 = performance.now();
+    const p1ms = 550;
+
+    function phase1(now) {
+        const p = Math.min((now - t0) / p1ms, 1);
+        tx = lerp(sx1, ep.x, easeInOut(p));
+        ty = lerp(sy1, ep.y, easeInOut(p));
+        tAngle = lerp(0, trackAngle, p);
+        drawScene(false);
+        if (p < 1) { animId = requestAnimationFrame(phase1); return; }
+
+        // phase 2: fall off screen
+        const t1 = performance.now();
+        const p2ms = 750;
+        const bx = tx, by = ty, ba = tAngle;
+
+        function phase2(now2) {
+            const p = Math.min((now2 - t1) / p2ms, 1);
+            tx     = bx + p * 55;
+            ty     = by + p * p * 140;   // gravity
+            tAngle = ba + p * Math.PI * 1.5; // spin
+            tAlpha = 1 - p;
+            drawScene(false);
+            if (p < 1) { animId = requestAnimationFrame(phase2); return; }
+            tAlpha = 1;
+            onDone && onDone();
+        }
+        animId = requestAnimationFrame(phase2);
+    }
+    animId = requestAnimationFrame(phase1);
+}
+
+/* =============================================
+   SOUND
+   ============================================= */
+let audioCtx = null;
+function getAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+}
+function playDing() {
+    const a = getAudio();
+    const osc = a.createOscillator(), g = a.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(659.25, a.currentTime);
+    osc.frequency.setValueAtTime(523.25, a.currentTime + 0.15);
+    g.gain.setValueAtTime(0.1, a.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.6);
+    osc.connect(g); g.connect(a.destination);
+    osc.start(); osc.stop(a.currentTime + 0.6);
+}
+function playBuzz() {
+    const a = getAudio();
+    const osc = a.createOscillator(), g = a.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(140, a.currentTime);
+    g.gain.setValueAtTime(0.06, a.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.4);
+    osc.connect(g); g.connect(a.destination);
+    osc.start(); osc.stop(a.currentTime + 0.4);
+}
+
+/* =============================================
+   GAME STATE
+   ============================================= */
+const TOTAL_Q = 10;
+let gs = {
+    questions:    [],
+    currentIndex: 0,
+    score:        0,
+    leftChoice:   null,
+    rightChoice:  null,
+    correctSide:  null,
+    busy:         false,
+};
+
+function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function showFeedback(emoji) {
+    const el = document.getElementById('feedback-overlay');
+    el.textContent = emoji;
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 1400);
+}
+
+function setButtons(enabled) {
+    document.getElementById('btn-left').disabled  = !enabled;
+    document.getElementById('btn-right').disabled = !enabled;
+}
+
+/* ---- Render question text with [BLANK] highlighted ---- */
+function renderQuestion(q) {
+    function fmtSentence(s) {
+        const blank = '<span class="blank-word">（　　　）</span>';
+        let out = s.replace(/\( \[BLANK\] \)/g, blank);
+        // Style "X: " speaker prefix
+        out = out.replace(/^([A-Z]\s*:\s*)/, '<span class="speaker">$1</span>');
+        return out;
+    }
+    const html = q.sentences.map(s => `<div>${fmtSentence(s)}</div>`).join('');
+    document.getElementById('question-text').innerHTML = html;
+}
+
+/* ---- Set up one question ---- */
+function setupQuestion() {
+    const q = gs.questions[gs.currentIndex];
+    const correct = q.choices[q.a - 1];
+    const wrongChoices = q.choices.filter((_, i) => i !== q.a - 1);
+    const wrong = wrongChoices[Math.floor(Math.random() * wrongChoices.length)];
+
+    if (Math.random() < 0.5) {
+        gs.leftChoice   = correct;
+        gs.rightChoice  = wrong;
+        gs.correctSide  = 'left';
+    } else {
+        gs.leftChoice   = wrong;
+        gs.rightChoice  = correct;
+        gs.correctSide  = 'right';
+    }
+
+    renderQuestion(q);
+    document.getElementById('left-choice').textContent  = gs.leftChoice;
+    document.getElementById('right-choice').textContent = gs.rightChoice;
+    document.getElementById('q-num').textContent = gs.currentIndex + 1;
+
+    setButtons(false);
+
+    // Reset trolley to start and animate to wait position
+    tx = TSTART_X; ty = TRACK_Y; tAngle = 0; tAlpha = 1;
+    gamePhase = 'moving';
+    cancelAnim();
+    moveTrolley(TWAIT_X, TRACK_Y, 800, 0, () => {
+        gamePhase = 'idle';
+        drawScene(true);
+        setButtons(true);
+    });
+}
+
+/* ---- Handle player choice ---- */
+function chooseAnswer(side) {
+    if (gs.busy || gamePhase !== 'idle') return;
+    gs.busy = true;
+    setButtons(false);
+    cancelAnim();
+
+    const isCorrect = (side === gs.correctSide);
+    gamePhase = 'animating';
+
+    if (isCorrect) {
+        playDing();
+        showFeedback('⭕️');
+        gs.score++;
+        document.getElementById('score-display').textContent = gs.score;
+
+        const ep = side === 'left' ? LEFT_END : RIGHT_END;
+        const angle = Math.atan2(ep.y - TRACK_Y, ep.x - FORK_X);
+        moveTrolley(ep.x + 50, ep.y, 900, angle, afterAnswer);
+    } else {
+        playBuzz();
+        showFeedback('❌');
+        fallTrolley(side, afterAnswer);
+    }
+}
+
+function afterAnswer() {
+    gs.currentIndex++;
+    gs.busy = false;
+    gamePhase = 'idle';
+
+    if (gs.currentIndex >= gs.questions.length) {
+        setTimeout(showGameOver, 400);
+    } else {
+        setTimeout(setupQuestion, 350);
+    }
+}
+
+/* ---- Screen switching ---- */
+function showScreen(id) {
+    ['screen-welcome', 'screen-game', 'screen-gameover'].forEach(sid => {
+        document.getElementById(sid).style.display = (sid === id) ? 'flex' : 'none';
+    });
+}
+
+/* ---- Start / Restart ---- */
+function startGame() {
+    gs.questions    = shuffle(quizData).slice(0, TOTAL_Q);
+    gs.currentIndex = 0;
+    gs.score        = 0;
+    gs.busy         = false;
+
+    document.getElementById('score-display').textContent = '0';
+    document.getElementById('q-total').textContent       = TOTAL_Q;
+
+    showScreen('screen-game');
+    setupQuestion();
+}
+
+/* ---- Game Over screen ---- */
+function showGameOver() {
+    const s = gs.score, t = TOTAL_Q;
+    document.getElementById('final-score').textContent = s;
+    document.getElementById('final-total').textContent = t;
+
+    let title, msg;
+    if (s === t)          { title = '🎉 パーフェクト！ 🎉'; msg = '全問正解！すごすぎる！！'; }
+    else if (s >= t * .8) { title = '🌟 すばらしい！';      msg = 'とてもよくできました！';  }
+    else if (s >= t * .6) { title = '😊 よくできました！';   msg = 'なかなかじょうず！';     }
+    else if (s >= t * .4) { title = '🌱 もう少し！';         msg = 'また挑戦してみよう！';   }
+    else                  { title = '💪 がんばれ！';          msg = 'もう一度チャレンジ！';  }
+
+    document.getElementById('gameover-title').textContent = title;
+    document.getElementById('score-message').textContent  = msg;
+    showScreen('screen-gameover');
+}
+
+/* ---- Initial canvas render (welcome screen) ---- */
+tx = TSTART_X; ty = TRACK_Y; tAngle = 0; tAlpha = 1;
+gs.leftChoice = null; gs.rightChoice = null;
+drawScene(false);
+</script>
+</body>
+</html>
