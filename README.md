@@ -1,10 +1,9 @@
-# english-quiz
+# README
 
-### 概要
-4歳の子供が英検を受験するためのクイズ形式の英語学習アプリです。
+## 概要
 
-### 特徴
-楽しくゲーム感覚で英語の問題に挑戦できます。
+This is an English quiz project.
 
-### 使用について
-このアプリは個人利用を想定して作成されていますが、ご自由にお使いください。
+## GitHub Pages
+
+[GitHub Pages URL](https://ishisato-debug.github.io/english-quiz)
