@@ -375,7 +375,7 @@ function buildQuestion(raw) {
 }
 
 // ─── Background removal ───────────────────────────────────────────────────────
-function removeBackground(img, threshold = 38) {
+function removeBackground(img, threshold = 30) {
   const c = document.createElement('canvas');
   c.width = img.naturalWidth; c.height = img.naturalHeight;
   const ctx = c.getContext('2d');
@@ -431,7 +431,7 @@ const RAIL_Y = 218;
 const TRAIN_W = 220, TRAIN_H = 72;
 const TRAIN_STOP_X = 80;
 const PLATFORM_X = 310, PLATFORM_W = 340, PLATFORM_Y = 200;
-const CHAR_SIZE = 62;              // larger characters
+const CHAR_SIZE = 76;              // larger characters
 const CHAR_FOOT_Y = PLATFORM_Y;
 const CHAR_XS = [345, 435, 525, 615]; // spread across full station width
 const DOOR_X = TRAIN_STOP_X + TRAIN_W - 22;
