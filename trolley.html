@@ -375,7 +375,7 @@ function buildQuestion(raw) {
 }
 
 // ─── Background removal ───────────────────────────────────────────────────────
-function removeBackground(img, threshold = 30) {
+function removeBackground(img, threshold = 15) {
   const c = document.createElement('canvas');
   c.width = img.naturalWidth; c.height = img.naturalHeight;
   const ctx = c.getContext('2d');
