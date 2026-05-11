@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>トロッコアドベンチャー</title>
+    <title>えいご電車</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -20,9 +20,9 @@
         }
 
         h1 {
-            color: #ff69b4;
-            font-size: clamp(22px, 5vw, 32px);
-            margin: 8px 0;
+            color: #660033;
+            font-size: clamp(20px, 5vw, 28px);
+            margin: 8px 0 4px;
             text-shadow: 1px 1px white;
             text-align: center;
         }
@@ -33,728 +33,806 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
         }
 
         /* Welcome */
-        #screen-welcome { gap: 20px; }
         .welcome-card {
             background: white;
-            border: 5px solid #ffb6c1;
+            border: 5px solid #c8a844;
             border-radius: 30px;
             padding: 28px 24px;
-            box-shadow: 0 8px 0 #ffb6c1;
+            box-shadow: 0 8px 0 #c8a844;
             text-align: center;
             width: 100%;
         }
-        .welcome-card h2 { font-size: 22px; color: #ff69b4; margin-bottom: 16px; }
-        .instructions { text-align: left; font-size: 16px; line-height: 2.2; color: #555; margin-bottom: 20px; }
-        .start-btn {
-            padding: 18px 60px; font-size: 24px; font-weight: bold;
-            background: linear-gradient(135deg, #ff69b4, #ff1493);
-            color: white; border: none; border-radius: 50px; cursor: pointer;
-            box-shadow: 0 7px 0 #c94f8a; transition: transform 0.1s, box-shadow 0.1s;
-        }
-        .start-btn:active { box-shadow: none; transform: translateY(7px); }
+        .welcome-card h2 { font-size: 22px; color: #660033; margin-bottom: 16px; }
+        .welcome-card p { font-size: 15px; color: #555; line-height: 1.7; }
 
-        /* Game header */
-        .game-header {
-            display: flex; justify-content: space-between; align-items: center;
-            width: 100%; padding: 0 4px;
+        .start-btn {
+            background: #660033;
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+            padding: 18px 50px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 7px 0 #3a0020;
+            transition: 0.1s;
         }
-        .badge { padding: 8px 18px; border-radius: 20px; font-weight: bold; font-size: 18px; color: white; }
-        .badge-score { background: #ff69b4; }
-        .badge-progress { background: #4db8ff; }
+        .start-btn:active { transform: translateY(7px); box-shadow: none; }
+
+        /* Quiz screen */
+        #screen-quiz { display: none; }
+
+        .question-box {
+            background: white;
+            border: 4px solid #ffb6c1;
+            border-radius: 24px;
+            padding: 18px 20px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 6px 0 #ffb6c1;
+        }
+        .q-number { font-size: 13px; color: #aaa; margin-bottom: 6px; }
+        .q-text {
+            font-size: clamp(15px, 3.5vw, 20px);
+            font-weight: bold;
+            color: #333;
+            line-height: 1.8;
+        }
+        .blank { color: #ff1493; }
 
         /* Canvas */
-        #gameCanvas {
-            width: 100%; border-radius: 18px; border: 4px solid #ffb6c1;
-            display: block; background: #87CEEB;
+        #train-canvas {
+            width: 100%;
+            max-width: 660px;
+            border-radius: 16px;
+            background: #e8f4e8;
+            display: block;
         }
 
-        /* Question card */
-        .question-card {
-            background: white; border: 4px solid #ffb6c1; border-radius: 22px;
-            padding: 14px 18px; box-shadow: 0 6px 0 #ffb6c1;
-            width: 100%; min-height: 70px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        #question-text {
-            font-size: clamp(14px, 3.2vw, 20px); font-weight: bold;
-            line-height: 1.9; text-align: center; color: #333;
-        }
-        #question-text .blank-word {
-            color: #ff1493; border-bottom: 3px solid #ff1493;
-            padding: 0 4px; white-space: nowrap;
-        }
-        #question-text .speaker { color: #999; font-weight: normal; font-size: 0.85em; }
-        #answer-reveal {
-            margin-top: 10px; font-size: clamp(14px, 3vw, 18px);
-            font-weight: bold; color: #ff6600; display: none;
-        }
-
-        /* Animal buttons (4 choices) */
-        .animal-area {
+        /* Character buttons */
+        .char-buttons {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 10px;
             width: 100%;
         }
-        .animal-btn {
-            padding: 12px 8px; font-weight: bold; border: none;
-            border-radius: 18px; cursor: pointer; color: white;
-            display: flex; flex-direction: column; align-items: center;
-            gap: 4px; min-height: 80px;
-            transition: transform 0.1s, box-shadow 0.1s;
-        }
-        .animal-btn:active { transform: translateY(5px); box-shadow: none !important; }
-        .animal-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
-        .animal-emoji { font-size: 28px; line-height: 1; }
-        .animal-choice { font-size: clamp(12px, 2.8vw, 16px); line-height: 1.3; text-align: center; }
-        .btn-rabbit  { background: linear-gradient(135deg, #ff88bb, #ff4499); box-shadow: 0 6px 0 #bb2270; }
-        .btn-fox     { background: linear-gradient(135deg, #ff8c42, #ff5500); box-shadow: 0 6px 0 #bb3a00; }
-        .btn-buffalo { background: linear-gradient(135deg, #a1887f, #6d4c41); box-shadow: 0 6px 0 #4e342e; }
-        .btn-snake   { background: linear-gradient(135deg, #66bb6a, #2e7d32); box-shadow: 0 6px 0 #1b5e20; }
 
-        /* Feedback overlay */
-        #feedback-overlay {
-            display: none; position: fixed; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); font-size: 110px;
-            animation: pop 0.3s ease-out; z-index: 200; pointer-events: none;
+        .char-btn {
+            border: none;
+            border-radius: 20px;
+            padding: 14px 10px 10px;
+            font-size: clamp(13px, 3vw, 17px);
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            transition: 0.1s;
+            line-height: 1.3;
         }
-        @keyframes pop {
-            0%  { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
-            60% { transform: translate(-50%, -50%) scale(1.2); }
-            100%{ transform: translate(-50%, -50%) scale(1);   opacity: 1; }
+        .char-btn:active { transform: translateY(4px); box-shadow: none !important; }
+        .char-btn .char-icon { font-size: 32px; line-height: 1; }
+        .char-btn .choice-text { font-size: clamp(13px, 3vw, 17px); }
+
+        .btn-kitty   { background: #ffb6d9; color: #880055; box-shadow: 0 5px 0 #d4608a; }
+        .btn-cinnamon{ background: #b8dcff; color: #003388; box-shadow: 0 5px 0 #608ab8; }
+        .btn-kuromi  { background: #d0b8ff; color: #330077; box-shadow: 0 5px 0 #8060b8; }
+        .btn-mymelo  { background: #ffcce0; color: #880044; box-shadow: 0 5px 0 #d47090; }
+
+        .char-btn.correct { background: #b8ffb8 !important; box-shadow: 0 5px 0 #60b860 !important; }
+        .char-btn.wrong   { background: #ffb8b8 !important; box-shadow: 0 5px 0 #b86060 !important; }
+        .char-btn:disabled { opacity: 0.6; cursor: default; }
+
+        /* Feedback */
+        #feedback-area {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            min-height: 30px;
+            text-align: center;
         }
 
-        /* Game over */
-        #screen-gameover { gap: 20px; }
-        .gameover-card {
-            background: white; border: 5px solid #ffb6c1; border-radius: 30px;
-            padding: 30px 24px; box-shadow: 0 8px 0 #ffb6c1; text-align: center; width: 100%;
+        /* Score / clear */
+        #screen-clear { display: none; gap: 20px; }
+        .clear-card {
+            background: white;
+            border: 5px solid #c8a844;
+            border-radius: 30px;
+            padding: 30px 24px;
+            box-shadow: 0 8px 0 #c8a844;
+            text-align: center;
+            width: 100%;
         }
-        #gameover-title { font-size: 28px; font-weight: bold; color: #ff69b4; margin-bottom: 10px; }
-        .final-score { font-size: 68px; font-weight: bold; color: #ff69b4; line-height: 1.1; }
-        .score-label { font-size: 18px; color: #999; margin-top: 4px; }
-        #score-message { font-size: 22px; font-weight: bold; color: #ff6600; margin: 12px 0 20px; }
-        .restart-btn {
-            display: block; width: 100%; padding: 18px; font-size: 22px; font-weight: bold;
-            background: linear-gradient(135deg, #ff69b4, #ff1493); color: white;
-            border: none; border-radius: 50px; cursor: pointer;
-            box-shadow: 0 7px 0 #c94f8a; transition: transform 0.1s, box-shadow 0.1s;
-            margin-bottom: 12px;
-        }
-        .restart-btn:active { box-shadow: none; transform: translateY(7px); }
+        .clear-card h2 { font-size: 28px; color: #660033; margin-bottom: 12px; }
+        .score-display { font-size: 48px; font-weight: bold; color: #660033; }
+        .score-label { font-size: 16px; color: #888; margin-top: 6px; }
+
         .home-btn {
-            display: inline-block; padding: 12px 30px; font-size: 17px; font-weight: bold;
-            background: white; color: #ff69b4; border: 3px solid #ffb6c1;
-            border-radius: 30px; cursor: pointer; text-decoration: none;
+            background: white;
+            color: #660033;
+            border: 3px solid #c8a844;
+            border-radius: 20px;
+            padding: 12px 28px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .next-btn {
+            background: #660033;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 12px 28px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #3a0020;
+            transition: 0.1s;
+        }
+        .next-btn:active { transform: translateY(5px); box-shadow: none; }
+
+        .progress-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            font-size: 14px;
+            color: #888;
+        }
+        #progress-bar-wrap {
+            width: 100%;
+            height: 8px;
+            background: #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        #progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #660033, #c8a844);
+            border-radius: 4px;
+            transition: width 0.4s;
+            width: 0%;
         }
     </style>
 </head>
 <body>
 
-<h1>🚃 トロッコアドベンチャー 🏔️</h1>
+<h1>🚃 えいご電車</h1>
 
-<!-- Welcome Screen -->
-<div id="screen-welcome" class="screen">
+<!-- Welcome -->
+<div class="screen" id="screen-welcome">
     <div class="welcome-card">
-        <h2>🎮 あそびかた</h2>
-        <div class="instructions">
-            🚃 トロッコにのって英語クイズにこたえよう！<br>
-            ❓ もんだいを読んで（　　）にはいる言葉をえらぼう<br>
-            🐰🦊🐃🐍 動物がもっている正解をタッチしよう！<br>
-            ✅ 正解するとトロッコがすすむよ！<br>
-            ❌ まちがえると崖から落ちちゃうよ！<br>
-            🎯 全10問で何点とれるかな？
-        </div>
-        <button class="start-btn" onclick="startGame()">🚀 スタート！</button>
-        <br>
-        <a class="home-btn" href="index.html" style="margin-top:16px;">🏠 ホームに戻る</a>
+        <h2>⛩️ えいご駅へようこそ！</h2>
+        <p>電車が駅に着いたよ！<br>キャラクターが持っている答えを選んで<br>正しいキャラクターを電車に乗せよう🎉</p>
     </div>
+    <button class="start-btn" onclick="startGame()">🚃 出発！</button>
 </div>
 
-<!-- Game Screen -->
-<div id="screen-game" class="screen" style="display:none">
-    <div class="game-header">
-        <div class="badge badge-score">⭐ <span id="score-display">0</span>てん</div>
-        <div class="badge badge-progress">Q<span id="q-num">1</span> / <span id="q-total">10</span></div>
+<!-- Quiz -->
+<div class="screen" id="screen-quiz">
+    <div class="progress-row">
+        <span id="q-counter">1 / 10</span>
+        <span id="score-disp">⭕ 0</span>
+    </div>
+    <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+
+    <div class="question-box">
+        <div class="q-number" id="q-number"></div>
+        <div class="q-text" id="q-text"></div>
     </div>
 
-    <div class="question-card">
-        <div id="question-text"></div>
-        <div id="answer-reveal"></div>
+    <canvas id="train-canvas" width="660" height="240"></canvas>
+
+    <div class="char-buttons" id="char-buttons">
+        <button class="char-btn btn-kitty"   id="btn0" onclick="answer(0)"><span class="char-icon">🎀</span><span class="choice-text" id="choice0"></span></button>
+        <button class="char-btn btn-cinnamon" id="btn1" onclick="answer(1)"><span class="char-icon">☁️</span><span class="choice-text" id="choice1"></span></button>
+        <button class="char-btn btn-kuromi"  id="btn2" onclick="answer(2)"><span class="char-icon">🖤</span><span class="choice-text" id="choice2"></span></button>
+        <button class="char-btn btn-mymelo"  id="btn3" onclick="answer(3)"><span class="char-icon">🎵</span><span class="choice-text" id="choice3"></span></button>
     </div>
 
-    <canvas id="gameCanvas" width="660" height="310"></canvas>
-
-    <div class="animal-area">
-        <button class="animal-btn btn-rabbit"  id="animal-btn-0" onclick="chooseAnswer(0)">
-            <span class="animal-emoji">🐰</span>
-            <span class="animal-choice" id="animal-choice-0">…</span>
-        </button>
-        <button class="animal-btn btn-fox"     id="animal-btn-1" onclick="chooseAnswer(1)">
-            <span class="animal-emoji">🦊</span>
-            <span class="animal-choice" id="animal-choice-1">…</span>
-        </button>
-        <button class="animal-btn btn-buffalo" id="animal-btn-2" onclick="chooseAnswer(2)">
-            <span class="animal-emoji">🐃</span>
-            <span class="animal-choice" id="animal-choice-2">…</span>
-        </button>
-        <button class="animal-btn btn-snake"   id="animal-btn-3" onclick="chooseAnswer(3)">
-            <span class="animal-emoji">🐍</span>
-            <span class="animal-choice" id="animal-choice-3">…</span>
-        </button>
-    </div>
+    <div id="feedback-area"></div>
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()" style="display:none;">つぎへ ▶</button>
 </div>
 
-<!-- Game Over Screen -->
-<div id="screen-gameover" class="screen" style="display:none">
-    <div class="gameover-card">
-        <div id="gameover-title">🎉 ゲームクリア！</div>
-        <div class="score-label">あなたのスコア</div>
-        <div class="final-score"><span id="final-score">0</span> <span style="font-size:30px;color:#999">/ <span id="final-total">10</span></span></div>
-        <div id="score-message"></div>
-        <button class="restart-btn" onclick="startGame()">🔄 もう一度あそぶ</button>
-        <a class="home-btn" href="index.html">🏠 ホームにもどる</a>
+<!-- Clear -->
+<div class="screen" id="screen-clear">
+    <div class="clear-card">
+        <h2>🎉 ゴール！</h2>
+        <div class="score-display" id="final-score">0</div>
+        <div class="score-label">/ 10 もん せいかい！</div>
     </div>
+    <button class="start-btn" onclick="restartGame()">もう一度 🔄</button>
+    <button class="home-btn" onclick="location.href='index.html'">🏠 ホーム</button>
 </div>
-
-<!-- Feedback overlay -->
-<div id="feedback-overlay"></div>
 
 <script>
-/* =============================================
-   QUIZ DATA (reading1.html + reading2.html)
-   ============================================= */
+// ─── Quiz data ───────────────────────────────────────────────────────────────
 const reading1Data = [
-    // ── 第3回 ──
-    { sentences: ['Mr. Yamada is an art teacher.', 'He ( [BLANK] ) pictures of flowers in his free time.'], a: 2, choices: ['plays', 'draws', 'speaks', 'reads'] },
-    { sentences: ["It's ( [BLANK] ), so we can't have a picnic now."], a: 2, choices: ['cooking', 'raining', 'washing', 'sleeping'] },
-    { sentences: ["I'm very busy from Monday to Friday.", 'I always go shopping on ( [BLANK] ).'], a: 1, choices: ['Sunday', 'month', 'calendar', 'minute'] },
-    { sentences: ['A: Is it hot today?', 'B: No. It is cloudy and ( [BLANK] ) today.'], a: 1, choices: ['cool', 'young', 'easy', 'happy'] },
-    { sentences: ['A: Do you have any ( [BLANK] ), John?', 'B: Yes, I have a cat.'], a: 4, choices: ['cups', 'hats', 'cars', 'pets'] },
-    { sentences: ['A: Dad, please ( [BLANK] ) this wall.', "B: OK. But first, let's wash it."], a: 3, choices: ['swim', 'sleep', 'paint', 'play'] },
-    { sentences: ['A: Excuse me. I want some ( [BLANK] ) in my coffee.'], a: 4, choices: ['paper', 'sun', 'light', 'sugar'] },
-    { sentences: ['A: Fred, is your brother on the volleyball team?', "B: Yes, ( [BLANK] ) right."], a: 2, choices: ["we're", "that's", "she's", "I'm"] },
-    { sentences: ['A: Steve, are you Canadian?', "B: No. I'm ( [BLANK] ) America."], a: 2, choices: ['to', 'from', 'under', 'by'] },
-    { sentences: ['Julia likes her camera.', 'She often ( [BLANK] ) pictures.'], a: 3, choices: ['tells', 'does', 'takes', 'sings'] },
-    { sentences: ['A: I like tennis. What ( [BLANK] ) you, Rachel?', 'B: I do, too.'], a: 2, choices: ['over', 'about', 'down', 'after'] },
-    { sentences: ["Yuki's father often goes jogging ( [BLANK] ) the morning."], a: 2, choices: ['on', 'in', 'out', 'down'] },
-    { sentences: ['Keiko and Megumi are good friends.', '( [BLANK] ) like tennis.'], a: 1, choices: ['They', 'He', 'She', 'You'] },
-    { sentences: ["A: Everyone, let's clean ( [BLANK] ) classroom.", 'B: OK, Mr. White.'], a: 2, choices: ['we', 'our', 'us', 'ours'] },
-    { sentences: ['A: What is Scott doing now?', 'B: He is ( [BLANK] ) a doghouse.'], a: 2, choices: ['make', 'making', 'makes', 'made'] },
-    // ── 第2回 ──
-    { sentences: ["A: Yuka, let's sit down on the ( [BLANK] ) and watch TV.", 'B: OK.'], a: 2, choices: ['drink', 'floor', 'jump', 'breakfast'] },
-    { sentences: ['Mr. Hara has a big ( [BLANK] ) in his garden.', 'It has many oranges.'], a: 4, choices: ['plate', 'fork', 'kitchen', 'tree'] },
-    { sentences: ["A: Mom, I don't know this word. Can you help me?", "B: No, I can't. Use your ( [BLANK] ), Tom."], a: 3, choices: ['page', 'cup', 'dictionary', 'story'] },
-    { sentences: ['Mr. Brown is a music teacher.', 'He plays the ( [BLANK] ) very well.'], a: 1, choices: ['trumpet', 'cup', 'clock', 'pencil'] },
-    { sentences: ['A: This is my new computer.', "B: It's ( [BLANK] ). I want one, too."], a: 1, choices: ['great', 'cloudy', 'sure', 'delicious'] },
-    { sentences: ['Sally has a smart dog.', 'He can stand and ( [BLANK] ) a ball.'], a: 2, choices: ['eat', 'catch', 'cook', 'buy'] },
-    { sentences: ['A: Mom, please ( [BLANK] ) sandwiches for lunch.', 'B: OK, John.'], a: 2, choices: ['know', 'make', 'sit', 'study'] },
-    { sentences: ["A: I have a cold, so I can't play soccer with you today.", "B: I ( [BLANK] ). That's OK."], a: 3, choices: ['am', 'do', 'see', 'love'] },
-    { sentences: ["A: ( [BLANK] ) me. Where's the bathroom?", "B: It's over there."], a: 4, choices: ['Begin', 'Know', 'Call', 'Excuse'] },
-    { sentences: ['A: Goodbye, David.', 'B: Bye, Sam. ( [BLANK] ) a good day.'], a: 3, choices: ['Help', 'Take', 'Have', 'Hear'] },
-    { sentences: ['A: Welcome ( [BLANK] ) our sports club, Paul.', 'B: Thank you, Mr. Johnson.'], a: 4, choices: ['on', 'of', 'for', 'to'] },
-    { sentences: ['I play basketball ( [BLANK] ) school.', 'My brother and my friend play, too.'], a: 2, choices: ['from', 'at', 'of', 'with'] },
-    { sentences: ['Jack ( [BLANK] ) a junior high school student.', 'He goes to a high school.'], a: 3, choices: ["aren't", "doesn't", "isn't", "don't"] },
-    { sentences: ['A: This dress is very nice. ( [BLANK] ) is it?', "B: It's my mother's."], a: 3, choices: ['Who', 'Where', 'Whose', 'When'] },
-    { sentences: ["A: Bill, let's ( [BLANK] ) the homework together.", 'B: OK, Maria.'], a: 1, choices: ['check', 'checked', 'checks', 'checking'] },
-    // ── 第1回 ──
-    { sentences: ["A: What's Mike doing now?", "B: He's ( [BLANK] ) his dog in the garden."], a: 2, choices: ['reading', 'washing', 'making', 'sitting'] },
-    { sentences: ["A: It's very cold, Billy. ( [BLANK] ) a coat today.", 'B: OK, Mom.'], a: 2, choices: ['Listen', 'Wear', 'See', 'Watch'] },
-    { sentences: ["A: What's your favorite color, Amy?", "B: It's ( [BLANK] )."], a: 2, choices: ['clean', 'brown', 'tall', 'hard'] },
-    { sentences: ['I have a photo ( [BLANK] ).', 'I have many pictures of my family in it.'], a: 1, choices: ['album', 'pen', 'sun', 'dog'] },
-    { sentences: ['My brother and I ( [BLANK] ) to school by bus every day.'], a: 4, choices: ['talk', 'eat', 'see', 'come'] },
-    { sentences: ['Henry is a ( [BLANK] ).', 'He plays the guitar and the piano.'], a: 2, choices: ['rabbit', 'musician', 'jacket', 'team'] },
-    { sentences: ['A: Hi, Jane. Where is Ken?', "B: He's in the ( [BLANK] )."], a: 2, choices: ['watch', 'gym', 'banana', 'night'] },
-    { sentences: ['I love basketball.', 'I often watch basketball games ( [BLANK] ) TV with my brother.'], a: 2, choices: ['of', 'on', 'at', 'in'] },
-    { sentences: ['Tom has a ( [BLANK] ) of coffee every morning before he goes to school.'], a: 4, choices: ['corn', 'floor', 'window', 'cup'] },
-    { sentences: ['A: Do you play basketball, Bob?', 'B: Yes, a ( [BLANK] ).'], a: 1, choices: ['little', 'beautiful', 'fast', 'much'] },
-    { sentences: ['I get ( [BLANK] ) early every morning and go to the park.'], a: 2, choices: ['on', 'up', 'over', 'right'] },
-    { sentences: ['Janet ( [BLANK] ) swimming every Sunday with her sister.'], a: 1, choices: ['goes', 'asks', 'buys', 'drinks'] },
-    { sentences: ['A: Mom, can I ( [BLANK] ) a letter to Uncle Rob this afternoon?', 'B: Of course, Kenji.'], a: 3, choices: ['writes', 'wrote', 'write', 'writing'] },
-    { sentences: ['I know Tim and Lucy.', '( [BLANK] ) are Canadian.'], a: 2, choices: ['He', 'They', 'It', 'You'] },
-    { sentences: ["A: It's hot. Please ( [BLANK] ) the window.", 'B: OK, Mom.'], a: 2, choices: ['opens', 'open', 'opening', 'opened'] },
+  { q: "A: Hi, I'm Kate. ___ you Yuki?\nB: Yes, I am.",         choices:["Are","Is","Am","Be"],   a:0 },
+  { q: "Yuki ___ a student.",                                    choices:["is","am","are","be"],    a:0 },
+  { q: "A: ___ this your bag?\nB: Yes, it is.",                  choices:["Is","Are","Am","Do"],    a:0 },
+  { q: "Kate and Yuki ___ good friends.",                        choices:["are","is","am","be"],    a:0 },
+  { q: "A: What ___ your name?\nB: My name is Leo.",             choices:["is","are","am","be"],    a:0 },
+  { q: "I ___ from Japan.",                                      choices:["am","is","are","be"],    a:0 },
+  { q: "A: ___ he your brother?\nB: No, he is not.",             choices:["Is","Are","Am","Do"],    a:0 },
+  { q: "She ___ a music teacher.",                               choices:["is","am","are","be"],    a:0 },
+  { q: "A: ___ they in the gym?\nB: Yes, they are.",             choices:["Are","Is","Am","Do"],    a:0 },
+  { q: "We ___ classmates.",                                     choices:["are","is","am","be"],    a:0 },
+  { q: "A: ___ you hungry?\nB: No, I'm not.",                    choices:["Are","Is","Am","Do"],    a:0 },
+  { q: "He ___ from Australia.",                                 choices:["is","am","are","be"],    a:0 },
+  { q: "A: Who ___ that?\nB: She is my sister.",                 choices:["is","are","am","be"],    a:0 },
+  { q: "Tom and I ___ on the soccer team.",                      choices:["are","is","am","be"],    a:0 },
+  { q: "I ___ a junior high school student.",                    choices:["am","is","are","be"],    a:0 },
+  { q: "A: ___ this a library?\nB: Yes, it is.",                 choices:["Is","Are","Am","Do"],    a:0 },
+  { q: "She ___ in the science club.",                           choices:["is","am","are","be"],    a:0 },
+  { q: "You ___ very kind.",                                     choices:["are","is","am","be"],    a:0 },
+  { q: "A: ___ your parents teachers?\nB: Yes, they are.",       choices:["Are","Is","Am","Do"],    a:0 },
+  { q: "My dog ___ very cute.",                                  choices:["is","am","are","be"],    a:0 },
 ];
 
 const reading2Data = [
-    { sentences: ["Teacher: Let's start today's English lesson. ( [BLANK] )", 'Student: OK, Ms. Peterson.'], a: 3, choices: ['See you tomorrow.', "We're going to school.", 'Please open your book.', 'You can go home.'] },
-    { sentences: ['Woman: Excuse me. What time does the next train come?', 'Man: ( [BLANK] )'], a: 3, choices: ['Yes, it does.', "It's good.", "At five o'clock.", 'For one hour.'] },
-    { sentences: ['Mother: Bob, come here and help me with dinner.', "Boy: ( [BLANK] ) Mom. I'm coming."], a: 1, choices: ['All right,', "It's ready,", 'You can drink it,', "No, I can't,"] },
-    { sentences: ['Girl: What class do you like?', 'Boy: ( [BLANK] )'], a: 1, choices: ['Science.', 'I go to school.', 'After lunch.', "It's my homework."] },
-    { sentences: ['Teacher: Please close the windows, Jack. ( [BLANK] )', 'Student: Yes, Ms. Carter.'], a: 3, choices: ['Good morning.', 'Here you are.', "It's cold.", "It's today."] },
-    { sentences: ["Boy: Where are my pajamas, Mom?", 'Mother: ( [BLANK] )'], a: 3, choices: ["It's big.", 'Five dollars.', 'On your bed.', 'After dinner.'] },
-    { sentences: ['Mother: What drink do you want?', 'Girl: ( [BLANK] )'], a: 3, choices: ['Two eggs.', 'Yes, at night.', 'Orange juice, please.', 'Every weekend.'] },
-    { sentences: ['Girl: Allan, your pink T-shirt is nice.', 'Boy: ( [BLANK] ) Brenda.'], a: 1, choices: ['Thanks,', 'Good job,', "You're welcome,", "They're interesting,"] },
-    { sentences: ['Girl: When do you study English, Taro?', 'Boy: ( [BLANK] ) Then I watch TV.'], a: 3, choices: ['I like it.', 'In my room.', 'After dinner.', 'For three hours.'] },
-    { sentences: ['Boy: Can you come to my house today, Lisa?', "Girl: No, I can't. ( [BLANK] )"], a: 2, choices: ["That's a good idea.", 'I have a violin lesson.', 'Come in, please.', "It's not mine."] },
-    { sentences: ['Boy: Do you have any sisters?', 'Girl: No, but ( [BLANK] )'], a: 2, choices: ["it's my birthday.", 'I have two brothers.', 'this is my room.', 'I like tennis.'] },
-    { sentences: ["Boy: What's the date today?", 'Mother: ( [BLANK] )'], a: 1, choices: ["It's April 29.", "It's nine o'clock.", 'I love spring.', 'Next Monday.'] },
-    { sentences: ['Girl: What do you do on weekends, Bob?', 'Boy: ( [BLANK] )'], a: 3, choices: ["No, I don't.", 'Good idea.', 'I play soccer.', "Sorry, I can't."] },
-    { sentences: ["Boy 1: Let's play badminton at the park, Brad.", 'Boy 2: ( [BLANK] )'], a: 1, choices: ["Yes, let's.", 'Yes, I am.', "It's you.", "It's short."] },
-    { sentences: ["Teacher: Hi, I'm Tom. I'm your new English teacher.", 'Girl: Hello, Tom. ( [BLANK] )'], a: 4, choices: ['I think so.', "You're welcome.", 'I do, too.', 'Nice to meet you.'] },
+  { q: "A: ___ you from Canada?\nB: Yes, I am.",                 choices:["Are","Is","Am","Do"],    a:0 },
+  { q: "It ___ a sunny day.",                                    choices:["is","am","are","be"],    a:0 },
+  { q: "A: Who ___ your English teacher?\nB: Ms. Brown is.",     choices:["is","are","am","be"],    a:0 },
+  { q: "They ___ good friends. They like tennis.",               choices:["are","is","am","be"],    a:0 },
+  { q: "I ___ very busy from Monday to Friday.",                 choices:["am","is","are","be"],    a:0 },
+  { q: "A: ___ he a doctor?\nB: No, he isn't.",                  choices:["Is","Are","Am","Do"],    a:0 },
+  { q: "She ___ Canadian.",                                      choices:["is","am","are","be"],    a:0 },
+  { q: "A: ___ these your books?\nB: Yes, they are.",            choices:["Are","Is","Am","Do"],    a:0 },
+  { q: "Tim and Lucy ___ from Canada.",                          choices:["are","is","am","be"],    a:0 },
+  { q: "I ___ in the art club.",                                 choices:["am","is","are","be"],    a:0 },
+  { q: "A: ___ she a high school student?\nB: Yes, she is.",     choices:["Is","Are","Am","Do"],    a:0 },
+  { q: "He ___ a musician.",                                     choices:["is","am","are","be"],    a:0 },
+  { q: "A: ___ you and Ken cousins?\nB: Yes, we are.",           choices:["Are","Is","Am","Do"],    a:0 },
+  { q: "My mother ___ a nurse.",                                 choices:["is","am","are","be"],    a:0 },
+  { q: "You ___ my best friend.",                                choices:["are","is","am","be"],    a:0 },
+  { q: "A: ___ it cold today?\nB: Yes, it is.",                  choices:["Is","Are","Am","Do"],    a:0 },
+  { q: "We ___ in the same class.",                              choices:["are","is","am","be"],    a:0 },
+  { q: "He ___ tall and kind.",                                  choices:["is","am","are","be"],    a:0 },
+  { q: "A: ___ I late?\nB: No, you aren't.",                     choices:["Am","Is","Are","Do"],    a:0 },
+  { q: "She ___ a good tennis player.",                          choices:["is","am","are","be"],    a:0 },
 ];
 
-const quizData = [...reading1Data, ...reading2Data];
-
-/* =============================================
-   CANVAS & DRAWING
-   ============================================= */
-const canvas = document.getElementById('gameCanvas');
-const C = canvas.getContext('2d');
-
-const CW = 660, CH = 310;
-const VP_X  = CW / 2;
-const VP_Y  = 90;
-const RAIL_W = 88;
-
-const SCROLL_SPEED    = 0.85;
-const APPROACH_CYCLES = 1.9;
-
-let scrollOff   = 0;
-let scrollReqId = null;
-let gamePhase   = 'idle';
-let canvasPhase = 'moving';
-
-function roundRect(x, y, w, h, r) {
-    C.beginPath();
-    C.moveTo(x+r, y); C.lineTo(x+w-r, y);
-    C.quadraticCurveTo(x+w, y, x+w, y+r); C.lineTo(x+w, y+h-r);
-    C.quadraticCurveTo(x+w, y+h, x+w-r, y+h); C.lineTo(x+r, y+h);
-    C.quadraticCurveTo(x, y+h, x, y+h-r); C.lineTo(x, y+r);
-    C.quadraticCurveTo(x, y, x+r, y); C.closePath();
+// Shuffle correct answer to a random position among the 4 choices
+function buildQuestion(raw) {
+  const correctText = raw.choices[raw.a];
+  // Create 4 display choices, shuffled
+  const shuffled = [...raw.choices].sort(() => Math.random() - 0.5);
+  const newCorrect = shuffled.indexOf(correctText);
+  return { q: raw.q, choices: shuffled, a: newCorrect };
 }
 
-function drawBG() {
-    const sky = C.createLinearGradient(0, 0, 0, VP_Y);
-    sky.addColorStop(0, '#3A7FBD'); sky.addColorStop(1, '#87CEEB');
-    C.fillStyle = sky; C.fillRect(0, 0, CW, VP_Y);
+// ─── Game state ───────────────────────────────────────────────────────────────
+const allData = [...reading1Data, ...reading2Data];
+let quizList = [];
+let qi = 0;          // current question index
+let score = 0;
+let answered = false;
 
-    function cloud(cx, cy, r) {
-        C.fillStyle = 'rgba(255,255,255,0.88)';
-        [[0,0,1],[0.42,0.18,0.74],[-0.35,0.22,0.64],[0.1,0.42,0.8]].forEach(([dx,dy,s]) => {
-            C.beginPath(); C.arc(cx+dx*r, cy+dy*r, r*s, 0, Math.PI*2); C.fill();
-        });
-    }
-    cloud(90, 28, 26); cloud(270, 18, 22); cloud(490, 32, 32); cloud(610, 22, 20);
-
-    C.fillStyle = '#9DC484';
-    C.beginPath(); C.moveTo(0, VP_Y);
-    [[0,0],[60,-22],[130,0],[210,-15],[290,-32],[370,-13],[455,-30],[540,-40],[630,-22],[CW,-17],[CW,VP_Y]]
-        .forEach(([x, dy]) => C.lineTo(x, VP_Y + dy));
-    C.closePath(); C.fill();
-
-    const grd = C.createLinearGradient(0, VP_Y, 0, CH);
-    grd.addColorStop(0, '#7ABD4A'); grd.addColorStop(1, '#4A8F2A');
-    C.fillStyle = grd; C.fillRect(0, VP_Y, CW, CH - VP_Y);
-}
-
-function drawStraightTracks(phase) {
-    C.fillStyle = '#B09464';
-    C.beginPath();
-    C.moveTo(VP_X-3, VP_Y+5); C.lineTo(VP_X+3, VP_Y+5);
-    C.lineTo(VP_X+RAIL_W+42, CH); C.lineTo(VP_X-RAIL_W-42, CH);
-    C.closePath(); C.fill();
-
-    const N = 15;
-    C.lineCap = 'butt';
-    for (let i = 0; i < N; i++) {
-        const raw = ((i / N) + (phase % 1.0)) % 1.0;
-        const t   = 0.025 + 0.975 * raw * raw;
-        const y   = VP_Y + (CH - VP_Y) * t;
-        const lx  = VP_X - RAIL_W * t;
-        const rx  = VP_X + RAIL_W * t;
-        const ext = RAIL_W * t * 0.10 + 2;
-        C.strokeStyle = '#7B5B3A'; C.lineWidth = Math.max(1.5, 9 * t);
-        C.beginPath(); C.moveTo(lx-ext, y); C.lineTo(rx+ext, y); C.stroke();
-    }
-
-    C.strokeStyle = '#C0C0C0'; C.lineWidth = 4; C.lineCap = 'round';
-    C.beginPath(); C.moveTo(VP_X, VP_Y+2); C.lineTo(VP_X-RAIL_W, CH); C.stroke();
-    C.beginPath(); C.moveTo(VP_X, VP_Y+2); C.lineTo(VP_X+RAIL_W, CH); C.stroke();
-}
-
-function drawTrolleyBack() {
-    C.save(); C.translate(VP_X, CH);
-    C.fillStyle = '#E91E63'; C.strokeStyle = '#880E4F'; C.lineWidth = 2.5;
-    roundRect(-58, -54, 116, 52, 9); C.fill(); C.stroke();
-    C.fillStyle = '#FFFDE7'; roundRect(-40, -49, 80, 30, 5); C.fill();
-    C.fillStyle = '#444'; roundRect(-42, -66, 9, 16, 2); C.fill();
-    C.globalAlpha = 0.55; C.fillStyle = '#DDD';
-    C.beginPath(); C.arc(-39, -72, 7, 0, Math.PI*2); C.fill();
-    C.beginPath(); C.arc(-34, -80, 5, 0, Math.PI*2); C.fill();
-    C.globalAlpha = 1;
-    C.fillStyle = '#42A5F5';
-    C.beginPath(); C.arc(0, -62, 13, Math.PI, 0, false); C.fill();
-    C.fillStyle = '#FFCC80';
-    C.beginPath(); C.arc(0, -74, 14, 0, Math.PI*2); C.fill();
-    C.strokeStyle = '#F57C00'; C.lineWidth = 1.5; C.stroke();
-    C.fillStyle = '#5D4037';
-    C.beginPath(); C.arc(0, -82, 11, Math.PI, 0, false); C.fill();
-    C.fillStyle = '#333';
-    C.beginPath(); C.arc(-5, -72, 2.5, 0, Math.PI*2); C.fill();
-    C.beginPath(); C.arc( 5, -72, 2.5, 0, Math.PI*2); C.fill();
-    C.strokeStyle = '#333'; C.lineWidth = 1.5;
-    C.beginPath(); C.arc(0, -70, 5, 0.1, Math.PI - 0.1); C.stroke();
-    C.restore();
-}
-
-function drawAnimals() {
-    const emojis = ['🐰', '🦊', '🐃', '🐍'];
-    const positions = [[90, 250], [210, 275], [450, 275], [570, 250]];
-    C.font = '36px serif'; C.textAlign = 'center'; C.textBaseline = 'middle';
-    emojis.forEach((e, i) => C.fillText(e, positions[i][0], positions[i][1]));
-}
-
-function drawCorrectOverlay() {
-    drawStraightTracks(0); drawTrolleyBack();
-    const cy = VP_Y + (CH - VP_Y) * 0.52;
-    C.strokeStyle = 'rgba(0,200,83,0.35)'; C.lineWidth = 22;
-    C.beginPath(); C.arc(VP_X, cy, 52, 0, Math.PI*2); C.stroke();
-    C.strokeStyle = '#00C853'; C.lineWidth = 10;
-    C.beginPath(); C.arc(VP_X, cy, 52, 0, Math.PI*2); C.stroke();
-}
-
-function drawBrokenOverlay() {
-    const breakT = 0.52;
-    const breakY = VP_Y + (CH - VP_Y) * breakT;
-    const bLX    = VP_X - RAIL_W * breakT;
-    const bRX    = VP_X + RAIL_W * breakT;
-
-    C.fillStyle = '#B09464';
-    C.beginPath();
-    C.moveTo(VP_X-3, VP_Y+5); C.lineTo(VP_X+3, VP_Y+5);
-    C.lineTo(bRX+20, breakY); C.lineTo(bLX-20, breakY);
-    C.closePath(); C.fill();
-
-    C.strokeStyle = '#7B5B3A'; C.lineCap = 'butt';
-    for (let i = 1; i <= 4; i++) {
-        const t  = breakT * (i / 5);
-        const y  = VP_Y + (CH - VP_Y) * t;
-        const lx = VP_X - RAIL_W * t;
-        const rx = VP_X + RAIL_W * t;
-        C.lineWidth = Math.max(1.5, 8 * t);
-        C.beginPath(); C.moveTo(lx-4, y); C.lineTo(rx+4, y); C.stroke();
-    }
-
-    C.strokeStyle = '#C0C0C0'; C.lineWidth = 4; C.lineCap = 'round';
-    C.beginPath(); C.moveTo(VP_X, VP_Y+2); C.lineTo(bLX, breakY); C.stroke();
-    C.beginPath(); C.moveTo(VP_X, VP_Y+2); C.lineTo(bRX, breakY); C.stroke();
-
-    C.strokeStyle = '#E53935'; C.lineWidth = 5; C.lineCap = 'round';
-    C.beginPath(); C.moveTo(bLX, breakY); C.lineTo(bLX-22, breakY+32); C.stroke();
-    C.beginPath(); C.moveTo(bRX, breakY); C.lineTo(bRX+22, breakY+32); C.stroke();
-    C.strokeStyle = '#B71C1C'; C.lineWidth = 3;
-    C.beginPath(); C.moveTo(bLX-4, breakY+5); C.lineTo(bLX-28, breakY+18); C.stroke();
-    C.beginPath(); C.moveTo(bRX+4, breakY+5); C.lineTo(bRX+28, breakY+18); C.stroke();
-
-    C.fillStyle = '#6D4C41';
-    C.beginPath();
-    C.moveTo(bLX-44, breakY+10); C.lineTo(bRX+44, breakY+10);
-    C.lineTo(bRX+24, breakY+28); C.lineTo(bLX-24, breakY+28);
-    C.closePath(); C.fill();
-
-    const vg = C.createLinearGradient(0, breakY+28, 0, CH);
-    vg.addColorStop(0, '#1A2332'); vg.addColorStop(1, '#000A14');
-    C.fillStyle = vg; C.fillRect(0, breakY+28, CW, CH - breakY - 28);
-
-    function dangerX(x, y) {
-        C.strokeStyle = '#FF5252'; C.lineWidth = 4; C.lineCap = 'round';
-        C.beginPath(); C.moveTo(x-9, y-9); C.lineTo(x+9, y+9); C.stroke();
-        C.beginPath(); C.moveTo(x+9, y-9); C.lineTo(x-9, y+9); C.stroke();
-    }
-    dangerX(bLX-28, breakY - 18); dangerX(bRX+28, breakY - 18);
-
-    function drawBoulder(cx, cy, rx, ry, angle, baseColor, hiColor) {
-        C.save(); C.translate(cx, cy); C.rotate(angle);
-        C.fillStyle = baseColor; C.strokeStyle = '#3D2D1A'; C.lineWidth = 2;
-        C.beginPath(); C.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); C.fill(); C.stroke();
-        C.fillStyle = hiColor;
-        C.beginPath(); C.ellipse(-rx * 0.28, -ry * 0.32, rx * 0.32, ry * 0.22, -0.3, 0, Math.PI * 2); C.fill();
-        C.restore();
-    }
-    const bldY = breakY - 10;
-    drawBoulder(VP_X - 18, bldY,      32, 22, -0.18, '#7A6655', 'rgba(255,255,255,0.15)');
-    drawBoulder(VP_X + 26, bldY + 6,  27, 18,  0.25, '#8A7260', 'rgba(255,255,255,0.12)');
-    drawBoulder(VP_X - 52, bldY + 8,  20, 14,  0.10, '#6A5548', 'rgba(255,255,255,0.10)');
-    drawBoulder(VP_X + 55, bldY + 2,  17, 12, -0.30, '#6F5E4E', 'rgba(255,255,255,0.10)');
-    drawBoulder(VP_X +  4, bldY - 18, 14, 10,  0.05, '#7D6B5B', 'rgba(255,255,255,0.12)');
-
-    drawTrolleyBack();
-}
-
-function drawScene() {
-    C.clearRect(0, 0, CW, CH);
-    drawBG();
-    switch (canvasPhase) {
-        case 'moving':
-            drawStraightTracks(scrollOff % 1.0);
-            drawTrolleyBack();
-            break;
-        case 'arrived':
-            drawStraightTracks(0);
-            drawTrolleyBack();
-            drawAnimals();
-            break;
-        case 'correct':
-            drawCorrectOverlay();
-            break;
-        case 'broken':
-            drawBrokenOverlay();
-            break;
-    }
-}
-
-/* =============================================
-   ANIMATION HELPERS
-   ============================================= */
-function stopScrollAnim() {
-    if (scrollReqId) { cancelAnimationFrame(scrollReqId); scrollReqId = null; }
-}
-
-function startApproachAnim(onArrived) {
-    canvasPhase = 'moving';
-    scrollOff   = 0;
-    let lastTime = null;
-    startTrainSound();
-
-    function step(now) {
-        if (!lastTime) lastTime = now;
-        const dt = (now - lastTime) / 1000;
-        lastTime = now;
-        scrollOff += SCROLL_SPEED * dt;
-        drawScene();
-        if (scrollOff < APPROACH_CYCLES) {
-            scrollReqId = requestAnimationFrame(step);
-        } else {
-            scrollReqId = null;
-            canvasPhase = 'arrived';
-            drawScene();
-            onArrived && onArrived();
-        }
-    }
-    scrollReqId = requestAnimationFrame(step);
-}
-
-function startPostAnswerAnim(onDone) {
-    canvasPhase = 'moving';
-    let elapsed = 0, lastTime = null;
-    const POST_DURATION = 0.65;
-
-    function step(now) {
-        if (!lastTime) lastTime = now;
-        const dt = (now - lastTime) / 1000;
-        lastTime = now;
-        elapsed  += dt;
-        scrollOff += SCROLL_SPEED * dt;
-        drawScene();
-        if (elapsed < POST_DURATION) {
-            scrollReqId = requestAnimationFrame(step);
-        } else {
-            scrollReqId = null;
-            stopTrainSound();
-            onDone();
-        }
-    }
-    scrollReqId = requestAnimationFrame(step);
-}
-
-/* =============================================
-   SOUND
-   ============================================= */
-let audioCtx = null;
-function getAudio() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    return audioCtx;
-}
-function playDing() {
-    const a = getAudio();
-    const osc = a.createOscillator(), g = a.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(659.25, a.currentTime);
-    osc.frequency.setValueAtTime(523.25, a.currentTime + 0.15);
-    g.gain.setValueAtTime(0.1, a.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.6);
-    osc.connect(g); g.connect(a.destination);
-    osc.start(); osc.stop(a.currentTime + 0.6);
-}
-function playBuzz() {
-    const a = getAudio();
-    const osc = a.createOscillator(), g = a.createGain();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(140, a.currentTime);
-    g.gain.setValueAtTime(0.06, a.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.4);
-    osc.connect(g); g.connect(a.destination);
-    osc.start(); osc.stop(a.currentTime + 0.4);
-}
-let trainNoiseSource = null;
-function startTrainSound() {
-    stopTrainSound();
-    try {
-        const a = getAudio(), sr = a.sampleRate;
-        const buf = a.createBuffer(1, sr, sr);
-        const d   = buf.getChannelData(0);
-        [0, 0.5].forEach(offset => {
-            const si = Math.round(offset * sr), len = Math.round(sr * 0.055);
-            for (let i = 0; i < len && si + i < sr; i++)
-                d[si + i] += (Math.random() * 2 - 1) * Math.exp(-i / (sr * 0.012)) * 0.45;
-        });
-        for (let i = 0; i < sr; i++) d[i] += (Math.random() * 2 - 1) * 0.018;
-        const src = a.createBufferSource();
-        src.buffer = buf; src.loop = true;
-        const lpf = a.createBiquadFilter();
-        lpf.type = 'lowpass'; lpf.frequency.value = 450;
-        const g = a.createGain(); g.gain.value = 0.32;
-        src.connect(lpf); lpf.connect(g); g.connect(a.destination);
-        src.start(); trainNoiseSource = src;
-    } catch(e) {}
-}
-function stopTrainSound() {
-    if (trainNoiseSource) { try { trainNoiseSource.stop(); } catch(e) {} trainNoiseSource = null; }
-}
-
-/* =============================================
-   GAME STATE
-   ============================================= */
-const TOTAL_Q = 10;
-let gs = {
-    questions:     [],
-    currentIndex:  0,
-    score:         0,
-    animalChoices: [],
-    correctAnimal: -1,
-    busy:          false,
-};
+// Character assignment per question
+const CHAR_NAMES = ['ハローキティ', 'シナモロール', 'クロミ', 'マイメロディ'];
 
 function shuffle(arr) {
-    const a = [...arr];
-    for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ─── Canvas / Train animation ─────────────────────────────────────────────────
+const CW = 660, CH = 240;
+const RAIL_Y = 210;
+const TRAIN_W = 220, TRAIN_H = 72;
+const TRAIN_STOP_X = 80;   // left edge of train when stopped at platform
+const PLATFORM_X = 310;    // start of platform
+const PLATFORM_W = 340;
+const PLATFORM_Y = 192;
+const CHAR_Y = 178;        // feet of characters
+const CHAR_XS = [330, 400, 470, 540];
+
+let trainX = -TRAIN_W;    // left edge of train
+let animFrame = null;
+let phase = 'idle';        // idle | approaching | arrived | departing
+let wrongIdx = -1;         // which char got wrong answer
+
+function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+function easeIn(t)  { return Math.pow(t, 3); }
+
+function startApproach() {
+  const startX = -TRAIN_W - 20;
+  const endX   = TRAIN_STOP_X;
+  const dur    = 1800;
+  const t0     = performance.now();
+  phase = 'approaching';
+  if (animFrame) cancelAnimationFrame(animFrame);
+
+  function tick(now) {
+    const p = Math.min((now - t0) / dur, 1);
+    trainX = startX + (endX - startX) * easeOut(p);
+    drawScene();
+    if (p < 1) { animFrame = requestAnimationFrame(tick); }
+    else {
+      trainX = endX;
+      phase = 'arrived';
+      drawScene();
+      enableButtons();
     }
-    return a;
+  }
+  animFrame = requestAnimationFrame(tick);
 }
 
-function showFeedback(emoji) {
-    const el = document.getElementById('feedback-overlay');
-    el.textContent = emoji; el.style.display = 'block';
-    setTimeout(() => { el.style.display = 'none'; }, 1400);
-}
+function startDepart() {
+  const startX = TRAIN_STOP_X;
+  const endX   = CW + 40;
+  const dur    = 1100;
+  const t0     = performance.now();
+  phase = 'departing';
+  disableButtons();
+  if (animFrame) cancelAnimationFrame(animFrame);
 
-function setButtons(enabled) {
-    for (let i = 0; i < 4; i++)
-        document.getElementById('animal-btn-' + i).disabled = !enabled;
-}
-
-function renderQuestion(q) {
-    function fmtSentence(s) {
-        const blank = '<span class="blank-word">（　　　）</span>';
-        let out = s.replace(/\( \[BLANK\] \)/g, blank);
-        out = out.replace(/^([A-Z][a-z]*\s*[12]?\s*:\s*)/, '<span class="speaker">$1</span>');
-        return out;
+  function tick(now) {
+    const p = Math.min((now - t0) / dur, 1);
+    trainX = startX + (endX - startX) * easeIn(p);
+    drawScene();
+    if (p < 1) { animFrame = requestAnimationFrame(tick); }
+    else {
+      phase = 'idle';
+      showNextBtn();
     }
-    const html = q.sentences.map(s => `<div>${fmtSentence(s)}</div>`).join('');
-    document.getElementById('question-text').innerHTML = html;
+  }
+  animFrame = requestAnimationFrame(tick);
 }
 
-function setupQuestion() {
-    const q = gs.questions[gs.currentIndex];
-    const correct = q.choices[q.a - 1];
-    const shuffled = shuffle([...q.choices]);
-    gs.animalChoices = shuffled;
-    gs.correctAnimal = shuffled.indexOf(correct);
+// ─── Drawing ─────────────────────────────────────────────────────────────────
+function drawScene() {
+  const canvas = document.getElementById('train-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, CW, CH);
 
-    for (let i = 0; i < 4; i++)
-        document.getElementById('animal-choice-' + i).textContent = shuffled[i];
-
-    renderQuestion(q);
-    document.getElementById('q-num').textContent = gs.currentIndex + 1;
-    document.getElementById('answer-reveal').style.display = 'none';
-
-    setButtons(false);
-    stopScrollAnim();
-    gamePhase = 'moving';
-
-    startApproachAnim(() => {
-        gamePhase = 'idle';
-        setButtons(true);
-    });
+  drawBackground(ctx);
+  drawPlatform(ctx);
+  drawCharacters(ctx);
+  drawTrack(ctx);
+  drawTrain(ctx, trainX);
 }
 
-function chooseAnswer(idx) {
-    if (gs.busy || gamePhase !== 'idle') return;
-    gs.busy = true;
-    setButtons(false);
-    stopScrollAnim();
+function drawBackground(ctx) {
+  // Sky gradient
+  const sky = ctx.createLinearGradient(0, 0, 0, CH * 0.75);
+  sky.addColorStop(0, '#87ceeb');
+  sky.addColorStop(1, '#d0eeff');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, CW, CH * 0.75);
 
-    const isCorrect = (idx === gs.correctAnimal);
-    gamePhase = 'animating';
+  // Ground
+  ctx.fillStyle = '#8db87a';
+  ctx.fillRect(0, CH * 0.75, CW, CH * 0.25);
 
-    startPostAnswerAnim(() => {
-        if (isCorrect) {
-            gs.score++;
-            document.getElementById('score-display').textContent = gs.score;
-            canvasPhase = 'correct';
-            drawScene(); playDing(); showFeedback('⭕️');
-            setTimeout(afterAnswer, 1400);
-        } else {
-            const correctWord = gs.animalChoices[gs.correctAnimal];
-            const reveal = document.getElementById('answer-reveal');
-            reveal.textContent = '✨ 正解は「' + correctWord + '」だよ！';
-            reveal.style.display = 'block';
-            canvasPhase = 'broken';
-            drawScene(); playBuzz(); showFeedback('❌');
-            setTimeout(afterAnswer, 2200);
-        }
-    });
+  // Station sign
+  ctx.fillStyle = '#440022';
+  ctx.fillRect(PLATFORM_X + 20, 30, 90, 36);
+  ctx.fillStyle = '#c8a844';
+  ctx.font = 'bold 14px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('えいご駅', PLATFORM_X + 65, 53);
 }
 
-function afterAnswer() {
-    gs.currentIndex++; gs.busy = false; gamePhase = 'idle';
-    if (gs.currentIndex >= gs.questions.length) setTimeout(showGameOver, 400);
-    else setTimeout(setupQuestion, 350);
+function drawPlatform(ctx) {
+  // Platform body
+  ctx.fillStyle = '#c8a8a0';
+  ctx.fillRect(PLATFORM_X, PLATFORM_Y, PLATFORM_W, 24);
+  // Platform edge stripe
+  ctx.fillStyle = '#f0e0a0';
+  ctx.fillRect(PLATFORM_X, PLATFORM_Y, PLATFORM_W, 6);
 }
 
-function showScreen(id) {
-    ['screen-welcome', 'screen-game', 'screen-gameover'].forEach(sid =>
-        document.getElementById(sid).style.display = (sid === id) ? 'flex' : 'none'
-    );
+function drawTrack(ctx) {
+  // Rails
+  ctx.strokeStyle = '#888';
+  ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(0, RAIL_Y);     ctx.lineTo(CW, RAIL_Y);     ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, RAIL_Y + 8); ctx.lineTo(CW, RAIL_Y + 8); ctx.stroke();
+
+  // Sleepers
+  ctx.strokeStyle = '#7a5c3a';
+  ctx.lineWidth = 3;
+  for (let x = 10; x < CW; x += 22) {
+    ctx.beginPath();
+    ctx.moveTo(x, RAIL_Y - 2);
+    ctx.lineTo(x, RAIL_Y + 12);
+    ctx.stroke();
+  }
 }
 
+function drawTrain(ctx, x) {
+  const y = RAIL_Y - TRAIN_H;
+  const w = TRAIN_W, h = TRAIN_H;
+
+  // Body
+  ctx.fillStyle = '#660033';
+  roundRect(ctx, x, y, w, h, 8);
+  ctx.fill();
+
+  // Gold stripe
+  ctx.fillStyle = '#c8a844';
+  ctx.fillRect(x, y + h * 0.55, w, 7);
+
+  // Windows (2)
+  ctx.fillStyle = '#d0eeff';
+  ctx.fillRect(x + 18, y + 10, 55, 32);
+  ctx.fillRect(x + 95, y + 10, 55, 32);
+
+  // Window frame
+  ctx.strokeStyle = '#440022';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x + 18, y + 10, 55, 32);
+  ctx.strokeRect(x + 95, y + 10, 55, 32);
+
+  // Door
+  ctx.fillStyle = '#550028';
+  ctx.fillRect(x + w - 44, y + 8, 34, h - 8);
+  ctx.strokeStyle = '#440022';
+  ctx.strokeRect(x + w - 44, y + 8, 34, h - 8);
+  // Door handle
+  ctx.fillStyle = '#c8a844';
+  ctx.fillRect(x + w - 20, y + h * 0.5 - 8, 3, 16);
+
+  // Destination sign
+  ctx.fillStyle = '#002244';
+  ctx.fillRect(x + 165, y + 12, 40, 16);
+  ctx.fillStyle = '#ffffaa';
+  ctx.font = 'bold 10px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('梅田', x + 185, y + 24);
+
+  // Pantograph (on roof)
+  ctx.strokeStyle = '#999';
+  ctx.lineWidth = 2;
+  const px = x + 60;
+  ctx.beginPath();
+  ctx.moveTo(px, y);
+  ctx.lineTo(px - 12, y - 18);
+  ctx.lineTo(px + 12, y - 18);
+  ctx.lineTo(px, y - 30);
+  ctx.stroke();
+  // Contact wire bar
+  ctx.beginPath();
+  ctx.moveTo(px - 16, y - 18);
+  ctx.lineTo(px + 16, y - 18);
+  ctx.stroke();
+
+  // Wrong X overlay
+  if (phase === 'arrived' && wrongIdx >= 0) {
+    ctx.save();
+    ctx.strokeStyle = 'red';
+    ctx.lineWidth = 8;
+    ctx.globalAlpha = 0.75;
+    const cx2 = x + w / 2, cy2 = y + h / 2;
+    ctx.beginPath(); ctx.moveTo(cx2 - 28, cy2 - 28); ctx.lineTo(cx2 + 28, cy2 + 28); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx2 + 28, cy2 - 28); ctx.lineTo(cx2 - 28, cy2 + 28); ctx.stroke();
+    ctx.restore();
+  }
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function drawCharacters(ctx) {
+  if (phase === 'idle') return;
+  const q = quizList[qi];
+  for (let i = 0; i < 4; i++) {
+    const cx = CHAR_XS[i];
+    drawChar(ctx, i, cx, CHAR_Y, q.choices[i]);
+  }
+}
+
+function drawChar(ctx, idx, cx, footY, label) {
+  ctx.save();
+  ctx.textAlign = 'center';
+
+  if (idx === 0) drawKitty(ctx, cx, footY);
+  else if (idx === 1) drawCinnamoroll(ctx, cx, footY);
+  else if (idx === 2) drawKuromi(ctx, cx, footY);
+  else drawMyMelo(ctx, cx, footY);
+
+  // Speech bubble with choice
+  const bx = cx, by = footY - 52;
+  ctx.fillStyle = 'white';
+  ctx.strokeStyle = '#666';
+  ctx.lineWidth = 1.5;
+  roundRect(ctx, bx - 22, by - 14, 44, 20, 6);
+  ctx.fill(); ctx.stroke();
+  // bubble tail
+  ctx.beginPath();
+  ctx.moveTo(bx - 4, by + 6);
+  ctx.lineTo(bx + 4, by + 6);
+  ctx.lineTo(bx, by + 13);
+  ctx.fill();
+
+  ctx.fillStyle = '#222';
+  ctx.font = 'bold 11px sans-serif';
+  ctx.fillText(label, bx, by + 1);
+  ctx.restore();
+}
+
+function drawKitty(ctx, cx, fy) {
+  const hy = fy - 22;
+  // body
+  ctx.fillStyle = '#ffb6d9';
+  ctx.beginPath(); ctx.ellipse(cx, hy + 4, 11, 14, 0, 0, Math.PI * 2); ctx.fill();
+  // head
+  ctx.fillStyle = 'white';
+  ctx.beginPath(); ctx.arc(cx, hy - 12, 13, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1; ctx.stroke();
+  // ears
+  ctx.fillStyle = 'white';
+  ctx.beginPath(); ctx.moveTo(cx - 11, hy - 22); ctx.lineTo(cx - 6, hy - 13); ctx.lineTo(cx - 16, hy - 13); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(cx + 11, hy - 22); ctx.lineTo(cx + 6, hy - 13); ctx.lineTo(cx + 16, hy - 13); ctx.closePath(); ctx.fill();
+  // bow
+  ctx.fillStyle = '#ff0066';
+  ctx.beginPath(); ctx.ellipse(cx + 9, hy - 22, 5, 3, -0.5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 14, hy - 22, 5, 3, 0.5, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#ffaacc';
+  ctx.beginPath(); ctx.arc(cx + 11, hy - 22, 2, 0, Math.PI * 2); ctx.fill();
+  // eyes
+  ctx.fillStyle = '#222';
+  ctx.beginPath(); ctx.arc(cx - 4, hy - 13, 2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 4, hy - 13, 2, 0, Math.PI * 2); ctx.fill();
+  // nose
+  ctx.fillStyle = '#ff9900';
+  ctx.beginPath(); ctx.arc(cx, hy - 10, 1.5, 0, Math.PI * 2); ctx.fill();
+  // legs
+  ctx.fillStyle = '#ffb6d9';
+  ctx.fillRect(cx - 8, fy - 10, 6, 10);
+  ctx.fillRect(cx + 2, fy - 10, 6, 10);
+}
+
+function drawCinnamoroll(ctx, cx, fy) {
+  const hy = fy - 22;
+  // body
+  ctx.fillStyle = '#d8eeff';
+  ctx.beginPath(); ctx.ellipse(cx, hy + 4, 11, 13, 0, 0, Math.PI * 2); ctx.fill();
+  // head (big round)
+  ctx.fillStyle = 'white';
+  ctx.beginPath(); ctx.arc(cx, hy - 14, 15, 0, Math.PI * 2); ctx.fill();
+  // ears (big floppy)
+  ctx.fillStyle = '#d0e8ff';
+  ctx.beginPath(); ctx.ellipse(cx - 14, hy - 20, 6, 10, -0.4, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 14, hy - 20, 6, 10, 0.4, 0, Math.PI * 2); ctx.fill();
+  // eyes
+  ctx.fillStyle = '#224488';
+  ctx.beginPath(); ctx.arc(cx - 4, hy - 15, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 4, hy - 15, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = 'white';
+  ctx.beginPath(); ctx.arc(cx - 3, hy - 16, 1, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 5, hy - 16, 1, 0, Math.PI * 2); ctx.fill();
+  // nose + cheeks
+  ctx.fillStyle = '#ff99bb';
+  ctx.beginPath(); ctx.arc(cx, hy - 11, 2, 0, Math.PI * 2); ctx.fill();
+  ctx.globalAlpha = 0.4;
+  ctx.beginPath(); ctx.ellipse(cx - 7, hy - 11, 4, 3, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 7, hy - 11, 4, 3, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.globalAlpha = 1;
+  // tail (curled on top)
+  ctx.strokeStyle = '#88bbff';
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(cx, hy - 29, 5, Math.PI, 0); ctx.stroke();
+  // legs
+  ctx.fillStyle = '#d8eeff';
+  ctx.fillRect(cx - 8, fy - 10, 6, 10);
+  ctx.fillRect(cx + 2, fy - 10, 6, 10);
+}
+
+function drawKuromi(ctx, cx, fy) {
+  const hy = fy - 22;
+  // body
+  ctx.fillStyle = '#333';
+  ctx.beginPath(); ctx.ellipse(cx, hy + 4, 11, 13, 0, 0, Math.PI * 2); ctx.fill();
+  // head
+  ctx.fillStyle = '#222';
+  ctx.beginPath(); ctx.arc(cx, hy - 13, 13, 0, Math.PI * 2); ctx.fill();
+  // skull hood points
+  ctx.fillStyle = '#222';
+  ctx.beginPath();
+  ctx.moveTo(cx - 13, hy - 18);
+  ctx.lineTo(cx - 8, hy - 30);
+  ctx.lineTo(cx - 3, hy - 18);
+  ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(cx + 3, hy - 18);
+  ctx.lineTo(cx + 8, hy - 30);
+  ctx.lineTo(cx + 13, hy - 18);
+  ctx.closePath(); ctx.fill();
+  // inner face white area
+  ctx.fillStyle = 'white';
+  ctx.beginPath(); ctx.ellipse(cx, hy - 12, 9, 10, 0, 0, Math.PI * 2); ctx.fill();
+  // eyes
+  ctx.fillStyle = '#224488';
+  ctx.beginPath(); ctx.arc(cx - 3, hy - 14, 2.5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 3, hy - 14, 2.5, 0, Math.PI * 2); ctx.fill();
+  // skull on forehead
+  ctx.fillStyle = 'white';
+  ctx.font = 'bold 8px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('☠', cx, hy - 24);
+  // pink cheeks
+  ctx.fillStyle = '#ff99bb';
+  ctx.globalAlpha = 0.5;
+  ctx.beginPath(); ctx.ellipse(cx - 7, hy - 10, 4, 3, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 7, hy - 10, 4, 3, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.globalAlpha = 1;
+  // legs
+  ctx.fillStyle = '#333';
+  ctx.fillRect(cx - 8, fy - 10, 6, 10);
+  ctx.fillRect(cx + 2, fy - 10, 6, 10);
+}
+
+function drawMyMelo(ctx, cx, fy) {
+  const hy = fy - 22;
+  // body
+  ctx.fillStyle = '#ffccdd';
+  ctx.beginPath(); ctx.ellipse(cx, hy + 4, 11, 13, 0, 0, Math.PI * 2); ctx.fill();
+  // hood
+  ctx.fillStyle = '#ff88bb';
+  ctx.beginPath();
+  ctx.arc(cx, hy - 14, 14, Math.PI, 0);
+  ctx.lineTo(cx + 16, hy - 8);
+  ctx.lineTo(cx - 16, hy - 8);
+  ctx.closePath(); ctx.fill();
+  // hood ears (rounded bumps)
+  ctx.beginPath(); ctx.ellipse(cx - 12, hy - 26, 5, 8, -0.2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 12, hy - 26, 5, 8, 0.2, 0, Math.PI * 2); ctx.fill();
+  // face white
+  ctx.fillStyle = 'white';
+  ctx.beginPath(); ctx.ellipse(cx, hy - 12, 10, 10, 0, 0, Math.PI * 2); ctx.fill();
+  // eyes
+  ctx.fillStyle = '#222';
+  ctx.beginPath(); ctx.arc(cx - 3, hy - 14, 2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 3, hy - 14, 2, 0, Math.PI * 2); ctx.fill();
+  // nose
+  ctx.fillStyle = '#ff0066';
+  ctx.beginPath(); ctx.arc(cx, hy - 10, 2, 0, Math.PI * 2); ctx.fill();
+  // cheeks
+  ctx.fillStyle = '#ffaacc';
+  ctx.globalAlpha = 0.5;
+  ctx.beginPath(); ctx.ellipse(cx - 7, hy - 10, 4, 3, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 7, hy - 10, 4, 3, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.globalAlpha = 1;
+  // legs
+  ctx.fillStyle = '#ffccdd';
+  ctx.fillRect(cx - 8, fy - 10, 6, 10);
+  ctx.fillRect(cx + 2, fy - 10, 6, 10);
+}
+
+// ─── Game flow ────────────────────────────────────────────────────────────────
 function startGame() {
-    stopTrainSound();
-    gs.questions    = shuffle(quizData).slice(0, TOTAL_Q);
-    gs.currentIndex = 0;
-    gs.score        = 0;
-    gs.busy         = false;
-    document.getElementById('score-display').textContent = '0';
-    document.getElementById('q-total').textContent       = TOTAL_Q;
-    showScreen('screen-game');
-    setupQuestion();
+  const pool = shuffle([...allData]).slice(0, 10);
+  quizList = pool.map(buildQuestion);
+  qi = 0; score = 0; answered = false;
+  document.getElementById('screen-welcome').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'flex';
+  loadQuestion();
 }
 
-function showGameOver() {
-    const s = gs.score, t = TOTAL_Q;
-    document.getElementById('final-score').textContent = s;
-    document.getElementById('final-total').textContent = t;
-    let title, msg;
-    if (s === t)          { title = '🎉 パーフェクト！ 🎉'; msg = '全問正解！すごすぎる！！'; }
-    else if (s >= t * .8) { title = '🌟 すばらしい！';      msg = 'とてもよくできました！';  }
-    else if (s >= t * .6) { title = '😊 よくできました！';   msg = 'なかなかじょうず！';     }
-    else if (s >= t * .4) { title = '🌱 もう少し！';         msg = 'また挑戦してみよう！';   }
-    else                  { title = '💪 がんばれ！';          msg = 'もう一度チャレンジ！';  }
-    document.getElementById('gameover-title').textContent = title;
-    document.getElementById('score-message').textContent  = msg;
-    showScreen('screen-gameover');
+function loadQuestion() {
+  answered = false;
+  wrongIdx = -1;
+  const q = quizList[qi];
+
+  // Progress
+  document.getElementById('q-counter').textContent = `${qi + 1} / ${quizList.length}`;
+  document.getElementById('score-disp').textContent = `⭕ ${score}`;
+  document.getElementById('progress-bar').style.width = (qi / quizList.length * 100) + '%';
+
+  // Question text with blank
+  const rawText = q.q.replace(/_+/g, '<span class="blank">（　　）</span>');
+  document.getElementById('q-text').innerHTML = rawText.replace(/\n/g, '<br>');
+
+  // Choice labels on buttons (canvas drawn later)
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('choice' + i).textContent = q.choices[i];
+    const btn = document.getElementById('btn' + i);
+    btn.disabled = false;
+    btn.classList.remove('correct', 'wrong');
+  }
+
+  document.getElementById('feedback-area').textContent = '';
+  document.getElementById('next-btn').style.display = 'none';
+
+  // Train approaches
+  trainX = -TRAIN_W - 20;
+  phase = 'approaching';
+  disableButtons();
+  drawScene();
+  startApproach();
 }
 
-canvasPhase = 'moving';
-scrollOff = 0;
-drawScene();
+function answer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = quizList[qi];
+  const correct = (idx === q.a);
+
+  const btn = document.getElementById('btn' + idx);
+  if (correct) {
+    btn.classList.add('correct');
+    score++;
+    document.getElementById('feedback-area').textContent = '⭕ せいかい！';
+    document.getElementById('score-disp').textContent = `⭕ ${score}`;
+    disableButtons();
+    setTimeout(() => startDepart(), 400);
+  } else {
+    btn.classList.add('wrong');
+    wrongIdx = idx;
+    document.getElementById('btn' + q.a).classList.add('correct');
+    document.getElementById('feedback-area').textContent = `❌ せいかいは「${q.choices[q.a]}」だよ！`;
+    disableButtons();
+    drawScene(); // redraw with X
+    setTimeout(() => showNextBtn(), 800);
+  }
+}
+
+function disableButtons() {
+  for (let i = 0; i < 4; i++) document.getElementById('btn' + i).disabled = true;
+}
+function enableButtons() {
+  for (let i = 0; i < 4; i++) document.getElementById('btn' + i).disabled = false;
+}
+
+function showNextBtn() {
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  qi++;
+  if (qi >= quizList.length) {
+    showClear();
+  } else {
+    loadQuestion();
+  }
+}
+
+function showClear() {
+  document.getElementById('screen-quiz').style.display = 'none';
+  document.getElementById('screen-clear').style.display = 'flex';
+  document.getElementById('final-score').textContent = score;
+  document.getElementById('progress-bar').style.width = '100%';
+}
+
+function restartGame() {
+  document.getElementById('screen-clear').style.display = 'none';
+  document.getElementById('screen-welcome').style.display = 'flex';
+}
+
+// Initial idle canvas
+(function initCanvas() {
+  const canvas = document.getElementById('train-canvas');
+  const ctx = canvas.getContext('2d');
+  drawBackground(ctx);
+  drawPlatform(ctx);
+  drawTrack(ctx);
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 18px sans-serif';
+  ctx.fillStyle = '#660033';
+  ctx.fillText('「出発！」をおしてね 🚃', CW / 2, CH / 2);
+})();
 </script>
 </body>
 </html>
