@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>えいご電車</title>
+    <title>Train game</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -36,6 +36,7 @@
             gap: 12px;
         }
 
+        /* ── Welcome ── */
         .welcome-card {
             background: white;
             border: 5px solid #c8a844;
@@ -46,7 +47,7 @@
             width: 100%;
         }
         .welcome-card h2 { font-size: 22px; color: #660033; margin-bottom: 16px; }
-        .welcome-card p { font-size: 15px; color: #555; line-height: 1.7; }
+        .welcome-card p  { font-size: 15px; color: #555; line-height: 1.7; }
 
         .start-btn {
             background: #660033;
@@ -62,128 +63,31 @@
         }
         .start-btn:active { transform: translateY(7px); box-shadow: none; }
 
+        /* ── Quiz ── */
         #screen-quiz { display: none; }
-
-        .question-box {
-            background: white;
-            border: 4px solid #ffb6c1;
-            border-radius: 24px;
-            padding: 16px 18px;
-            width: 100%;
-            text-align: left;
-            box-shadow: 0 6px 0 #ffb6c1;
-        }
-        .q-text {
-            font-size: clamp(14px, 3.5vw, 19px);
-            font-weight: bold;
-            color: #333;
-            line-height: 1.85;
-        }
-        .q-text .speaker { color: #888; font-size: 0.88em; }
-        .blank { color: #ff1493; border-bottom: 2px solid #ff1493; padding: 0 6px; }
-
-        #train-canvas {
-            width: 100%;
-            max-width: 660px;
-            border-radius: 16px;
-            background: #e8f4e8;
-            display: block;
-        }
-
-        .char-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            width: 100%;
-        }
-
-        .char-btn {
-            border: none;
-            border-radius: 20px;
-            padding: 10px 8px 10px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            transition: 0.1s;
-            line-height: 1.4;
-            min-height: 90px;
-        }
-        .char-btn:active { transform: translateY(4px); box-shadow: none !important; }
-        .char-btn img { width: 44px; height: 44px; object-fit: contain; pointer-events: none; flex-shrink: 0; }
-        .char-btn .choice-text {
-            font-size: clamp(11px, 2.8vw, 15px);
-            text-align: center;
-            word-break: break-word;
-            overflow-wrap: break-word;
-            width: 100%;
-        }
-
-        .btn-kitty    { background: #ffb6d9; color: #880055; box-shadow: 0 5px 0 #d4608a; }
-        .btn-cinnamon { background: #b8dcff; color: #003388; box-shadow: 0 5px 0 #608ab8; }
-        .btn-kuromi   { background: #d0b8ff; color: #330077; box-shadow: 0 5px 0 #8060b8; }
-        .btn-mymelo   { background: #ffcce0; color: #880044; box-shadow: 0 5px 0 #d47090; }
-
-        .char-btn.correct { background: #b8ffb8 !important; box-shadow: 0 5px 0 #60b860 !important; color: #006600 !important; }
-        .char-btn.wrong   { background: #ffb8b8 !important; box-shadow: 0 5px 0 #b86060 !important; color: #880000 !important; }
-        .char-btn:disabled { opacity: 0.6; cursor: default; }
-
-        #feedback-area {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            min-height: 28px;
-            text-align: center;
-        }
-
-        #screen-clear { display: none; gap: 20px; }
-        .clear-card {
-            background: white;
-            border: 5px solid #c8a844;
-            border-radius: 30px;
-            padding: 30px 24px;
-            box-shadow: 0 8px 0 #c8a844;
-            text-align: center;
-            width: 100%;
-        }
-        .clear-card h2 { font-size: 28px; color: #660033; margin-bottom: 12px; }
-        .score-display { font-size: 48px; font-weight: bold; color: #660033; }
-        .score-label { font-size: 16px; color: #888; margin-top: 6px; }
-
-        .home-btn {
-            background: white;
-            color: #660033;
-            border: 3px solid #c8a844;
-            border-radius: 20px;
-            padding: 12px 28px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .next-btn {
-            background: #660033;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            padding: 12px 28px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 5px 0 #3a0020;
-            transition: 0.1s;
-        }
-        .next-btn:active { transform: translateY(5px); box-shadow: none; }
 
         .progress-row {
             display: flex;
-            justify-content: space-between;
             align-items: center;
             width: 100%;
             font-size: 14px;
             color: #888;
+            gap: 8px;
         }
+        .tiny-home-btn {
+            background: white;
+            color: #660033;
+            border: 2px solid #c8a844;
+            border-radius: 12px;
+            padding: 5px 10px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        #q-counter { flex: 1; text-align: center; }
+        #score-disp { white-space: nowrap; }
+
         #progress-bar-wrap {
             width: 100%;
             height: 8px;
@@ -198,11 +102,135 @@
             transition: width 0.4s;
             width: 0%;
         }
+
+        .question-box {
+            background: white;
+            border: 4px solid #ffb6c1;
+            border-radius: 24px;
+            padding: 14px 18px 12px;
+            width: 100%;
+            box-shadow: 0 6px 0 #ffb6c1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .q-text {
+            font-size: clamp(14px, 3.5vw, 19px);
+            font-weight: bold;
+            color: #333;
+            line-height: 1.85;
+            text-align: left;
+        }
+        .q-text .speaker { color: #999; font-size: 0.88em; }
+        .blank { color: #ff1493; border-bottom: 2px solid #ff1493; padding: 0 6px; }
+
+        .voice-btn {
+            background: #fff8e8;
+            border: 2px solid #c8a844;
+            border-radius: 20px;
+            padding: 7px 18px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #660033;
+            align-self: flex-start;
+        }
+        .voice-btn:active { background: #f0e0a0; }
+
+        /* ── Canvas ── */
+        #train-canvas {
+            width: 100%;
+            max-width: 660px;
+            border-radius: 16px;
+            background: #e8f4e8;
+            display: block;
+        }
+
+        /* ── Character buttons ── */
+        .char-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+        }
+        .char-btn {
+            border: none;
+            border-radius: 20px;
+            padding: 10px 8px 10px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            transition: 0.1s;
+            min-height: 96px;
+        }
+        .char-btn:active { transform: translateY(4px); box-shadow: none !important; }
+        .char-btn img { width: 48px; height: 48px; object-fit: contain; pointer-events: none; flex-shrink: 0; }
+        .char-btn .choice-text { font-size: clamp(11px, 2.8vw, 15px); text-align: center; line-height: 1.35; }
+
+        .btn-kitty    { background: #ffb6d9; color: #880055; box-shadow: 0 5px 0 #d4608a; }
+        .btn-cinnamon { background: #b8dcff; color: #003388; box-shadow: 0 5px 0 #608ab8; }
+        .btn-kuromi   { background: #d0b8ff; color: #330077; box-shadow: 0 5px 0 #8060b8; }
+        .btn-mymelo   { background: #ffcce0; color: #880044; box-shadow: 0 5px 0 #d47090; }
+
+        .char-btn.correct { background: #b8ffb8 !important; box-shadow: 0 5px 0 #60b860 !important; color: #006600 !important; }
+        .char-btn.wrong   { background: #ffb8b8 !important; box-shadow: 0 5px 0 #b86060 !important; color: #880000 !important; }
+        .char-btn:disabled { opacity: 0.6; cursor: default; }
+
+        #feedback-area {
+            font-size: 17px;
+            font-weight: bold;
+            color: #333;
+            min-height: 26px;
+            text-align: center;
+        }
+
+        .next-btn {
+            background: #660033;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 12px 28px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #3a0020;
+            transition: 0.1s;
+        }
+        .next-btn:active { transform: translateY(5px); box-shadow: none; }
+
+        /* ── Clear ── */
+        #screen-clear { display: none; gap: 20px; }
+        .clear-card {
+            background: white;
+            border: 5px solid #c8a844;
+            border-radius: 30px;
+            padding: 30px 24px;
+            box-shadow: 0 8px 0 #c8a844;
+            text-align: center;
+            width: 100%;
+        }
+        .clear-card h2 { font-size: 28px; color: #660033; margin-bottom: 12px; }
+        .score-display { font-size: 48px; font-weight: bold; color: #660033; }
+        .score-label   { font-size: 16px; color: #888; margin-top: 6px; }
+
+        .home-btn {
+            background: white;
+            color: #660033;
+            border: 3px solid #c8a844;
+            border-radius: 20px;
+            padding: 12px 28px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-<h1>🚃 えいご電車</h1>
+<h1>🚃 Train game</h1>
 
 <!-- Welcome -->
 <div class="screen" id="screen-welcome">
@@ -216,6 +244,7 @@
 <!-- Quiz -->
 <div class="screen" id="screen-quiz">
     <div class="progress-row">
+        <button class="tiny-home-btn" onclick="location.href='index.html'">🏠 ホーム</button>
         <span id="q-counter">1 / 10</span>
         <span id="score-disp">⭕ 0</span>
     </div>
@@ -223,6 +252,7 @@
 
     <div class="question-box">
         <div class="q-text" id="q-text"></div>
+        <button class="voice-btn" onclick="speakQuestion()">🔊 おんせい</button>
     </div>
 
     <canvas id="train-canvas" width="660" height="250"></canvas>
@@ -262,78 +292,76 @@
 </div>
 
 <script>
-// ─── Quiz data from reading1.html + reading2.html ────────────────────────────
-// (a is 1-indexed in source, converted to 0-indexed below)
+// ─── Quiz data (reading1 + reading2, a is 1-indexed in source) ────────────────
 const rawData = [
   // reading1 ── 第3回
-  { s: ['Mr. Yamada is an art teacher.', 'He ( [BLANK] ) pictures of flowers in his free time.'], a:2, c:['plays','draws','speaks','reads'] },
-  { s: ["It's ( [BLANK] ), so we can't have a picnic now."], a:2, c:['cooking','raining','washing','sleeping'] },
-  { s: ["I'm very busy from Monday to Friday.", 'I always go shopping on ( [BLANK] ).'], a:1, c:['Sunday','month','calendar','minute'] },
-  { s: ['A: Is it hot today?', 'B: No. It is cloudy and ( [BLANK] ) today.'], a:1, c:['cool','young','easy','happy'] },
-  { s: ['A: Do you have any ( [BLANK] ), John?', 'B: Yes, I have a cat.'], a:4, c:['cups','hats','cars','pets'] },
-  { s: ['A: Dad, please ( [BLANK] ) this wall.', "B: OK. But first, let's wash it."], a:3, c:['swim','sleep','paint','play'] },
-  { s: ['A: Excuse me. I want some ( [BLANK] ) in my coffee.'], a:4, c:['paper','sun','light','sugar'] },
-  { s: ['A: Fred, is your brother on the volleyball team?', "B: Yes, ( [BLANK] ) right."], a:2, c:["we're","that's","she's","I'm"] },
-  { s: ['A: Steve, are you Canadian?', "B: No. I'm ( [BLANK] ) America."], a:2, c:['to','from','under','by'] },
-  { s: ['Julia likes her camera.', 'She often ( [BLANK] ) pictures.'], a:3, c:['tells','does','takes','sings'] },
-  { s: ['A: I like tennis. What ( [BLANK] ) you, Rachel?', 'B: I do, too.'], a:2, c:['over','about','down','after'] },
-  { s: ["Yuki's father often goes jogging ( [BLANK] ) the morning."], a:2, c:['on','in','out','down'] },
-  { s: ['Keiko and Megumi are good friends.', '( [BLANK] ) like tennis.'], a:1, c:['They','He','She','You'] },
-  { s: ["A: Everyone, let's clean ( [BLANK] ) classroom.", 'B: OK, Mr. White.'], a:2, c:['we','our','us','ours'] },
-  { s: ['A: What is Scott doing now?', 'B: He is ( [BLANK] ) a doghouse.'], a:2, c:['make','making','makes','made'] },
+  { s:['Mr. Yamada is an art teacher.','He ( [BLANK] ) pictures of flowers in his free time.'], a:2, c:['plays','draws','speaks','reads'] },
+  { s:["It's ( [BLANK] ), so we can't have a picnic now."], a:2, c:['cooking','raining','washing','sleeping'] },
+  { s:["I'm very busy from Monday to Friday.",'I always go shopping on ( [BLANK] ).'], a:1, c:['Sunday','month','calendar','minute'] },
+  { s:['A: Is it hot today?','B: No. It is cloudy and ( [BLANK] ) today.'], a:1, c:['cool','young','easy','happy'] },
+  { s:['A: Do you have any ( [BLANK] ), John?','B: Yes, I have a cat.'], a:4, c:['cups','hats','cars','pets'] },
+  { s:['A: Dad, please ( [BLANK] ) this wall.',"B: OK. But first, let's wash it."], a:3, c:['swim','sleep','paint','play'] },
+  { s:['A: Excuse me. I want some ( [BLANK] ) in my coffee.'], a:4, c:['paper','sun','light','sugar'] },
+  { s:['A: Fred, is your brother on the volleyball team?',"B: Yes, ( [BLANK] ) right."], a:2, c:["we're","that's","she's","I'm"] },
+  { s:['A: Steve, are you Canadian?',"B: No. I'm ( [BLANK] ) America."], a:2, c:['to','from','under','by'] },
+  { s:['Julia likes her camera.','She often ( [BLANK] ) pictures.'], a:3, c:['tells','does','takes','sings'] },
+  { s:['A: I like tennis. What ( [BLANK] ) you, Rachel?','B: I do, too.'], a:2, c:['over','about','down','after'] },
+  { s:["Yuki's father often goes jogging ( [BLANK] ) the morning."], a:2, c:['on','in','out','down'] },
+  { s:['Keiko and Megumi are good friends.','( [BLANK] ) like tennis.'], a:1, c:['They','He','She','You'] },
+  { s:["A: Everyone, let's clean ( [BLANK] ) classroom.",'B: OK, Mr. White.'], a:2, c:['we','our','us','ours'] },
+  { s:['A: What is Scott doing now?','B: He is ( [BLANK] ) a doghouse.'], a:2, c:['make','making','makes','made'] },
   // reading1 ── 第2回
-  { s: ["A: Yuka, let's sit down on the ( [BLANK] ) and watch TV.", 'B: OK.'], a:2, c:['drink','floor','jump','breakfast'] },
-  { s: ['Mr. Hara has a big ( [BLANK] ) in his garden.', 'It has many oranges.'], a:4, c:['plate','fork','kitchen','tree'] },
-  { s: ["A: Mom, I don't know this word. Can you help me?", "B: No, I can't. Use your ( [BLANK] ), Tom."], a:3, c:['page','cup','dictionary','story'] },
-  { s: ['Mr. Brown is a music teacher.', 'He plays the ( [BLANK] ) very well.'], a:1, c:['trumpet','cup','clock','pencil'] },
-  { s: ['A: This is my new computer.', "B: It's ( [BLANK] ). I want one, too."], a:1, c:['great','cloudy','sure','delicious'] },
-  { s: ['Sally has a smart dog.', 'He can stand and ( [BLANK] ) a ball.'], a:2, c:['eat','catch','cook','buy'] },
-  { s: ['A: Mom, please ( [BLANK] ) sandwiches for lunch.', 'B: OK, John.'], a:2, c:['know','make','sit','study'] },
-  { s: ["A: I have a cold, so I can't play soccer with you today.", "B: I ( [BLANK] ). That's OK."], a:3, c:['am','do','see','love'] },
-  { s: ["A: ( [BLANK] ) me. Where's the bathroom?", "B: It's over there."], a:4, c:['Begin','Know','Call','Excuse'] },
-  { s: ['A: Goodbye, David.', 'B: Bye, Sam. ( [BLANK] ) a good day.'], a:3, c:['Help','Take','Have','Hear'] },
-  { s: ['A: Welcome ( [BLANK] ) our sports club, Paul.', 'B: Thank you, Mr. Johnson.'], a:4, c:['on','of','for','to'] },
-  { s: ['I play basketball ( [BLANK] ) school.', 'My brother and my friend play, too.'], a:2, c:['from','at','of','with'] },
-  { s: ['Jack ( [BLANK] ) a junior high school student.', 'He goes to a high school.'], a:3, c:["aren't","doesn't","isn't","don't"] },
-  { s: ['A: This dress is very nice. ( [BLANK] ) is it?', "B: It's my mother's."], a:3, c:['Who','Where','Whose','When'] },
-  { s: ["A: Bill, let's ( [BLANK] ) the homework together.", 'B: OK, Maria.'], a:1, c:['check','checked','checks','checking'] },
+  { s:["A: Yuka, let's sit down on the ( [BLANK] ) and watch TV.",'B: OK.'], a:2, c:['drink','floor','jump','breakfast'] },
+  { s:['Mr. Hara has a big ( [BLANK] ) in his garden.','It has many oranges.'], a:4, c:['plate','fork','kitchen','tree'] },
+  { s:["A: Mom, I don't know this word. Can you help me?","B: No, I can't. Use your ( [BLANK] ), Tom."], a:3, c:['page','cup','dictionary','story'] },
+  { s:['Mr. Brown is a music teacher.','He plays the ( [BLANK] ) very well.'], a:1, c:['trumpet','cup','clock','pencil'] },
+  { s:['A: This is my new computer.',"B: It's ( [BLANK] ). I want one, too."], a:1, c:['great','cloudy','sure','delicious'] },
+  { s:['Sally has a smart dog.','He can stand and ( [BLANK] ) a ball.'], a:2, c:['eat','catch','cook','buy'] },
+  { s:['A: Mom, please ( [BLANK] ) sandwiches for lunch.','B: OK, John.'], a:2, c:['know','make','sit','study'] },
+  { s:["A: I have a cold, so I can't play soccer with you today.","B: I ( [BLANK] ). That's OK."], a:3, c:['am','do','see','love'] },
+  { s:["A: ( [BLANK] ) me. Where's the bathroom?","B: It's over there."], a:4, c:['Begin','Know','Call','Excuse'] },
+  { s:['A: Goodbye, David.','B: Bye, Sam. ( [BLANK] ) a good day.'], a:3, c:['Help','Take','Have','Hear'] },
+  { s:['A: Welcome ( [BLANK] ) our sports club, Paul.','B: Thank you, Mr. Johnson.'], a:4, c:['on','of','for','to'] },
+  { s:['I play basketball ( [BLANK] ) school.','My brother and my friend play, too.'], a:2, c:['from','at','of','with'] },
+  { s:['Jack ( [BLANK] ) a junior high school student.','He goes to a high school.'], a:3, c:["aren't","doesn't","isn't","don't"] },
+  { s:['A: This dress is very nice. ( [BLANK] ) is it?',"B: It's my mother's."], a:3, c:['Who','Where','Whose','When'] },
+  { s:["A: Bill, let's ( [BLANK] ) the homework together.",'B: OK, Maria.'], a:1, c:['check','checked','checks','checking'] },
   // reading1 ── 第1回
-  { s: ["A: What's Mike doing now?", "B: He's ( [BLANK] ) his dog in the garden."], a:2, c:['reading','washing','making','sitting'] },
-  { s: ["A: It's very cold, Billy. ( [BLANK] ) a coat today.", 'B: OK, Mom.'], a:2, c:['Listen','Wear','See','Watch'] },
-  { s: ["A: What's your favorite color, Amy?", "B: It's ( [BLANK] )."], a:2, c:['clean','brown','tall','hard'] },
-  { s: ['I have a photo ( [BLANK] ).', 'I have many pictures of my family in it.'], a:1, c:['album','pen','sun','dog'] },
-  { s: ['My brother and I ( [BLANK] ) to school by bus every day.'], a:4, c:['talk','eat','see','come'] },
-  { s: ['Henry is a ( [BLANK] ).', 'He plays the guitar and the piano.'], a:2, c:['rabbit','musician','jacket','team'] },
-  { s: ['A: Hi, Jane. Where is Ken?', "B: He's in the ( [BLANK] )."], a:2, c:['watch','gym','banana','night'] },
-  { s: ['I love basketball.', 'I often watch basketball games ( [BLANK] ) TV with my brother.'], a:2, c:['of','on','at','in'] },
-  { s: ['Tom has a ( [BLANK] ) of coffee every morning before he goes to school.'], a:4, c:['corn','floor','window','cup'] },
-  { s: ['A: Do you play basketball, Bob?', 'B: Yes, a ( [BLANK] ).'], a:1, c:['little','beautiful','fast','much'] },
-  { s: ['I get ( [BLANK] ) early every morning and go to the park.'], a:2, c:['on','up','over','right'] },
-  { s: ['Janet ( [BLANK] ) swimming every Sunday with her sister.'], a:1, c:['goes','asks','buys','drinks'] },
-  { s: ['A: Mom, can I ( [BLANK] ) a letter to Uncle Rob this afternoon?', 'B: Of course, Kenji.'], a:3, c:['writes','wrote','write','writing'] },
-  { s: ['I know Tim and Lucy.', '( [BLANK] ) are Canadian.'], a:2, c:['He','They','It','You'] },
-  { s: ["A: It's hot. Please ( [BLANK] ) the window.", 'B: OK, Mom.'], a:2, c:['opens','open','opening','opened'] },
+  { s:["A: What's Mike doing now?","B: He's ( [BLANK] ) his dog in the garden."], a:2, c:['reading','washing','making','sitting'] },
+  { s:["A: It's very cold, Billy. ( [BLANK] ) a coat today.",'B: OK, Mom.'], a:2, c:['Listen','Wear','See','Watch'] },
+  { s:["A: What's your favorite color, Amy?","B: It's ( [BLANK] )."], a:2, c:['clean','brown','tall','hard'] },
+  { s:['I have a photo ( [BLANK] ).','I have many pictures of my family in it.'], a:1, c:['album','pen','sun','dog'] },
+  { s:['My brother and I ( [BLANK] ) to school by bus every day.'], a:4, c:['talk','eat','see','come'] },
+  { s:['Henry is a ( [BLANK] ).','He plays the guitar and the piano.'], a:2, c:['rabbit','musician','jacket','team'] },
+  { s:['A: Hi, Jane. Where is Ken?',"B: He's in the ( [BLANK] )."], a:2, c:['watch','gym','banana','night'] },
+  { s:['I love basketball.','I often watch basketball games ( [BLANK] ) TV with my brother.'], a:2, c:['of','on','at','in'] },
+  { s:['Tom has a ( [BLANK] ) of coffee every morning before he goes to school.'], a:4, c:['corn','floor','window','cup'] },
+  { s:['A: Do you play basketball, Bob?','B: Yes, a ( [BLANK] ).'], a:1, c:['little','beautiful','fast','much'] },
+  { s:['I get ( [BLANK] ) early every morning and go to the park.'], a:2, c:['on','up','over','right'] },
+  { s:['Janet ( [BLANK] ) swimming every Sunday with her sister.'], a:1, c:['goes','asks','buys','drinks'] },
+  { s:['A: Mom, can I ( [BLANK] ) a letter to Uncle Rob this afternoon?','B: Of course, Kenji.'], a:3, c:['writes','wrote','write','writing'] },
+  { s:['I know Tim and Lucy.','( [BLANK] ) are Canadian.'], a:2, c:['He','They','It','You'] },
+  { s:["A: It's hot. Please ( [BLANK] ) the window.",'B: OK, Mom.'], a:2, c:['opens','open','opening','opened'] },
   // reading2 ── 第3回
-  { s: ["Teacher: Let's start today's English lesson. ( [BLANK] )", 'Student: OK, Ms. Peterson.'], a:3, c:['See you tomorrow.',"We're going to school.",'Please open your book.','You can go home.'] },
-  { s: ['Woman: Excuse me. What time does the next train come?', 'Man: ( [BLANK] )'], a:3, c:['Yes, it does.',"It's good.","At five o'clock.",'For one hour.'] },
-  { s: ['Mother: Bob, come here and help me with dinner.', "Boy: ( [BLANK] ) Mom. I'm coming."], a:1, c:['All right,',"It's ready,",'You can drink it,',"No, I can't,"] },
-  { s: ['Girl: What class do you like?', 'Boy: ( [BLANK] )'], a:1, c:['Science.','I go to school.','After lunch.',"It's my homework."] },
-  { s: ['Teacher: Please close the windows, Jack. ( [BLANK] )', 'Student: Yes, Ms. Carter.'], a:3, c:['Good morning.','Here you are.',"It's cold.","It's today."] },
+  { s:["Teacher: Let's start today's English lesson. ( [BLANK] )",'Student: OK, Ms. Peterson.'], a:3, c:['See you tomorrow.',"We're going to school.",'Please open your book.','You can go home.'] },
+  { s:['Woman: Excuse me. What time does the next train come?','Man: ( [BLANK] )'], a:3, c:['Yes, it does.',"It's good.","At five o'clock.",'For one hour.'] },
+  { s:['Mother: Bob, come here and help me with dinner.',"Boy: ( [BLANK] ) Mom. I'm coming."], a:1, c:['All right,',"It's ready,",'You can drink it,',"No, I can't,"] },
+  { s:['Girl: What class do you like?','Boy: ( [BLANK] )'], a:1, c:['Science.','I go to school.','After lunch.',"It's my homework."] },
+  { s:['Teacher: Please close the windows, Jack. ( [BLANK] )','Student: Yes, Ms. Carter.'], a:3, c:['Good morning.','Here you are.',"It's cold.","It's today."] },
   // reading2 ── 第2回
-  { s: ["Boy: Where are my pajamas, Mom?", 'Mother: ( [BLANK] )'], a:3, c:["It's big.",'Five dollars.','On your bed.','After dinner.'] },
-  { s: ['Mother: What drink do you want?', 'Girl: ( [BLANK] )'], a:3, c:['Two eggs.','Yes, at night.','Orange juice, please.','Every weekend.'] },
-  { s: ['Girl: Allan, your pink T-shirt is nice.', 'Boy: ( [BLANK] ) Brenda.'], a:1, c:['Thanks,','Good job,',"You're welcome,","They're interesting,"] },
-  { s: ['Girl: When do you study English, Taro?', 'Boy: ( [BLANK] ) Then I watch TV.'], a:3, c:['I like it.','In my room.','After dinner.','For three hours.'] },
-  { s: ['Boy: Can you come to my house today, Lisa?', "Girl: No, I can't. ( [BLANK] )"], a:2, c:["That's a good idea.",'I have a violin lesson.','Come in, please.',"It's not mine."] },
+  { s:["Boy: Where are my pajamas, Mom?",'Mother: ( [BLANK] )'], a:3, c:["It's big.",'Five dollars.','On your bed.','After dinner.'] },
+  { s:['Mother: What drink do you want?','Girl: ( [BLANK] )'], a:3, c:['Two eggs.','Yes, at night.','Orange juice, please.','Every weekend.'] },
+  { s:['Girl: Allan, your pink T-shirt is nice.','Boy: ( [BLANK] ) Brenda.'], a:1, c:['Thanks,','Good job,',"You're welcome,","They're interesting,"] },
+  { s:['Girl: When do you study English, Taro?','Boy: ( [BLANK] ) Then I watch TV.'], a:3, c:['I like it.','In my room.','After dinner.','For three hours.'] },
+  { s:['Boy: Can you come to my house today, Lisa?',"Girl: No, I can't. ( [BLANK] )"], a:2, c:["That's a good idea.",'I have a violin lesson.','Come in, please.',"It's not mine."] },
   // reading2 ── 第1回
-  { s: ['Boy: Do you have any sisters?', 'Girl: No, but ( [BLANK] )'], a:2, c:["it's my birthday.",'I have two brothers.','this is my room.','I like tennis.'] },
-  { s: ["Boy: What's the date today?", 'Mother: ( [BLANK] )'], a:1, c:["It's April 29.","It's nine o'clock.",'I love spring.','Next Monday.'] },
-  { s: ['Girl: What do you do on weekends, Bob?', 'Boy: ( [BLANK] )'], a:3, c:["No, I don't.",'Good idea.','I play soccer.',"Sorry, I can't."] },
-  { s: ["Boy 1: Let's play badminton at the park, Brad.", 'Boy 2: ( [BLANK] )'], a:1, c:["Yes, let's.",'Yes, I am.',"It's you.","It's short."] },
-  { s: ["Teacher: Hi, I'm Tom. I'm your new English teacher.", 'Girl: Hello, Tom. ( [BLANK] )'], a:4, c:['I think so.',"You're welcome.",'I do, too.','Nice to meet you.'] },
+  { s:['Boy: Do you have any sisters?','Girl: No, but ( [BLANK] )'], a:2, c:["it's my birthday.",'I have two brothers.','this is my room.','I like tennis.'] },
+  { s:["Boy: What's the date today?",'Mother: ( [BLANK] )'], a:1, c:["It's April 29.","It's nine o'clock.",'I love spring.','Next Monday.'] },
+  { s:['Girl: What do you do on weekends, Bob?','Boy: ( [BLANK] )'], a:3, c:["No, I don't.",'Good idea.','I play soccer.',"Sorry, I can't."] },
+  { s:["Boy 1: Let's play badminton at the park, Brad.",'Boy 2: ( [BLANK] )'], a:1, c:["Yes, let's.",'Yes, I am.',"It's you.","It's short."] },
+  { s:["Teacher: Hi, I'm Tom. I'm your new English teacher.",'Girl: Hello, Tom. ( [BLANK] )'], a:4, c:['I think so.',"You're welcome.",'I do, too.','Nice to meet you.'] },
 ];
 
-// Normalize: convert 1-indexed a to 0-indexed, flatten sentences to string
 const allData = rawData.map(r => ({
   q: r.s.join('\n').replace(/\( \[BLANK\] \)/g, '___'),
   choices: r.c,
@@ -349,9 +377,7 @@ function buildQuestion(raw) {
 // ─── Character images ─────────────────────────────────────────────────────────
 const charImages = [];
 ['kitty.png', 'sinamon.png', 'kuromi.png', 'mymelody.png'].forEach((src, i) => {
-  const img = new Image();
-  img.src = src;
-  charImages[i] = img;
+  const img = new Image(); img.src = src; charImages[i] = img;
 });
 
 // ─── Game state ───────────────────────────────────────────────────────────────
@@ -371,9 +397,9 @@ const RAIL_Y = 218;
 const TRAIN_W = 220, TRAIN_H = 72;
 const TRAIN_STOP_X = 80;
 const PLATFORM_X = 310, PLATFORM_W = 340, PLATFORM_Y = 200;
-const CHAR_SIZE = 48;
+const CHAR_SIZE = 62;              // larger characters
 const CHAR_FOOT_Y = PLATFORM_Y;
-const CHAR_XS = [335, 405, 475, 545];
+const CHAR_XS = [345, 435, 525, 615]; // spread across full station width
 const DOOR_X = TRAIN_STOP_X + TRAIN_W - 22;
 
 // ─── Animation state ──────────────────────────────────────────────────────────
@@ -381,16 +407,15 @@ let trainX = -TRAIN_W;
 let animFrame = null;
 let phase = 'idle'; // idle | approaching | arrived | boarding | departing
 let wrongIdx = -1;
-let boardingCharIdx = -1;  // index currently animating toward door
-let boardedCharIdx  = -1;  // index that has boarded (hide this one afterward)
+let boardingCharIdx = -1;
+let boardedCharIdx  = -1;
 let boardingCharX   = 0;
 
 function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
 function easeIn(t)  { return Math.pow(t, 3); }
 
 function startApproach() {
-  const startX = -TRAIN_W - 20, endX = TRAIN_STOP_X, dur = 1800;
-  const t0 = performance.now();
+  const startX = -TRAIN_W - 20, endX = TRAIN_STOP_X, dur = 1800, t0 = performance.now();
   phase = 'approaching';
   if (animFrame) cancelAnimationFrame(animFrame);
   function tick(now) {
@@ -407,7 +432,7 @@ function startBoarding(charIdx) {
   boardingCharIdx = charIdx;
   boardedCharIdx  = charIdx;
   boardingCharX   = CHAR_XS[charIdx];
-  const startX = CHAR_XS[charIdx], dur = 550, t0 = performance.now();
+  const startX = CHAR_XS[charIdx], dur = 600, t0 = performance.now();
   phase = 'boarding';
   if (animFrame) cancelAnimationFrame(animFrame);
   function tick(now) {
@@ -435,6 +460,34 @@ function startDepart() {
   animFrame = requestAnimationFrame(tick);
 }
 
+// ─── Sound ────────────────────────────────────────────────────────────────────
+function playDingDong() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator(), gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(659.25, ctx.currentTime);
+  osc.frequency.setValueAtTime(523.25, ctx.currentTime + 0.15);
+  gain.gain.setValueAtTime(0.12, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.55);
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.start(); osc.stop(ctx.currentTime + 0.55);
+}
+
+function speakQuestion() {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const q = quizList[qi];
+  const correct = q.choices[q.a];
+  const text = q.q
+    .replace(/___/g, correct)
+    .split('\n')
+    .map(line => line.replace(/^[A-Za-z][A-Za-z0-9 .]*:\s/, ''))
+    .join('. ');
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; u.rate = 0.85;
+  window.speechSynthesis.speak(u);
+}
+
 // ─── Drawing ──────────────────────────────────────────────────────────────────
 function drawScene() {
   const canvas = document.getElementById('train-canvas');
@@ -450,92 +503,72 @@ function drawScene() {
 
 function drawBackground(ctx) {
   const sky = ctx.createLinearGradient(0, 0, 0, CH * 0.78);
-  sky.addColorStop(0, '#87ceeb');
-  sky.addColorStop(1, '#c8e8ff');
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, CW, CH * 0.78);
-  ctx.fillStyle = '#8db87a';
-  ctx.fillRect(0, CH * 0.78, CW, CH * 0.22);
+  sky.addColorStop(0, '#87ceeb'); sky.addColorStop(1, '#c8e8ff');
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, CW, CH * 0.78);
+  ctx.fillStyle = '#8db87a'; ctx.fillRect(0, CH * 0.78, CW, CH * 0.22);
 }
 
 function drawStation(ctx) {
   const sx = PLATFORM_X, sw = PLATFORM_W;
 
-  // ── Building wall (cream stone) ──
+  // Building wall
   ctx.fillStyle = '#f0e4c8';
-  ctx.fillRect(sx, 78, sw, PLATFORM_Y - 78);
+  ctx.fillRect(sx, 80, sw, PLATFORM_Y - 80);
 
-  // Horizontal stone lines (texture)
-  ctx.strokeStyle = 'rgba(0,0,0,0.07)';
-  ctx.lineWidth = 1;
-  for (let y = 90; y < PLATFORM_Y; y += 14) {
+  // Stone texture lines
+  ctx.strokeStyle = 'rgba(0,0,0,0.07)'; ctx.lineWidth = 1;
+  for (let y = 92; y < PLATFORM_Y; y += 14) {
     ctx.beginPath(); ctx.moveTo(sx, y); ctx.lineTo(sx + sw, y); ctx.stroke();
   }
 
-  // Pilasters (columns embedded in wall)
+  // 5 pilasters creating 4 character bays
   const pilW = 11;
-  const pilXs = [sx, sx + Math.floor(sw * 0.34), sx + Math.floor(sw * 0.67), sx + sw - pilW];
+  const pils = [sx, sx + sw*0.25, sx + sw*0.5, sx + sw*0.75, sx + sw - pilW];
   ctx.fillStyle = '#c8a870';
-  pilXs.forEach(px => ctx.fillRect(px, 78, pilW, PLATFORM_Y - 78));
+  pils.forEach(px => ctx.fillRect(Math.round(px), 80, pilW, PLATFORM_Y - 80));
 
-  // Arched windows between pilasters (first two gaps)
-  for (let g = 0; g < 2; g++) {
-    const wx = pilXs[g] + pilW + 8;
-    const wr = pilXs[g + 1] - pilXs[g] - pilW * 2 - 16; // window width
-    const wy = 92, wh = 55, rad = wr / 2;
-    ctx.fillStyle = '#c8e8f8';
+  // 4 arched windows (one per bay)
+  for (let g = 0; g < 4; g++) {
+    const wx = Math.round(pils[g]) + pilW + 6;
+    const ww = Math.round(pils[g + 1]) - Math.round(pils[g]) - pilW - 12;
+    const wy = 92, rad = ww / 2, rectH = 40;
+    ctx.fillStyle = '#c8e4f8';
     ctx.beginPath();
-    ctx.arc(wx + rad, wy + rad, rad, Math.PI, 0); // arch top
-    ctx.lineTo(wx + wr, wy + rad + wh);
-    ctx.lineTo(wx, wy + rad + wh);
+    ctx.arc(wx + rad, wy + rad, rad, Math.PI, 0);
+    ctx.lineTo(wx + ww, wy + rad + rectH);
+    ctx.lineTo(wx, wy + rad + rectH);
     ctx.closePath();
     ctx.fill();
     ctx.strokeStyle = '#a09060'; ctx.lineWidth = 1.5;
     ctx.stroke();
-    // cross bars
+    // cross bar
     ctx.beginPath();
-    ctx.moveTo(wx + rad, wy + rad); ctx.lineTo(wx + rad, wy + rad + wh); ctx.stroke();
+    ctx.moveTo(wx + rad, wy + rad); ctx.lineTo(wx + rad, wy + rad + rectH); ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(wx, wy + rad + wh * 0.5); ctx.lineTo(wx + wr, wy + rad + wh * 0.5); ctx.stroke();
+    ctx.moveTo(wx, wy + rad + rectH * 0.5); ctx.lineTo(wx + ww, wy + rad + rectH * 0.5); ctx.stroke();
   }
 
-  // Gold cornice band
-  ctx.fillStyle = '#b89840';
-  ctx.fillRect(sx - 4, 74, sw + 8, 6);
+  // Gold cornice
+  ctx.fillStyle = '#b89840'; ctx.fillRect(sx - 4, 76, sw + 8, 6);
 
-  // Dark roof/fascia band
-  ctx.fillStyle = '#2a1008';
-  ctx.fillRect(sx - 6, 38, sw + 12, 38);
+  // Dark roof/fascia
+  ctx.fillStyle = '#2a1008'; ctx.fillRect(sx - 6, 38, sw + 12, 40);
+  ctx.fillStyle = '#3e1a0a'; ctx.fillRect(sx - 6, 38, sw + 12, 5);
 
-  // Roof ridge highlight
-  ctx.fillStyle = '#441808';
-  ctx.fillRect(sx - 6, 38, sw + 12, 5);
-
-  // "Station" sign board (navy blue, inside fascia)
-  const sgnX = sx + 16, sgnW = sw - 32, sgnY = 44, sgnH = 24;
+  // "Station" sign board
+  const sgnX = sx + 16, sgnW = sw - 32, sgnY = 44, sgnH = 26;
   ctx.fillStyle = '#0d2b72';
-  roundRect(ctx, sgnX, sgnY, sgnW, sgnH, 5);
-  ctx.fill();
-  // Gold border
-  ctx.strokeStyle = '#c8a844'; ctx.lineWidth = 2;
-  ctx.stroke();
-  // "Station" text
+  roundRect(ctx, sgnX, sgnY, sgnW, sgnH, 5); ctx.fill();
+  ctx.strokeStyle = '#c8a844'; ctx.lineWidth = 2; ctx.stroke();
   ctx.fillStyle = 'white';
-  ctx.font = 'bold 16px sans-serif';
+  ctx.font = 'bold 20px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('Station', sx + sw / 2, sgnY + 17);
-
-  // "えいご駅" label below sign in fascia
-  ctx.fillStyle = '#c8a844';
-  ctx.font = '10px sans-serif';
-  ctx.fillText('えいご駅', sx + sw / 2, 77);
+  ctx.fillText('Station', sx + sw / 2, sgnY + 19);
 }
 
 function drawPlatform(ctx) {
-  ctx.fillStyle = '#c0a898';
-  ctx.fillRect(PLATFORM_X, PLATFORM_Y, PLATFORM_W, 22);
-  ctx.fillStyle = '#e8d880';
-  ctx.fillRect(PLATFORM_X, PLATFORM_Y, PLATFORM_W, 5);
+  ctx.fillStyle = '#c0a898'; ctx.fillRect(PLATFORM_X, PLATFORM_Y, PLATFORM_W, 22);
+  ctx.fillStyle = '#e8d880'; ctx.fillRect(PLATFORM_X, PLATFORM_Y, PLATFORM_W, 5);
 }
 
 function drawTrack(ctx) {
@@ -553,11 +586,9 @@ function drawTrain(ctx, x) {
   ctx.fillStyle = '#660033'; roundRect(ctx, x, y, w, h, 8); ctx.fill();
   ctx.fillStyle = '#c8a844'; ctx.fillRect(x, y + h * 0.55, w, 7);
   ctx.fillStyle = '#d0eeff';
-  ctx.fillRect(x + 18, y + 10, 55, 32);
-  ctx.fillRect(x + 95, y + 10, 55, 32);
+  ctx.fillRect(x + 18, y + 10, 55, 32); ctx.fillRect(x + 95, y + 10, 55, 32);
   ctx.strokeStyle = '#440022'; ctx.lineWidth = 2;
-  ctx.strokeRect(x + 18, y + 10, 55, 32);
-  ctx.strokeRect(x + 95, y + 10, 55, 32);
+  ctx.strokeRect(x + 18, y + 10, 55, 32); ctx.strokeRect(x + 95, y + 10, 55, 32);
   ctx.fillStyle = '#550028'; ctx.fillRect(x + w - 44, y + 8, 34, h - 8);
   ctx.strokeStyle = '#440022'; ctx.strokeRect(x + w - 44, y + 8, 34, h - 8);
   ctx.fillStyle = '#c8a844'; ctx.fillRect(x + w - 20, y + h * 0.5 - 8, 3, 16);
@@ -566,28 +597,28 @@ function drawTrain(ctx, x) {
   ctx.fillText('梅田', x + 185, y + 24);
   ctx.strokeStyle = '#999'; ctx.lineWidth = 2;
   const px = x + 60;
-  ctx.beginPath(); ctx.moveTo(px, y); ctx.lineTo(px - 12, y - 18); ctx.lineTo(px + 12, y - 18); ctx.lineTo(px, y - 30); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(px - 16, y - 18); ctx.lineTo(px + 16, y - 18); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(px, y); ctx.lineTo(px-12, y-18); ctx.lineTo(px+12, y-18); ctx.lineTo(px, y-30); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(px-16, y-18); ctx.lineTo(px+16, y-18); ctx.stroke();
   if (phase === 'arrived' && wrongIdx >= 0) {
     ctx.save();
     ctx.strokeStyle = 'red'; ctx.lineWidth = 8; ctx.globalAlpha = 0.75;
-    const cx2 = x + w / 2, cy2 = y + h / 2;
-    ctx.beginPath(); ctx.moveTo(cx2 - 28, cy2 - 28); ctx.lineTo(cx2 + 28, cy2 + 28); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(cx2 + 28, cy2 - 28); ctx.lineTo(cx2 - 28, cy2 + 28); ctx.stroke();
+    const cx2 = x + w/2, cy2 = y + h/2;
+    ctx.beginPath(); ctx.moveTo(cx2-28, cy2-28); ctx.lineTo(cx2+28, cy2+28); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx2+28, cy2-28); ctx.lineTo(cx2-28, cy2+28); ctx.stroke();
     ctx.restore();
   }
 }
 
 function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
-  ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y);
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r);
+  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h);
+  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r);
+  ctx.quadraticCurveTo(x, y, x+r, y);
   ctx.closePath();
 }
 
@@ -596,17 +627,13 @@ function drawCharacters(ctx) {
   const q = quizList[qi];
   for (let i = 0; i < 4; i++) {
     if (i === boardingCharIdx && phase === 'boarding') {
-      // This character is sliding toward the door
       const progress = Math.max(0, Math.min(1, (boardingCharX - CHAR_XS[i]) / (DOOR_X - CHAR_XS[i])));
       ctx.globalAlpha = Math.max(0.05, 1 - progress * 0.95);
       drawCharImage(ctx, i, boardingCharX, CHAR_FOOT_Y, q.choices[i], false);
       ctx.globalAlpha = 1;
     } else if (i !== boardedCharIdx) {
-      // All chars except the one already inside the train
-      const showBubble = (phase === 'arrived');
-      drawCharImage(ctx, i, CHAR_XS[i], CHAR_FOOT_Y, q.choices[i], showBubble);
+      drawCharImage(ctx, i, CHAR_XS[i], CHAR_FOOT_Y, q.choices[i], phase === 'arrived');
     }
-    // boardedCharIdx is hidden (inside the departed train)
   }
 }
 
@@ -615,36 +642,31 @@ function drawCharImage(ctx, idx, cx, footY, label, showBubble) {
   if (img && img.complete && img.naturalWidth > 0) {
     const aspect = img.naturalWidth / img.naturalHeight;
     const h = CHAR_SIZE, w = h * aspect;
-    ctx.drawImage(img, cx - w / 2, footY - h, w, h);
+    ctx.drawImage(img, cx - w/2, footY - h, w, h);
   }
-  if (showBubble) drawSpeechBubble(ctx, cx, footY - CHAR_SIZE - 3, label);
+  if (showBubble) drawSpeechBubble(ctx, cx, footY - CHAR_SIZE - 4, label);
 }
 
 function drawSpeechBubble(ctx, cx, bottomY, text) {
-  // Dynamically size bubble to text
+  const display = text.length > 13 ? text.slice(0, 12) + '…' : text;
   ctx.save();
   ctx.font = 'bold 10px sans-serif';
-  const tw = ctx.measureText(text).width;
-  const bw = Math.max(38, tw + 12), bh = 18;
-  const bx = Math.max(PLATFORM_X + 2, Math.min(CW - bw - 2, cx - bw / 2));
+  const tw = ctx.measureText(display).width;
+  const bw = Math.max(36, tw + 12), bh = 18;
+  const bx = Math.max(PLATFORM_X + 2, Math.min(CW - bw - 2, cx - bw/2));
   const by = bottomY - bh;
-  ctx.fillStyle = 'white';
-  ctx.strokeStyle = '#555'; ctx.lineWidth = 1.5;
-  roundRect(ctx, bx, by, bw, bh, 5);
-  ctx.fill(); ctx.stroke();
+  ctx.fillStyle = 'white'; ctx.strokeStyle = '#555'; ctx.lineWidth = 1.5;
+  roundRect(ctx, bx, by, bw, bh, 5); ctx.fill(); ctx.stroke();
   ctx.beginPath();
-  ctx.moveTo(cx - 4, by + bh); ctx.lineTo(cx + 4, by + bh); ctx.lineTo(cx, by + bh + 7);
+  ctx.moveTo(cx-4, by+bh); ctx.lineTo(cx+4, by+bh); ctx.lineTo(cx, by+bh+7);
   ctx.fill();
-  ctx.fillStyle = '#222';
-  ctx.textAlign = 'center';
-  ctx.fillText(text, bx + bw / 2, by + bh - 4);
+  ctx.fillStyle = '#222'; ctx.textAlign = 'center';
+  ctx.fillText(display, bx + bw/2, by + bh - 4);
   ctx.restore();
 }
 
 // ─── Question rendering ───────────────────────────────────────────────────────
 function renderQuestion(raw) {
-  // raw.q has lines joined by \n, blanks are ___
-  // Speaker pattern: "Word: " or "Word Word: " at start of line
   return raw.q.split('\n').map(line => {
     const withBlank = line.replace(/___/g, '<span class="blank">　　　　</span>');
     const m = withBlank.match(/^([A-Za-z][A-Za-z0-9 .]*:\s)([\s\S]*)$/);
@@ -663,27 +685,21 @@ function startGame() {
 }
 
 function loadQuestion() {
-  answered = false;
-  wrongIdx = -1;
-  boardedCharIdx = -1;
+  answered = false; wrongIdx = -1; boardedCharIdx = -1;
   const q = quizList[qi];
-  document.getElementById('q-counter').textContent = `${qi + 1} / ${quizList.length}`;
+  document.getElementById('q-counter').textContent = `${qi+1} / ${quizList.length}`;
   document.getElementById('score-disp').textContent = `⭕ ${score}`;
   document.getElementById('progress-bar').style.width = (qi / quizList.length * 100) + '%';
   document.getElementById('q-text').innerHTML = renderQuestion(q);
   for (let i = 0; i < 4; i++) {
     document.getElementById('choice' + i).textContent = q.choices[i];
     const btn = document.getElementById('btn' + i);
-    btn.disabled = false;
-    btn.classList.remove('correct', 'wrong');
+    btn.disabled = false; btn.classList.remove('correct', 'wrong');
   }
   document.getElementById('feedback-area').textContent = '';
   document.getElementById('next-btn').style.display = 'none';
-  trainX = -TRAIN_W - 20;
-  phase = 'approaching';
-  disableButtons();
-  drawScene();
-  startApproach();
+  trainX = -TRAIN_W - 20; phase = 'approaching';
+  disableButtons(); drawScene(); startApproach();
 }
 
 function answer(idx) {
@@ -693,6 +709,7 @@ function answer(idx) {
   const correct = (idx === q.a);
   document.getElementById('btn' + idx).classList.add(correct ? 'correct' : 'wrong');
   if (correct) {
+    playDingDong();
     score++;
     document.getElementById('feedback-area').textContent = '⭕ せいかい！';
     document.getElementById('score-disp').textContent = `⭕ ${score}`;
@@ -702,8 +719,7 @@ function answer(idx) {
     wrongIdx = idx;
     document.getElementById('btn' + q.a).classList.add('correct');
     document.getElementById('feedback-area').textContent = `❌ せいかいは「${q.choices[q.a]}」だよ！`;
-    disableButtons();
-    drawScene();
+    disableButtons(); drawScene();
     setTimeout(() => showNextBtn(), 800);
   }
 }
@@ -720,8 +736,7 @@ function showNextBtn() {
 
 function nextQuestion() {
   qi++;
-  if (qi >= quizList.length) showClear();
-  else loadQuestion();
+  if (qi >= quizList.length) showClear(); else loadQuestion();
 }
 
 function showClear() {
@@ -736,7 +751,7 @@ function restartGame() {
   document.getElementById('screen-welcome').style.display = 'flex';
 }
 
-// Initial idle canvas draw
+// Initial idle canvas
 (function() {
   const canvas = document.getElementById('train-canvas');
   const ctx = canvas.getContext('2d');
@@ -747,7 +762,7 @@ function restartGame() {
   ctx.textAlign = 'center';
   ctx.font = 'bold 18px sans-serif';
   ctx.fillStyle = '#660033';
-  ctx.fillText('「出発！」をおしてね 🚃', CW / 2, CH / 2 + 20);
+  ctx.fillText('「出発！」をおしてね 🚃', CW/2, CH/2 + 20);
 })();
 </script>
 </body>
