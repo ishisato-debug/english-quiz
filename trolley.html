@@ -374,10 +374,44 @@ function buildQuestion(raw) {
   return { q: raw.q, choices: shuffled, a: shuffled.indexOf(correctText) };
 }
 
+// ─── Background removal ───────────────────────────────────────────────────────
+function removeBackground(img, threshold = 38) {
+  const c = document.createElement('canvas');
+  c.width = img.naturalWidth; c.height = img.naturalHeight;
+  const ctx = c.getContext('2d');
+  ctx.drawImage(img, 0, 0);
+  const d = ctx.getImageData(0, 0, c.width, c.height);
+  const px = d.data, w = c.width, h = c.height;
+  // Sample all 4 corners to handle images where one corner might be character
+  const corners = [0, w-1, w*(h-1), w*h-1];
+  const bgR = px[corners[0]*4], bgG = px[corners[0]*4+1], bgB = px[corners[0]*4+2];
+  const visited = new Uint8Array(w * h);
+  const stack = [...corners];
+  corners.forEach(i => { visited[i] = 1; });
+  while (stack.length) {
+    const i = stack.pop(), x = i % w, y = ~~(i / w), p = i * 4;
+    const dr = px[p]-bgR, dg = px[p+1]-bgG, db = px[p+2]-bgB;
+    if (Math.sqrt(dr*dr + dg*dg + db*db) > threshold) continue;
+    px[p+3] = 0;
+    for (const [nx, ny] of [[x-1,y],[x+1,y],[x,y-1],[x,y+1]]) {
+      if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+        const ni = ny*w+nx;
+        if (!visited[ni]) { visited[ni] = 1; stack.push(ni); }
+      }
+    }
+  }
+  ctx.putImageData(d, 0, 0);
+  return c;
+}
+
 // ─── Character images ─────────────────────────────────────────────────────────
 const charImages = [];
+const charCanvases = [null, null, null, null];
 ['kitty.png', 'sinamon.png', 'kuromi.png', 'mymelody.png'].forEach((src, i) => {
-  const img = new Image(); img.src = src; charImages[i] = img;
+  const img = new Image();
+  img.onload = () => { charCanvases[i] = removeBackground(img); };
+  img.src = src;
+  charImages[i] = img;
 });
 
 // ─── Game state ───────────────────────────────────────────────────────────────
@@ -638,11 +672,11 @@ function drawCharacters(ctx) {
 }
 
 function drawCharImage(ctx, idx, cx, footY, label, showBubble) {
-  const img = charImages[idx];
-  if (img && img.complete && img.naturalWidth > 0) {
-    const aspect = img.naturalWidth / img.naturalHeight;
+  const source = charCanvases[idx] || charImages[idx];
+  if (source && (source.width || (source.complete && source.naturalWidth > 0))) {
+    const aspect = (source.width || source.naturalWidth) / (source.height || source.naturalHeight);
     const h = CHAR_SIZE, w = h * aspect;
-    ctx.drawImage(img, cx - w/2, footY - h, w, h);
+    ctx.drawImage(source, cx - w/2, footY - h, w, h);
   }
   if (showBubble) drawSpeechBubble(ctx, cx, footY - CHAR_SIZE - 4, label);
 }
