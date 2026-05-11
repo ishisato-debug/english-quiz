@@ -36,7 +36,6 @@
             gap: 12px;
         }
 
-        /* Welcome */
         .welcome-card {
             background: white;
             border: 5px solid #c8a844;
@@ -63,7 +62,6 @@
         }
         .start-btn:active { transform: translateY(7px); box-shadow: none; }
 
-        /* Quiz screen */
         #screen-quiz { display: none; }
 
         .question-box {
@@ -84,7 +82,6 @@
         }
         .blank { color: #ff1493; }
 
-        /* Canvas */
         #train-canvas {
             width: 100%;
             max-width: 660px;
@@ -93,7 +90,6 @@
             display: block;
         }
 
-        /* Character buttons */
         .char-buttons {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -104,31 +100,30 @@
         .char-btn {
             border: none;
             border-radius: 20px;
-            padding: 14px 10px 10px;
+            padding: 12px 10px 10px;
             font-size: clamp(13px, 3vw, 17px);
             font-weight: bold;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             transition: 0.1s;
             line-height: 1.3;
         }
         .char-btn:active { transform: translateY(4px); box-shadow: none !important; }
-        .char-btn .char-icon { font-size: 32px; line-height: 1; }
+        .char-btn img { width: 52px; height: 52px; object-fit: contain; pointer-events: none; }
         .char-btn .choice-text { font-size: clamp(13px, 3vw, 17px); }
 
-        .btn-kitty   { background: #ffb6d9; color: #880055; box-shadow: 0 5px 0 #d4608a; }
-        .btn-cinnamon{ background: #b8dcff; color: #003388; box-shadow: 0 5px 0 #608ab8; }
-        .btn-kuromi  { background: #d0b8ff; color: #330077; box-shadow: 0 5px 0 #8060b8; }
-        .btn-mymelo  { background: #ffcce0; color: #880044; box-shadow: 0 5px 0 #d47090; }
+        .btn-kitty    { background: #ffb6d9; color: #880055; box-shadow: 0 5px 0 #d4608a; }
+        .btn-cinnamon { background: #b8dcff; color: #003388; box-shadow: 0 5px 0 #608ab8; }
+        .btn-kuromi   { background: #d0b8ff; color: #330077; box-shadow: 0 5px 0 #8060b8; }
+        .btn-mymelo   { background: #ffcce0; color: #880044; box-shadow: 0 5px 0 #d47090; }
 
         .char-btn.correct { background: #b8ffb8 !important; box-shadow: 0 5px 0 #60b860 !important; }
         .char-btn.wrong   { background: #ffb8b8 !important; box-shadow: 0 5px 0 #b86060 !important; }
         .char-btn:disabled { opacity: 0.6; cursor: default; }
 
-        /* Feedback */
         #feedback-area {
             font-size: 18px;
             font-weight: bold;
@@ -137,7 +132,6 @@
             text-align: center;
         }
 
-        /* Score / clear */
         #screen-clear { display: none; gap: 20px; }
         .clear-card {
             background: white;
@@ -208,7 +202,7 @@
 <div class="screen" id="screen-welcome">
     <div class="welcome-card">
         <h2>⛩️ えいご駅へようこそ！</h2>
-        <p>電車が駅に着いたよ！<br>キャラクターが持っている答えを選んで<br>正しいキャラクターを電車に乗せよう🎉</p>
+        <p>電車が駅に着いたよ！<br>正しい答えを持っているキャラクターを選んで<br>電車に乗せよう🎉</p>
     </div>
     <button class="start-btn" onclick="startGame()">🚃 出発！</button>
 </div>
@@ -226,13 +220,25 @@
         <div class="q-text" id="q-text"></div>
     </div>
 
-    <canvas id="train-canvas" width="660" height="240"></canvas>
+    <canvas id="train-canvas" width="660" height="250"></canvas>
 
     <div class="char-buttons" id="char-buttons">
-        <button class="char-btn btn-kitty"   id="btn0" onclick="answer(0)"><span class="char-icon">🎀</span><span class="choice-text" id="choice0"></span></button>
-        <button class="char-btn btn-cinnamon" id="btn1" onclick="answer(1)"><span class="char-icon">☁️</span><span class="choice-text" id="choice1"></span></button>
-        <button class="char-btn btn-kuromi"  id="btn2" onclick="answer(2)"><span class="char-icon">🖤</span><span class="choice-text" id="choice2"></span></button>
-        <button class="char-btn btn-mymelo"  id="btn3" onclick="answer(3)"><span class="char-icon">🎵</span><span class="choice-text" id="choice3"></span></button>
+        <button class="char-btn btn-kitty"    id="btn0" onclick="answer(0)">
+            <img src="kitty.png" alt="ハローキティ">
+            <span class="choice-text" id="choice0"></span>
+        </button>
+        <button class="char-btn btn-cinnamon" id="btn1" onclick="answer(1)">
+            <img src="sinamon.png" alt="シナモロール">
+            <span class="choice-text" id="choice1"></span>
+        </button>
+        <button class="char-btn btn-kuromi"   id="btn2" onclick="answer(2)">
+            <img src="kuromi.png" alt="クロミ">
+            <span class="choice-text" id="choice2"></span>
+        </button>
+        <button class="char-btn btn-mymelo"   id="btn3" onclick="answer(3)">
+            <img src="mymelody.png" alt="マイメロディ">
+            <span class="choice-text" id="choice3"></span>
+        </button>
     </div>
 
     <div id="feedback-area"></div>
@@ -251,7 +257,7 @@
 </div>
 
 <script>
-// ─── Quiz data ───────────────────────────────────────────────────────────────
+// ─── Quiz data ────────────────────────────────────────────────────────────────
 const reading1Data = [
   { q: "A: Hi, I'm Kate. ___ you Yuki?\nB: Yes, I am.",         choices:["Are","Is","Am","Be"],   a:0 },
   { q: "Yuki ___ a student.",                                    choices:["is","am","are","be"],    a:0 },
@@ -298,24 +304,23 @@ const reading2Data = [
   { q: "She ___ a good tennis player.",                          choices:["is","am","are","be"],    a:0 },
 ];
 
-// Shuffle correct answer to a random position among the 4 choices
 function buildQuestion(raw) {
   const correctText = raw.choices[raw.a];
-  // Create 4 display choices, shuffled
   const shuffled = [...raw.choices].sort(() => Math.random() - 0.5);
-  const newCorrect = shuffled.indexOf(correctText);
-  return { q: raw.q, choices: shuffled, a: newCorrect };
+  return { q: raw.q, choices: shuffled, a: shuffled.indexOf(correctText) };
 }
+
+// ─── Character images ─────────────────────────────────────────────────────────
+const charImages = [];
+['kitty.png', 'sinamon.png', 'kuromi.png', 'mymelody.png'].forEach((src, i) => {
+  const img = new Image();
+  img.src = src;
+  charImages[i] = img;
+});
 
 // ─── Game state ───────────────────────────────────────────────────────────────
 const allData = [...reading1Data, ...reading2Data];
-let quizList = [];
-let qi = 0;          // current question index
-let score = 0;
-let answered = false;
-
-// Character assignment per question
-const CHAR_NAMES = ['ハローキティ', 'シナモロール', 'クロミ', 'マイメロディ'];
+let quizList = [], qi = 0, score = 0, answered = false;
 
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -325,121 +330,118 @@ function shuffle(arr) {
   return arr;
 }
 
-// ─── Canvas / Train animation ─────────────────────────────────────────────────
-const CW = 660, CH = 240;
-const RAIL_Y = 210;
+// ─── Canvas layout ────────────────────────────────────────────────────────────
+const CW = 660, CH = 250;
+const RAIL_Y = 218;
 const TRAIN_W = 220, TRAIN_H = 72;
-const TRAIN_STOP_X = 80;   // left edge of train when stopped at platform
-const PLATFORM_X = 310;    // start of platform
-const PLATFORM_W = 340;
-const PLATFORM_Y = 192;
-const CHAR_Y = 178;        // feet of characters
-const CHAR_XS = [330, 400, 470, 540];
+const TRAIN_STOP_X = 80;
+const PLATFORM_X = 310, PLATFORM_W = 340, PLATFORM_Y = 200;
+const CHAR_SIZE = 48;           // display height of character PNG
+const CHAR_FOOT_Y = PLATFORM_Y; // characters stand on platform surface
+const CHAR_XS = [335, 405, 475, 545];
+const DOOR_X = TRAIN_STOP_X + TRAIN_W - 22; // x center of train door
 
-let trainX = -TRAIN_W;    // left edge of train
+// ─── Animation state ──────────────────────────────────────────────────────────
+let trainX = -TRAIN_W;
 let animFrame = null;
-let phase = 'idle';        // idle | approaching | arrived | departing
-let wrongIdx = -1;         // which char got wrong answer
+let phase = 'idle'; // idle | approaching | arrived | boarding | departing
+let wrongIdx = -1;
+let boardingCharIdx = -1;
+let boardingCharX = 0;
 
 function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
 function easeIn(t)  { return Math.pow(t, 3); }
 
 function startApproach() {
-  const startX = -TRAIN_W - 20;
-  const endX   = TRAIN_STOP_X;
-  const dur    = 1800;
-  const t0     = performance.now();
+  const startX = -TRAIN_W - 20, endX = TRAIN_STOP_X, dur = 1800;
+  const t0 = performance.now();
   phase = 'approaching';
   if (animFrame) cancelAnimationFrame(animFrame);
-
   function tick(now) {
     const p = Math.min((now - t0) / dur, 1);
     trainX = startX + (endX - startX) * easeOut(p);
     drawScene();
     if (p < 1) { animFrame = requestAnimationFrame(tick); }
-    else {
-      trainX = endX;
-      phase = 'arrived';
-      drawScene();
-      enableButtons();
-    }
+    else { trainX = endX; phase = 'arrived'; drawScene(); enableButtons(); }
+  }
+  animFrame = requestAnimationFrame(tick);
+}
+
+function startBoarding(charIdx) {
+  boardingCharIdx = charIdx;
+  boardingCharX = CHAR_XS[charIdx];
+  const startX = CHAR_XS[charIdx];
+  const dur = 550;
+  const t0 = performance.now();
+  phase = 'boarding';
+  if (animFrame) cancelAnimationFrame(animFrame);
+  function tick(now) {
+    const p = Math.min((now - t0) / dur, 1);
+    boardingCharX = startX + (DOOR_X - startX) * easeOut(p);
+    drawScene();
+    if (p < 1) { animFrame = requestAnimationFrame(tick); }
+    else { boardingCharIdx = -1; startDepart(); }
   }
   animFrame = requestAnimationFrame(tick);
 }
 
 function startDepart() {
-  const startX = TRAIN_STOP_X;
-  const endX   = CW + 40;
-  const dur    = 1100;
-  const t0     = performance.now();
+  const startX = TRAIN_STOP_X, endX = CW + 40, dur = 1100;
+  const t0 = performance.now();
   phase = 'departing';
   disableButtons();
   if (animFrame) cancelAnimationFrame(animFrame);
-
   function tick(now) {
     const p = Math.min((now - t0) / dur, 1);
     trainX = startX + (endX - startX) * easeIn(p);
     drawScene();
     if (p < 1) { animFrame = requestAnimationFrame(tick); }
-    else {
-      phase = 'idle';
-      showNextBtn();
-    }
+    else { phase = 'idle'; showNextBtn(); }
   }
   animFrame = requestAnimationFrame(tick);
 }
 
-// ─── Drawing ─────────────────────────────────────────────────────────────────
+// ─── Drawing ──────────────────────────────────────────────────────────────────
 function drawScene() {
   const canvas = document.getElementById('train-canvas');
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, CW, CH);
-
   drawBackground(ctx);
   drawPlatform(ctx);
-  drawCharacters(ctx);
   drawTrack(ctx);
   drawTrain(ctx, trainX);
+  drawCharacters(ctx);
 }
 
 function drawBackground(ctx) {
-  // Sky gradient
-  const sky = ctx.createLinearGradient(0, 0, 0, CH * 0.75);
+  const sky = ctx.createLinearGradient(0, 0, 0, CH * 0.78);
   sky.addColorStop(0, '#87ceeb');
   sky.addColorStop(1, '#d0eeff');
   ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, CW, CH * 0.75);
-
-  // Ground
+  ctx.fillRect(0, 0, CW, CH * 0.78);
   ctx.fillStyle = '#8db87a';
-  ctx.fillRect(0, CH * 0.75, CW, CH * 0.25);
-
+  ctx.fillRect(0, CH * 0.78, CW, CH * 0.22);
   // Station sign
   ctx.fillStyle = '#440022';
-  ctx.fillRect(PLATFORM_X + 20, 30, 90, 36);
+  ctx.fillRect(PLATFORM_X + 20, 28, 90, 34);
   ctx.fillStyle = '#c8a844';
   ctx.font = 'bold 14px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('えいご駅', PLATFORM_X + 65, 53);
+  ctx.fillText('えいご駅', PLATFORM_X + 65, 50);
 }
 
 function drawPlatform(ctx) {
-  // Platform body
   ctx.fillStyle = '#c8a8a0';
   ctx.fillRect(PLATFORM_X, PLATFORM_Y, PLATFORM_W, 24);
-  // Platform edge stripe
   ctx.fillStyle = '#f0e0a0';
   ctx.fillRect(PLATFORM_X, PLATFORM_Y, PLATFORM_W, 6);
 }
 
 function drawTrack(ctx) {
-  // Rails
   ctx.strokeStyle = '#888';
   ctx.lineWidth = 4;
   ctx.beginPath(); ctx.moveTo(0, RAIL_Y);     ctx.lineTo(CW, RAIL_Y);     ctx.stroke();
   ctx.beginPath(); ctx.moveTo(0, RAIL_Y + 8); ctx.lineTo(CW, RAIL_Y + 8); ctx.stroke();
-
-  // Sleepers
   ctx.strokeStyle = '#7a5c3a';
   ctx.lineWidth = 3;
   for (let x = 10; x < CW; x += 22) {
@@ -451,68 +453,35 @@ function drawTrack(ctx) {
 }
 
 function drawTrain(ctx, x) {
-  const y = RAIL_Y - TRAIN_H;
-  const w = TRAIN_W, h = TRAIN_H;
-
-  // Body
+  const y = RAIL_Y - TRAIN_H, w = TRAIN_W, h = TRAIN_H;
   ctx.fillStyle = '#660033';
-  roundRect(ctx, x, y, w, h, 8);
-  ctx.fill();
-
-  // Gold stripe
+  roundRect(ctx, x, y, w, h, 8); ctx.fill();
   ctx.fillStyle = '#c8a844';
   ctx.fillRect(x, y + h * 0.55, w, 7);
-
-  // Windows (2)
   ctx.fillStyle = '#d0eeff';
   ctx.fillRect(x + 18, y + 10, 55, 32);
   ctx.fillRect(x + 95, y + 10, 55, 32);
-
-  // Window frame
-  ctx.strokeStyle = '#440022';
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#440022'; ctx.lineWidth = 2;
   ctx.strokeRect(x + 18, y + 10, 55, 32);
   ctx.strokeRect(x + 95, y + 10, 55, 32);
-
-  // Door
   ctx.fillStyle = '#550028';
   ctx.fillRect(x + w - 44, y + 8, 34, h - 8);
   ctx.strokeStyle = '#440022';
   ctx.strokeRect(x + w - 44, y + 8, 34, h - 8);
-  // Door handle
   ctx.fillStyle = '#c8a844';
   ctx.fillRect(x + w - 20, y + h * 0.5 - 8, 3, 16);
-
-  // Destination sign
   ctx.fillStyle = '#002244';
   ctx.fillRect(x + 165, y + 12, 40, 16);
   ctx.fillStyle = '#ffffaa';
-  ctx.font = 'bold 10px sans-serif';
-  ctx.textAlign = 'center';
+  ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
   ctx.fillText('梅田', x + 185, y + 24);
-
-  // Pantograph (on roof)
-  ctx.strokeStyle = '#999';
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#999'; ctx.lineWidth = 2;
   const px = x + 60;
-  ctx.beginPath();
-  ctx.moveTo(px, y);
-  ctx.lineTo(px - 12, y - 18);
-  ctx.lineTo(px + 12, y - 18);
-  ctx.lineTo(px, y - 30);
-  ctx.stroke();
-  // Contact wire bar
-  ctx.beginPath();
-  ctx.moveTo(px - 16, y - 18);
-  ctx.lineTo(px + 16, y - 18);
-  ctx.stroke();
-
-  // Wrong X overlay
+  ctx.beginPath(); ctx.moveTo(px, y); ctx.lineTo(px - 12, y - 18); ctx.lineTo(px + 12, y - 18); ctx.lineTo(px, y - 30); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(px - 16, y - 18); ctx.lineTo(px + 16, y - 18); ctx.stroke();
   if (phase === 'arrived' && wrongIdx >= 0) {
     ctx.save();
-    ctx.strokeStyle = 'red';
-    ctx.lineWidth = 8;
-    ctx.globalAlpha = 0.75;
+    ctx.strokeStyle = 'red'; ctx.lineWidth = 8; ctx.globalAlpha = 0.75;
     const cx2 = x + w / 2, cy2 = y + h / 2;
     ctx.beginPath(); ctx.moveTo(cx2 - 28, cy2 - 28); ctx.lineTo(cx2 + 28, cy2 + 28); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(cx2 + 28, cy2 - 28); ctx.lineTo(cx2 - 28, cy2 + 28); ctx.stroke();
@@ -522,8 +491,7 @@ function drawTrain(ctx, x) {
 
 function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
+  ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
   ctx.quadraticCurveTo(x + w, y, x + w, y + r);
   ctx.lineTo(x + w, y + h - r);
   ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
@@ -535,196 +503,56 @@ function roundRect(ctx, x, y, w, h, r) {
 }
 
 function drawCharacters(ctx) {
-  if (phase === 'idle') return;
+  if (phase === 'idle' || phase === 'departing') return;
   const q = quizList[qi];
   for (let i = 0; i < 4; i++) {
-    const cx = CHAR_XS[i];
-    drawChar(ctx, i, cx, CHAR_Y, q.choices[i]);
+    const isBoarding = (i === boardingCharIdx && phase === 'boarding');
+    if (isBoarding) {
+      // fade out as approaches door
+      const progress = (boardingCharX - CHAR_XS[i]) / (DOOR_X - CHAR_XS[i]);
+      ctx.globalAlpha = Math.max(0.05, 1 - progress * 0.95);
+      drawCharImage(ctx, i, boardingCharX, CHAR_FOOT_Y, q.choices[i], false);
+      ctx.globalAlpha = 1;
+    } else {
+      const showBubble = (phase === 'arrived');
+      drawCharImage(ctx, i, CHAR_XS[i], CHAR_FOOT_Y, q.choices[i], showBubble);
+    }
   }
 }
 
-function drawChar(ctx, idx, cx, footY, label) {
+function drawCharImage(ctx, idx, cx, footY, label, showBubble) {
+  const img = charImages[idx];
+  if (img && img.complete && img.naturalWidth > 0) {
+    const aspect = img.naturalWidth / img.naturalHeight;
+    const h = CHAR_SIZE, w = h * aspect;
+    ctx.drawImage(img, cx - w / 2, footY - h, w, h);
+  }
+  if (showBubble) {
+    drawSpeechBubble(ctx, cx, footY - CHAR_SIZE - 2, label);
+  }
+}
+
+function drawSpeechBubble(ctx, cx, bottomY, text) {
+  const bw = 46, bh = 22, bx = cx - bw / 2, by = bottomY - bh;
   ctx.save();
-  ctx.textAlign = 'center';
-
-  if (idx === 0) drawKitty(ctx, cx, footY);
-  else if (idx === 1) drawCinnamoroll(ctx, cx, footY);
-  else if (idx === 2) drawKuromi(ctx, cx, footY);
-  else drawMyMelo(ctx, cx, footY);
-
-  // Speech bubble with choice
-  const bx = cx, by = footY - 52;
   ctx.fillStyle = 'white';
-  ctx.strokeStyle = '#666';
+  ctx.strokeStyle = '#555';
   ctx.lineWidth = 1.5;
-  roundRect(ctx, bx - 22, by - 14, 44, 20, 6);
+  roundRect(ctx, bx, by, bw, bh, 6);
   ctx.fill(); ctx.stroke();
-  // bubble tail
   ctx.beginPath();
-  ctx.moveTo(bx - 4, by + 6);
-  ctx.lineTo(bx + 4, by + 6);
-  ctx.lineTo(bx, by + 13);
+  ctx.moveTo(cx - 5, by + bh); ctx.lineTo(cx + 5, by + bh); ctx.lineTo(cx, by + bh + 8);
   ctx.fill();
-
   ctx.fillStyle = '#222';
   ctx.font = 'bold 11px sans-serif';
-  ctx.fillText(label, bx, by + 1);
-  ctx.restore();
-}
-
-function drawKitty(ctx, cx, fy) {
-  const hy = fy - 22;
-  // body
-  ctx.fillStyle = '#ffb6d9';
-  ctx.beginPath(); ctx.ellipse(cx, hy + 4, 11, 14, 0, 0, Math.PI * 2); ctx.fill();
-  // head
-  ctx.fillStyle = 'white';
-  ctx.beginPath(); ctx.arc(cx, hy - 12, 13, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1; ctx.stroke();
-  // ears
-  ctx.fillStyle = 'white';
-  ctx.beginPath(); ctx.moveTo(cx - 11, hy - 22); ctx.lineTo(cx - 6, hy - 13); ctx.lineTo(cx - 16, hy - 13); ctx.closePath(); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(cx + 11, hy - 22); ctx.lineTo(cx + 6, hy - 13); ctx.lineTo(cx + 16, hy - 13); ctx.closePath(); ctx.fill();
-  // bow
-  ctx.fillStyle = '#ff0066';
-  ctx.beginPath(); ctx.ellipse(cx + 9, hy - 22, 5, 3, -0.5, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(cx + 14, hy - 22, 5, 3, 0.5, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#ffaacc';
-  ctx.beginPath(); ctx.arc(cx + 11, hy - 22, 2, 0, Math.PI * 2); ctx.fill();
-  // eyes
-  ctx.fillStyle = '#222';
-  ctx.beginPath(); ctx.arc(cx - 4, hy - 13, 2, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(cx + 4, hy - 13, 2, 0, Math.PI * 2); ctx.fill();
-  // nose
-  ctx.fillStyle = '#ff9900';
-  ctx.beginPath(); ctx.arc(cx, hy - 10, 1.5, 0, Math.PI * 2); ctx.fill();
-  // legs
-  ctx.fillStyle = '#ffb6d9';
-  ctx.fillRect(cx - 8, fy - 10, 6, 10);
-  ctx.fillRect(cx + 2, fy - 10, 6, 10);
-}
-
-function drawCinnamoroll(ctx, cx, fy) {
-  const hy = fy - 22;
-  // body
-  ctx.fillStyle = '#d8eeff';
-  ctx.beginPath(); ctx.ellipse(cx, hy + 4, 11, 13, 0, 0, Math.PI * 2); ctx.fill();
-  // head (big round)
-  ctx.fillStyle = 'white';
-  ctx.beginPath(); ctx.arc(cx, hy - 14, 15, 0, Math.PI * 2); ctx.fill();
-  // ears (big floppy)
-  ctx.fillStyle = '#d0e8ff';
-  ctx.beginPath(); ctx.ellipse(cx - 14, hy - 20, 6, 10, -0.4, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(cx + 14, hy - 20, 6, 10, 0.4, 0, Math.PI * 2); ctx.fill();
-  // eyes
-  ctx.fillStyle = '#224488';
-  ctx.beginPath(); ctx.arc(cx - 4, hy - 15, 3, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(cx + 4, hy - 15, 3, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = 'white';
-  ctx.beginPath(); ctx.arc(cx - 3, hy - 16, 1, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(cx + 5, hy - 16, 1, 0, Math.PI * 2); ctx.fill();
-  // nose + cheeks
-  ctx.fillStyle = '#ff99bb';
-  ctx.beginPath(); ctx.arc(cx, hy - 11, 2, 0, Math.PI * 2); ctx.fill();
-  ctx.globalAlpha = 0.4;
-  ctx.beginPath(); ctx.ellipse(cx - 7, hy - 11, 4, 3, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(cx + 7, hy - 11, 4, 3, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.globalAlpha = 1;
-  // tail (curled on top)
-  ctx.strokeStyle = '#88bbff';
-  ctx.lineWidth = 3;
-  ctx.beginPath(); ctx.arc(cx, hy - 29, 5, Math.PI, 0); ctx.stroke();
-  // legs
-  ctx.fillStyle = '#d8eeff';
-  ctx.fillRect(cx - 8, fy - 10, 6, 10);
-  ctx.fillRect(cx + 2, fy - 10, 6, 10);
-}
-
-function drawKuromi(ctx, cx, fy) {
-  const hy = fy - 22;
-  // body
-  ctx.fillStyle = '#333';
-  ctx.beginPath(); ctx.ellipse(cx, hy + 4, 11, 13, 0, 0, Math.PI * 2); ctx.fill();
-  // head
-  ctx.fillStyle = '#222';
-  ctx.beginPath(); ctx.arc(cx, hy - 13, 13, 0, Math.PI * 2); ctx.fill();
-  // skull hood points
-  ctx.fillStyle = '#222';
-  ctx.beginPath();
-  ctx.moveTo(cx - 13, hy - 18);
-  ctx.lineTo(cx - 8, hy - 30);
-  ctx.lineTo(cx - 3, hy - 18);
-  ctx.closePath(); ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(cx + 3, hy - 18);
-  ctx.lineTo(cx + 8, hy - 30);
-  ctx.lineTo(cx + 13, hy - 18);
-  ctx.closePath(); ctx.fill();
-  // inner face white area
-  ctx.fillStyle = 'white';
-  ctx.beginPath(); ctx.ellipse(cx, hy - 12, 9, 10, 0, 0, Math.PI * 2); ctx.fill();
-  // eyes
-  ctx.fillStyle = '#224488';
-  ctx.beginPath(); ctx.arc(cx - 3, hy - 14, 2.5, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(cx + 3, hy - 14, 2.5, 0, Math.PI * 2); ctx.fill();
-  // skull on forehead
-  ctx.fillStyle = 'white';
-  ctx.font = 'bold 8px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('☠', cx, hy - 24);
-  // pink cheeks
-  ctx.fillStyle = '#ff99bb';
-  ctx.globalAlpha = 0.5;
-  ctx.beginPath(); ctx.ellipse(cx - 7, hy - 10, 4, 3, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(cx + 7, hy - 10, 4, 3, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.globalAlpha = 1;
-  // legs
-  ctx.fillStyle = '#333';
-  ctx.fillRect(cx - 8, fy - 10, 6, 10);
-  ctx.fillRect(cx + 2, fy - 10, 6, 10);
-}
-
-function drawMyMelo(ctx, cx, fy) {
-  const hy = fy - 22;
-  // body
-  ctx.fillStyle = '#ffccdd';
-  ctx.beginPath(); ctx.ellipse(cx, hy + 4, 11, 13, 0, 0, Math.PI * 2); ctx.fill();
-  // hood
-  ctx.fillStyle = '#ff88bb';
-  ctx.beginPath();
-  ctx.arc(cx, hy - 14, 14, Math.PI, 0);
-  ctx.lineTo(cx + 16, hy - 8);
-  ctx.lineTo(cx - 16, hy - 8);
-  ctx.closePath(); ctx.fill();
-  // hood ears (rounded bumps)
-  ctx.beginPath(); ctx.ellipse(cx - 12, hy - 26, 5, 8, -0.2, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(cx + 12, hy - 26, 5, 8, 0.2, 0, Math.PI * 2); ctx.fill();
-  // face white
-  ctx.fillStyle = 'white';
-  ctx.beginPath(); ctx.ellipse(cx, hy - 12, 10, 10, 0, 0, Math.PI * 2); ctx.fill();
-  // eyes
-  ctx.fillStyle = '#222';
-  ctx.beginPath(); ctx.arc(cx - 3, hy - 14, 2, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(cx + 3, hy - 14, 2, 0, Math.PI * 2); ctx.fill();
-  // nose
-  ctx.fillStyle = '#ff0066';
-  ctx.beginPath(); ctx.arc(cx, hy - 10, 2, 0, Math.PI * 2); ctx.fill();
-  // cheeks
-  ctx.fillStyle = '#ffaacc';
-  ctx.globalAlpha = 0.5;
-  ctx.beginPath(); ctx.ellipse(cx - 7, hy - 10, 4, 3, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(cx + 7, hy - 10, 4, 3, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.globalAlpha = 1;
-  // legs
-  ctx.fillStyle = '#ffccdd';
-  ctx.fillRect(cx - 8, fy - 10, 6, 10);
-  ctx.fillRect(cx + 2, fy - 10, 6, 10);
+  ctx.fillText(text, cx, by + bh - 5);
+  ctx.restore();
 }
 
 // ─── Game flow ────────────────────────────────────────────────────────────────
 function startGame() {
-  const pool = shuffle([...allData]).slice(0, 10);
-  quizList = pool.map(buildQuestion);
+  quizList = shuffle([...allData]).slice(0, 10).map(buildQuestion);
   qi = 0; score = 0; answered = false;
   document.getElementById('screen-welcome').style.display = 'none';
   document.getElementById('screen-quiz').style.display = 'flex';
@@ -735,28 +563,18 @@ function loadQuestion() {
   answered = false;
   wrongIdx = -1;
   const q = quizList[qi];
-
-  // Progress
   document.getElementById('q-counter').textContent = `${qi + 1} / ${quizList.length}`;
   document.getElementById('score-disp').textContent = `⭕ ${score}`;
   document.getElementById('progress-bar').style.width = (qi / quizList.length * 100) + '%';
-
-  // Question text with blank
-  const rawText = q.q.replace(/_+/g, '<span class="blank">（　　）</span>');
-  document.getElementById('q-text').innerHTML = rawText.replace(/\n/g, '<br>');
-
-  // Choice labels on buttons (canvas drawn later)
+  document.getElementById('q-text').innerHTML = q.q.replace(/_+/g, '<span class="blank">（　　）</span>').replace(/\n/g, '<br>');
   for (let i = 0; i < 4; i++) {
     document.getElementById('choice' + i).textContent = q.choices[i];
     const btn = document.getElementById('btn' + i);
     btn.disabled = false;
     btn.classList.remove('correct', 'wrong');
   }
-
   document.getElementById('feedback-area').textContent = '';
   document.getElementById('next-btn').style.display = 'none';
-
-  // Train approaches
   trainX = -TRAIN_W - 20;
   phase = 'approaching';
   disableButtons();
@@ -769,22 +587,19 @@ function answer(idx) {
   answered = true;
   const q = quizList[qi];
   const correct = (idx === q.a);
-
-  const btn = document.getElementById('btn' + idx);
+  document.getElementById('btn' + idx).classList.add(correct ? 'correct' : 'wrong');
   if (correct) {
-    btn.classList.add('correct');
     score++;
     document.getElementById('feedback-area').textContent = '⭕ せいかい！';
     document.getElementById('score-disp').textContent = `⭕ ${score}`;
     disableButtons();
-    setTimeout(() => startDepart(), 400);
+    setTimeout(() => startBoarding(q.a), 300);
   } else {
-    btn.classList.add('wrong');
     wrongIdx = idx;
     document.getElementById('btn' + q.a).classList.add('correct');
     document.getElementById('feedback-area').textContent = `❌ せいかいは「${q.choices[q.a]}」だよ！`;
     disableButtons();
-    drawScene(); // redraw with X
+    drawScene();
     setTimeout(() => showNextBtn(), 800);
   }
 }
@@ -795,18 +610,14 @@ function disableButtons() {
 function enableButtons() {
   for (let i = 0; i < 4; i++) document.getElementById('btn' + i).disabled = false;
 }
-
 function showNextBtn() {
   document.getElementById('next-btn').style.display = 'block';
 }
 
 function nextQuestion() {
   qi++;
-  if (qi >= quizList.length) {
-    showClear();
-  } else {
-    loadQuestion();
-  }
+  if (qi >= quizList.length) showClear();
+  else loadQuestion();
 }
 
 function showClear() {
@@ -822,7 +633,7 @@ function restartGame() {
 }
 
 // Initial idle canvas
-(function initCanvas() {
+(function() {
   const canvas = document.getElementById('train-canvas');
   const ctx = canvas.getContext('2d');
   drawBackground(ctx);
