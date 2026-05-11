@@ -69,23 +69,13 @@
         .progress-row {
             display: flex;
             align-items: center;
+            justify-content: center;
             width: 100%;
             font-size: 14px;
             color: #888;
-            gap: 8px;
+            gap: 16px;
         }
-        .tiny-home-btn {
-            background: white;
-            color: #660033;
-            border: 2px solid #c8a844;
-            border-radius: 12px;
-            padding: 5px 10px;
-            font-size: 13px;
-            font-weight: bold;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-        #q-counter { flex: 1; text-align: center; }
+        #q-counter { text-align: center; }
         #score-disp { white-space: nowrap; }
 
         #progress-bar-wrap {
@@ -133,7 +123,6 @@
             font-weight: bold;
             cursor: pointer;
             color: #660033;
-            align-self: flex-start;
         }
         .voice-btn:active { background: #f0e0a0; }
 
@@ -168,7 +157,7 @@
         }
         .char-btn:active { transform: translateY(4px); box-shadow: none !important; }
         .char-btn img { width: 48px; height: 48px; object-fit: contain; pointer-events: none; flex-shrink: 0; }
-        .char-btn .choice-text { font-size: clamp(11px, 2.8vw, 15px); text-align: center; line-height: 1.35; }
+        .char-btn .choice-text { font-size: clamp(14px, 3.5vw, 18px); text-align: center; line-height: 1.35; }
 
         .btn-kitty    { background: #ffb6d9; color: #880055; box-shadow: 0 5px 0 #d4608a; }
         .btn-cinnamon { background: #b8dcff; color: #003388; box-shadow: 0 5px 0 #608ab8; }
@@ -187,6 +176,14 @@
             text-align: center;
         }
 
+        .bottom-row {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+
         .next-btn {
             background: #660033;
             color: white;
@@ -200,6 +197,7 @@
             transition: 0.1s;
         }
         .next-btn:active { transform: translateY(5px); box-shadow: none; }
+        .next-btn:disabled { opacity: 0.4; cursor: default; box-shadow: none; transform: none; }
 
         /* ── Clear ── */
         #screen-clear { display: none; gap: 20px; }
@@ -244,7 +242,6 @@
 <!-- Quiz -->
 <div class="screen" id="screen-quiz">
     <div class="progress-row">
-        <button class="tiny-home-btn" onclick="location.href='index.html'">🏠 ホーム</button>
         <span id="q-counter">1 / 10</span>
         <span id="score-disp">⭕ 0</span>
     </div>
@@ -252,7 +249,6 @@
 
     <div class="question-box">
         <div class="q-text" id="q-text"></div>
-        <button class="voice-btn" onclick="speakQuestion()">🔊 おんせい</button>
     </div>
 
     <canvas id="train-canvas" width="660" height="250"></canvas>
@@ -277,7 +273,11 @@
     </div>
 
     <div id="feedback-area"></div>
-    <button class="next-btn" id="next-btn" onclick="nextQuestion()" style="display:none;">つぎへ ▶</button>
+    <div class="bottom-row">
+        <button class="voice-btn" onclick="speakQuestion()">🔊 おんせい</button>
+        <button class="next-btn" id="next-btn" onclick="nextQuestion()" disabled>つぎへ ▶</button>
+    </div>
+    <button class="home-btn" onclick="location.href='index.html'" style="align-self:center; margin-top:4px;">🏠 ホーム</button>
 </div>
 
 <!-- Clear -->
@@ -731,7 +731,7 @@ function loadQuestion() {
     btn.disabled = false; btn.classList.remove('correct', 'wrong');
   }
   document.getElementById('feedback-area').textContent = '';
-  document.getElementById('next-btn').style.display = 'none';
+  document.getElementById('next-btn').disabled = true;
   trainX = -TRAIN_W - 20; phase = 'approaching';
   disableButtons(); drawScene(); startApproach();
 }
@@ -765,7 +765,7 @@ function enableButtons() {
   for (let i = 0; i < 4; i++) document.getElementById('btn' + i).disabled = false;
 }
 function showNextBtn() {
-  document.getElementById('next-btn').style.display = 'block';
+  document.getElementById('next-btn').disabled = false;
 }
 
 function nextQuestion() {
