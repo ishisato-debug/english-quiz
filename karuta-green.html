@@ -299,6 +299,7 @@ function backWord() {
     historyIndex--;
     showWord(history[historyIndex], historyIndex);
     updateUI();
+    speak(history[historyIndex]);
   }
 }
 
