@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>えいたんごblue2</title>
+<title>えいたんごlightgreen</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
     font-family: 'Hiragino Maru Gothic ProN', 'Comic Sans MS', sans-serif;
-    background: linear-gradient(135deg, #e0f2f1, #f2fffd);
+    background: linear-gradient(135deg, #f1f8e9, #fbfff5);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -20,7 +20,7 @@
 
   h1 {
     font-size: 2.2rem;
-    color: #00695c;
+    color: #558b2f;
     margin-bottom: 10px;
     text-align: center;
     letter-spacing: 0.1em;
@@ -44,7 +44,7 @@
 
   #progress-bar {
     height: 100%;
-    background: #93c7f4;
+    background: #c9e896;
     border-radius: 8px;
     transition: width 0.4s;
     width: 0%;
@@ -74,7 +74,7 @@
   }
 
   #word-display {
-    font-size: 3.6rem;
+    font-size: 3.8rem;
     font-weight: bold;
     color: #333;
     letter-spacing: 0.03em;
@@ -133,9 +133,9 @@
   }
 
   #btn-next {
-    background: #93c7f4;
+    background: #c9e896;
     color: white;
-    box-shadow: 0 6px 0 #004d40;
+    box-shadow: 0 6px 0 #558b2f;
   }
 
   /* はじめから */
@@ -158,7 +158,7 @@
 #finished-msg {
     display: none;
     font-size: 1.8rem;
-    color: #00695c;
+    color: #558b2f;
     text-align: center;
     margin-top: 10px;
     font-weight: bold;
@@ -166,8 +166,8 @@
 
   #btn-home {
     background: #fff;
-    color: #00695c;
-    border: 2px solid #b2dfdb;
+    color: #558b2f;
+    border: 2px solid #dcedc8;
     font-size: 1.1rem;
     font-weight: bold;
     padding: 10px 22px;
@@ -181,9 +181,9 @@
 </head>
 <body>
 
-<h1>📘 えいたんごblue2</h1>
+<h1>🌳 えいたんごlightgreen</h1>
 
-<div id="progress-wrap">のこり <span id="remaining">55</span> / 55 まい</div>
+<div id="progress-wrap">のこり <span id="remaining">40</span> / 40 まい</div>
 
 <div id="progress-bar-wrap">
   <div id="progress-bar"></div>
@@ -209,7 +209,7 @@
 </div>
 
 <script>
-const allWords = "Book/box/class/club/homework/idea/lesson/name/page/pan/pool/question/school/student/teacher/textbook/cafeteria/calendar/chalk/classroom/dictionary/eraser/gym/locker/notebook/pencil/pencil case/score/song/test/bench/junior high school/clock/high school/teacher's room/math/music/art/history/science/PE/English/French/Japanese/Chinese/Australia/Brazil/Canada/country/India/Italy/Japan/Singapore/London/Sydney".split('/');
+const allWords = "Library/park/shop/station/store/bridge/city/department store/post office/restaurant/supermarket/zoo/airport/bank/bookstore/building/bus stop/hospital/museum/Street/bike(bicycle)/bus/car/train/plane/bird/cat/dog/fish/pet/animal/hamster/mouse/rabbit/butterfly/flower/mountain/river/tree/weather".split('/');
 
 const totalCount = allWords.length;
 let pool = [];
