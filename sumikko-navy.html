@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>えいたんごpink</title>
+<title>えいたんごnavy</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
     font-family: 'Hiragino Maru Gothic ProN', 'Comic Sans MS', sans-serif;
-    background: linear-gradient(135deg, #ffe3ef, #fff8fb);
+    background: linear-gradient(135deg, #e8eaf6, #f5f6fc);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -20,7 +20,7 @@
 
   h1 {
     font-size: 2.2rem;
-    color: #d6437c;
+    color: #283593;
     margin-bottom: 10px;
     text-align: center;
     letter-spacing: 0.1em;
@@ -44,7 +44,7 @@
 
   #progress-bar {
     height: 100%;
-    background: linear-gradient(90deg, #ff6fa5, #ffb0cf);
+    background: linear-gradient(90deg, #283593, #7986cb);
     border-radius: 8px;
     transition: width 0.4s;
     width: 0%;
@@ -133,9 +133,9 @@
   }
 
   #btn-next {
-    background: #ff6fa5;
+    background: #283593;
     color: white;
-    box-shadow: 0 6px 0 #d6437c;
+    box-shadow: 0 6px 0 #1a237e;
   }
 
   /* はじめから */
@@ -158,7 +158,7 @@
 #finished-msg {
     display: none;
     font-size: 1.8rem;
-    color: #d6437c;
+    color: #283593;
     text-align: center;
     margin-top: 10px;
     font-weight: bold;
@@ -166,8 +166,8 @@
 
   #btn-home {
     background: #fff;
-    color: #d6437c;
-    border: 2px solid #ffcfe2;
+    color: #283593;
+    border: 2px solid #c5cae9;
     font-size: 1.1rem;
     font-weight: bold;
     padding: 10px 22px;
@@ -181,9 +181,9 @@
 </head>
 <body>
 
-<h1>🌸 えいたんごpink</h1>
+<h1>⚓ えいたんごnavy</h1>
 
-<div id="progress-wrap">のこり <span id="remaining">58</span> / 58 まい</div>
+<div id="progress-wrap">のこり <span id="remaining">69</span> / 69 まい</div>
 
 <div id="progress-bar-wrap">
   <div id="progress-bar"></div>
@@ -205,11 +205,11 @@
 <div id="finished-msg">🎉 ぜんぶ よんだよ！おつかれさま！<br>「はじめから」をおしてね</div>
 
 <div style="text-align:center; margin-top:24px;">
-  <button id="btn-home" onclick="location.href='sumikkogurashi.html'">◀ シリーズえらぶ</button>
+  <button id="btn-home" onclick="location.href='sumikko_karuta_select.html'">◀ シリーズえらぶ</button>
 </div>
 
 <script>
-const allWords = "all/big/cold/every/fine/good/happy/hot/long/many/new/nice/old/pretty/right/some/sunny/tall/any/beautiful/cloudy/cute/easy/favorite/great/high/hungry/little/next/rainy/ready/slow/small/snowy/windy/young/large/late/short/sleepy/down/fast/here/now/o'clock/often/really/there/sure/too/up/usually/very/well/later/only/sometimes/then/together".split('/');
+const allWords = "no/not/yes/and/but/or/so/about/after/at/by/for/from/in/of/on/to/under/with/around/before/near/I/my/me/you/your/he/his/him/she/her/it/its/we/our/us/they/their/them/mine/yours/ours/one/this/that/these/those/everyone/what/when/where/which/who/whose/why/how/how many/how much/how old/how long/how tall/an/the/can/let's/Mr./Ms./Mrs.".split('/');
 
 const totalCount = allWords.length;
 let pool = [];

@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>えいたんごgreen</title>
+<title>えいたんごorange</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
     font-family: 'Hiragino Maru Gothic ProN', 'Comic Sans MS', sans-serif;
-    background: linear-gradient(135deg, #e3f5e8, #f7fff9);
+    background: linear-gradient(135deg, #fff3e0, #fffaf3);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -20,7 +20,7 @@
 
   h1 {
     font-size: 2.2rem;
-    color: #2e7d32;
+    color: #e65100;
     margin-bottom: 10px;
     text-align: center;
     letter-spacing: 0.1em;
@@ -44,7 +44,7 @@
 
   #progress-bar {
     height: 100%;
-    background: linear-gradient(90deg, #43a047, #81c784);
+    background: linear-gradient(90deg, #fb8c00, #ffb74d);
     border-radius: 8px;
     transition: width 0.4s;
     width: 0%;
@@ -74,10 +74,10 @@
   }
 
   #word-display {
-    font-size: 4rem;
+    font-size: 3.2rem;
     font-weight: bold;
     color: #333;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.02em;
     white-space: nowrap;
   }
 
@@ -133,9 +133,9 @@
   }
 
   #btn-next {
-    background: #43a047;
+    background: #fb8c00;
     color: white;
-    box-shadow: 0 6px 0 #2e7d32;
+    box-shadow: 0 6px 0 #e65100;
   }
 
   /* はじめから */
@@ -158,7 +158,7 @@
 #finished-msg {
     display: none;
     font-size: 1.8rem;
-    color: #2e7d32;
+    color: #e65100;
     text-align: center;
     margin-top: 10px;
     font-weight: bold;
@@ -166,8 +166,8 @@
 
   #btn-home {
     background: #fff;
-    color: #2e7d32;
-    border: 2px solid #c8e6c9;
+    color: #e65100;
+    border: 2px solid #ffe0b2;
     font-size: 1.1rem;
     font-weight: bold;
     padding: 10px 22px;
@@ -181,9 +181,9 @@
 </head>
 <body>
 
-<h1>🌿 えいたんごgreen</h1>
+<h1>🍊 えいたんごorange</h1>
 
-<div id="progress-wrap">のこり <span id="remaining">74</span> / 74 まい</div>
+<div id="progress-wrap">のこり <span id="remaining">50</span> / 50 まい</div>
 
 <div id="progress-bar-wrap">
   <div id="progress-bar"></div>
@@ -205,11 +205,11 @@
 <div id="finished-msg">🎉 ぜんぶ よんだよ！おつかれさま！<br>「はじめから」をおしてね</div>
 
 <div style="text-align:center; margin-top:24px;">
-  <button id="btn-home" onclick="location.href='sumikkogurashi.html'">◀ シリーズえらぶ</button>
+  <button id="btn-home" onclick="location.href='sumikko_karuta_select.html'">◀ シリーズえらぶ</button>
 </div>
 
 <script>
-const allWords = "one/two/three/four/five/six/seven/eight/nine/ten/eleven/twelve/thirteen/fourteen/fifteen/twenty/thirty/forty/fifty/sixty/seventy/eighty/ninety/hundred/thousand/number/first/second/third/fourth/fifth/sixth/seventh/eighth/ninth/tenth/eleventh/twelfth/dollar/meter/yen/centimeter/gram/kilogram/cent/January/February/March/April/May/June/July/August/September/October/November/December/month/Sunday/Monday/Tuesday/Wednesday/Thursday/Friday/Saturday/week/weekend/morning/noon/afternoon/evening/night/day/hour/time".split('/');
+const allWords = "after school/at school/be in the art club/every day/go shopping/go to/go to school/I'm from/in the morning/like running/look at/over there/very much/a cup of/a little/a lot of/at home/at night/by bus/come in/come to/do my homework/get up/go to bed/help me with/in the afternoon/listen to/live in/of course/on TV/take a picture/thank you for/this morning/time for/welcome to/years old/a glass of/be on the tennis team/brush your teeth/come on/from ~ to.../get to/go home/good job/on the phone/right now/sit down/stand up/take a bath/talk about".split('/');
 
 const totalCount = allWords.length;
 let pool = [];
@@ -268,7 +268,7 @@ function fitFontSize() {
   const wd = document.getElementById('word-display');
   const card = document.getElementById('word-card');
   const maxWidth = card.clientWidth - 60;
-  let size = 64;
+  let size = 50;
   wd.style.fontSize = size + 'px';
   while (wd.scrollWidth > maxWidth && size > 16) {
     size -= 2;
