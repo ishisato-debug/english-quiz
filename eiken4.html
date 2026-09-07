@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英検4級ドリル</title>
+    <style>
+        body {
+            font-family: 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+            text-align: center;
+            background-color: #fffaf0;
+            background-image: radial-gradient(#ffdfba 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #26a69a;
+            font-size: 28px;
+            text-shadow: 1px 1px white;
+            margin-bottom: 10px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border: 5px solid #80cbc4;
+            border-radius: 40px;
+            padding: 20px;
+            box-shadow: 0 10px 0 #80cbc4;
+            max-width: 650px;
+            margin: 0 auto;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .sentence-box {
+            font-size: clamp(18px, 4.5vw, 28px);
+            font-weight: bold;
+            line-height: 1.8;
+            margin: 20px 0;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            text-align: left;
+            width: 100%;
+        }
+        .sentence-box .line {
+            display: flex;
+            align-items: baseline;
+            width: 100%;
+            white-space: normal;
+        }
+        .speaker-label {
+            flex-shrink: 0;
+            white-space: nowrap;
+            padding-right: 0.2em;
+        }
+        .speaker-text {
+            flex: 1;
+            word-break: break-word;
+        }
+        .blank {
+            display: inline-block;
+            border-bottom: 3px solid #333;
+            min-width: 60px;
+            margin: 0 4px;
+        }
+        .btn-group {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            max-width: 400px;
+            margin: 0 auto 20px;
+        }
+        .choice-btn {
+            padding: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            border-radius: 20px;
+            color: white;
+            box-shadow: 0 6px #999;
+            transition: 0.1s;
+        }
+        .choice-btn:active {
+            box-shadow: none;
+            transform: translateY(6px);
+        }
+        .btn-1 { background-color: #ff9d00; }
+        .btn-2 { background-color: #4db8ff; }
+        .btn-3 { background-color: #c780ff; }
+        .btn-4 { background-color: #ff6666; }
+
+        #feedback {
+            font-size: 80px;
+            height: 90px;
+            margin-top: 10px;
+            line-height: 1;
+        }
+        .nav-speak {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .nav-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+        .home-area {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .nav-btn {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #fff;
+            border: 2px solid #80cbc4;
+            border-radius: 15px;
+            color: #26a69a;
+            font-weight: bold;
+            margin: 0 6px;
+        }
+        #restart-btn {
+            display: none;
+            margin-top: 12px;
+            padding: 12px 28px;
+            font-size: 20px;
+            cursor: pointer;
+            background-color: #26a69a;
+            border: none;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 6px #1f8a80;
+        }
+        #restart-btn:active {
+            box-shadow: none;
+            transform: translateY(6px);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>✨ 英検4級ドリル ✨</h1>
+
+    <div class="card">
+        <div id="sentence" class="sentence-box"></div>
+
+        <div id="feedback"></div>
+
+        <div class="btn-group">
+            <button class="choice-btn btn-1" onclick="check(1)">1</button>
+            <button class="choice-btn btn-2" onclick="check(2)">2</button>
+            <button class="choice-btn btn-3" onclick="check(3)">3</button>
+            <button class="choice-btn btn-4" onclick="check(4)">4</button>
+        </div>
+
+        <div>
+            <div class="nav-speak"><button class="nav-btn" onclick="speak()">🔊 おんせい</button></div>
+            <div class="nav-row">
+                <button class="nav-btn" onclick="prevQuestion()">🔙 まえへ</button>
+                <button class="nav-btn" onclick="nextQuestion()">つぎへ 🔜</button>
+            </div>
+        </div>
+        <div style="margin-top: 15px; color: #26a69a; font-weight: bold;">あと <span id="remaining">0</span> もん</div>
+        <button id="restart-btn" onclick="restart()">🔄 さいしょにもどる</button>
+    </div>
+    <div class="home-area">
+        <button class="nav-btn" onclick="location.href='index.html'">🏠 ホーム</button>
+    </div>
+
+    <script>
+        // 問題データ（英検4級ドリル）
+        const quizData = [
+            { sentences: ['My grandmother visited us at noon today.', 'My mother and I ( [BLANK] ) lunch for her.'], a: 1, choices: ['made', 'said', 'saw', 'came'] },
+            { sentences: ['A: I enjoyed swimming last Sunday. What did you do?', 'B: I ( [BLANK] ) to the museum with my family.'], a: 4, choices: ['go', 'goes', 'going', 'went'] },
+            { sentences: ['A: I ( [BLANK] ) have breakfast this morning.', 'B: Really? You can get some food at the cafeteria.'], a: 2, choices: ["don't", "didn't", "wasn't", "can't"] },
+            { sentences: ['A: Did Marie bring these flowers?', 'B: Yes, she ( [BLANK] ). She likes growing flowers.'], a: 3, choices: ['is', 'does', 'did', 'do'] },
+            { sentences: ['A: Do you know about Mike?', 'B: Yes. Mike and I ( [BLANK] ) in the same class.'], a: 2, choices: ['is', 'are', 'was', 'were'] },
+            { sentences: ['A: Was the movie interesting?', "B: It was long, but it ( [BLANK] ) boring."], a: 2, choices: ["isn't", "wasn't", "weren't", "didn't"] },
+            { sentences: ["A: I called you last night, but you didn't answer the phone.", 'B: Sorry, Josh. I ( [BLANK] ) taking a shower then.'], a: 2, choices: ['am', 'was', 'are', 'were'] },
+            { sentences: ['When I left home at five yesterday, my parents were ( [BLANK] ).'], a: 3, choices: ['sleep', 'slept', 'sleeping', 'to sleep'] },
+            { sentences: ['A: My friends are going ( [BLANK] ) to our school festival tomorrow.', 'B: Really? I want to see them.'], a: 4, choices: ['come', 'coming', 'came', 'to come'] },
+            { sentences: ['A: ( [BLANK] ) he going to move to Brazil next month?', "B: That's right."], a: 3, choices: ['Do', 'Does', 'Is', 'Can'] },
+            { sentences: ['A: Enjoy your summer vacation.', 'B: You too. I ( [BLANK] ) send an email to you.'], a: 1, choices: ['will', 'am', 'have', 'could'] },
+            { sentences: ['A: Will Fred ( [BLANK] ) here tomorrow?', "B: Yes, he'll come by train."], a: 1, choices: ['arrive', 'arrives', 'arrived', 'to arrive'] },
+            { sentences: ["Susan didn't do her homework.", 'She ( [BLANK] ) finish it by tomorrow.'], a: 3, choices: ['has', 'have to', 'must', 'going to'] },
+            { sentences: ['A: The train was very crowded today.', 'B: Yes, I ( [BLANK] ) to stand for fifteen minutes.'], a: 2, choices: ['have', 'had', 'going', 'must'] },
+            { sentences: ["A: Betty, was today's test difficult?", 'B: It was easy for me. There ( [BLANK] ) only.'], a: 1, choices: ['were', 'are', 'was', 'is'] },
+            { sentences: ['A: ( [BLANK] ) open the window, Yuta. The window is very strong.', 'B: OK, Mom.'], a: 4, choices: ['Be', 'Please', "Let's", "Don't"] },
+            { sentences: ['A: This omelette is delicious!', 'B: Thanks. I used four eggs ( [BLANK] ) it.'], a: 2, choices: ['make', 'to make', 'makes', 'made'] },
+            { sentences: ['A: Do you want something ( [BLANK] ), Mom?', 'B: Yes, please. Can I have some tea?'], a: 3, choices: ['drink', 'drinking', 'to drink', 'drank'] },
+            { sentences: ['A: What does your brother do, Hana?', 'B: He likes ( [BLANK] ) vegetables, so he works on a farm.'], a: 2, choices: ['grow', 'to grow', 'grew', 'grows'] },
+            { sentences: ['A: I heard you went to the mountains.', 'B: Yes, I enjoyed ( [BLANK] ) there.'], a: 4, choices: ['to ski', 'ski', 'skied', 'skiing'] },
+            { sentences: ['A: How was the weather in Paris?', 'B: Today was ( [BLANK] ) than yesterday.'], a: 4, choices: ['younger', 'smaller', 'busier', 'hotter'] },
+            { sentences: ["A: What's your favorite book?", 'B: I think this book is the ( [BLANK] ) of all.'], a: 1, choices: ['most interesting', 'more famous', 'most careful', 'more exciting'] },
+            { sentences: ['A: Which do you like ( [BLANK] ), summer or winter?', "B: I like both seasons. I can't decide."], a: 1, choices: ['better', 'best', 'most', 'good'] },
+            { sentences: ['A: Can Billy sing as well ( [BLANK] ) you?', 'B: Yes, he is good at singing.'], a: 2, choices: ['so', 'as', 'than', 'of'] },
+            { sentences: ['A: Please call me ( [BLANK] ) you arrive at the station.', "B: OK. I'll call you later, Mom."], a: 2, choices: ['because', 'when', 'so', 'that'] },
+            { sentences: ["A: Come to the event ( [BLANK] ) you're interested in anime.", "B: I'd love to. I love anime."], a: 4, choices: ['after', 'than', 'but', 'if'] },
+            { sentences: ['A: Did you ( [BLANK] ) your mother flowers.', 'B: No, I sent her a card this year.'], a: 3, choices: ['tell', 'look', 'give', 'make'] },
+            { sentences: ['A: I want to ( [BLANK] ) a police officer.', 'B: I hope your wish come true.'], a: 2, choices: ['look', 'become', 'give', 'get'] },
+            { sentences: ['A: ( [BLANK] ) do you want to study abroad?', 'B: To learn about American culture.'], a: 3, choices: ['What', 'When', 'Why', 'Which'] },
+            { sentences: ["A: It's time for bed now. ( [BLANK] ) does the drama finish?", "B: In five minutes. I'll go to bed after that."], a: 1, choices: ['When', 'Where', 'Why', 'Who'] },
+            { sentences: ['A: ( [BLANK] ) did you do yesterday?', 'B: I saw a magic show at the hall.'], a: 2, choices: ['Why', 'What', 'When', 'Where'] },
+            { sentences: ['A: What ( [BLANK] ) of ice cream do you like?', 'B: I like strawberry ice cream.'], a: 4, choices: ['color', 'size', 'fruit', 'kind'] },
+            { sentences: ['A: Excuse me Mr. Fox. ( [BLANK] ) I ask you a question?', 'B: Sure, please come in.'], a: 1, choices: ['May', 'Will', 'Do', 'Shall'] },
+            { sentences: ['A: ( [BLANK] ) you tell me the way to the city hall?', 'B: Just around the corner.'], a: 1, choices: ['Could', 'May', 'Should', 'Do'] },
+            { sentences: ['A: Do you ( [BLANK] ) another sandwich?', "B: No, thank you. I'm full."], a: 3, choices: ['like', 'make', 'want', 'find'] },
+            { sentences: ['A: Do you want ( [BLANK] ) to the park after school?', "B: Sure. It's play catch."], a: 2, choices: ['go', 'to go', 'went', 'going'] },
+            { sentences: ['A: How did you ( [BLANK] ) your trip to France?', 'B: It was wonderful!'], a: 2, choices: ['feel', 'like', 'want', 'have'] },
+            { sentences: ['A: ( [BLANK] ) do you feel today?', 'B: I feel great.'], a: 3, choices: ['What', 'Why', 'How', 'Whose'] },
+            { sentences: ['A: This is Karen. Can I ( [BLANK] ) to Yuta?', 'B: Just a minute.'], a: 1, choices: ['talk', 'say', 'call', 'write'] },
+            { sentences: ['A: May I help you?', "B: Yes. I'm ( [BLANK] ) for running shoes."], a: 4, choices: ['speaking', 'watching', 'buying', 'looking'] },
+        ];
+
+        // ランダム並べ替え
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        let shuffledData = shuffle(quizData);
+        let currentIndex = 0;
+
+        // ピンポーン
+        function playDingDong() {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(659.25, ctx.currentTime);
+            osc.frequency.setValueAtTime(523.25, ctx.currentTime + 0.15);
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.5);
+        }
+
+        // ブブー
+        function playBubu() {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(110, ctx.currentTime);
+            gain.gain.setValueAtTime(0.05, ctx.currentTime);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.2);
+        }
+
+        // [BLANK] をHTML表示用の下線スパンに変換（途中で改行しないようにnowrapで囲む）
+        function renderSentence(text) {
+            const blankHtml = '<span style="white-space:nowrap">( <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span> )</span>';
+            let rendered = text.replace('( [BLANK] )', blankHtml).replace('[BLANK]', blankHtml);
+            // "Speaker: text" パターンを検出して話者ラベルと本文を分割
+            const m = rendered.match(/^([\w.]+(?:\s[\w.]+)?:\s)([\s\S]*)$/);
+            if (m) {
+                return `<span class="speaker-label">${m[1]}</span><span class="speaker-text">${m[2]}</span>`;
+            }
+            return `<span class="speaker-text">${rendered}</span>`;
+        }
+
+        function updateDisplay() {
+            const q = shuffledData[currentIndex];
+
+            // 文ごとに <span class="line"> で囲み、複数文なら改行
+            const html = q.sentences.map(s => `<span class="line">${renderSentence(s)}</span>`).join('<br>');
+            document.getElementById('sentence').innerHTML = html;
+
+            document.getElementById('feedback').innerText = '';
+            document.getElementById('remaining').innerText = shuffledData.length - currentIndex - 1;
+            document.getElementById('restart-btn').style.display = 'none';
+
+            const buttons = document.querySelectorAll('.choice-btn');
+            for (let i = 0; i < 4; i++) {
+                buttons[i].innerText = `${i + 1}. ${q.choices[i]}`;
+            }
+        }
+
+        function check(choice) {
+            const q = shuffledData[currentIndex];
+            const feedbackEl = document.getElementById('feedback');
+            if (choice === q.a) {
+                playDingDong();
+                feedbackEl.innerText = '⭕️';
+                feedbackEl.style.color = '#ff1493';
+            } else {
+                playBubu();
+                feedbackEl.innerText = '❌';
+                feedbackEl.style.color = '#1e90ff';
+            }
+        }
+
+        function nextQuestion() {
+            if (currentIndex < shuffledData.length - 1) {
+                currentIndex++;
+                updateDisplay();
+            } else {
+                document.getElementById('feedback').innerText = '🎉';
+                document.getElementById('remaining').innerText = '0';
+                document.getElementById('restart-btn').style.display = 'inline-block';
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateDisplay();
+            }
+        }
+
+        function restart() {
+            shuffledData = shuffle(quizData);
+            currentIndex = 0;
+            updateDisplay();
+        }
+
+        // 音読（Web Speech API）
+        function speak() {
+            const q = shuffledData[currentIndex];
+            // [BLANK] を正解の単語に置き換えて読み上げ
+            const answer = q.choices[q.a - 1];
+            const text = q.sentences
+                .map(s => s.replace('( [BLANK] )', answer).replace('[BLANK]', answer))
+                .map(s => s.replace(/^[A-Za-z][A-Za-z0-9\s.]*:\s+/, ''))  // "Teacher: " などのラベルを除去
+                .join(' ');
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.85;
+            speechSynthesis.cancel();
+            speechSynthesis.speak(utterance);
+        }
+
+        // 初期表示
+        updateDisplay();
+    </script>
+</body>
+</html>
