@@ -27,7 +27,7 @@
 
   .screen {
     width: 100%;
-    max-width: 720px;
+    max-width: 960px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -116,21 +116,21 @@
 
   #card-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
     width: 100%;
   }
 
   .karuta-card {
     background: white;
     border: 3px solid #ffa02d;
-    border-radius: 16px;
-    min-height: 88px;
+    border-radius: 14px;
+    min-height: 70px;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 6px;
+    padding: 5px;
     font-weight: bold;
     color: #333;
     cursor: pointer;
@@ -186,6 +186,7 @@
   <div id="feedback">🔊 きいてね...</div>
   <button id="btn-replay" onclick="replay()">🔊 もう一度きく</button>
   <div id="card-grid"></div>
+  <button class="home-btn" onclick="location.href='sumikko_karuta_select.html'">◀ シリーズにもどる</button>
 </div>
 
 <!-- Clear -->
@@ -202,7 +203,7 @@
 <script>
 const allWords = ["after school", "at school", "be in the art club", "every day", "go shopping", "go to", "go to school", "I'm from", "in the morning", "like running", "look at", "over there", "very much", "a cup of", "a little", "a lot of", "at home", "at night", "by bus", "come in", "come to", "do my homework", "get up", "go to bed", "help me with", "in the afternoon", "listen to", "live in", "of course", "on TV", "take a picture", "thank you for", "this morning", "time for", "welcome to", "years old", "a glass of", "be on the tennis team", "brush your teeth", "come on", "from ~ to...", "get to", "go home", "good job", "on the phone", "right now", "sit down", "stand up", "take a bath", "talk about"];
 const totalCount = allWords.length;
-const ROUND_SIZE = 16;
+const ROUND_SIZE = 32;
 
 let deck = [];
 let roundWords = [];
@@ -247,7 +248,7 @@ function speak(text) {
 }
 
 function fitCardFont(el) {
-  let size = 19;
+  let size = 16;
   el.style.fontSize = size + 'px';
   while ((el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth) && size > 9) {
     size -= 1;

@@ -27,7 +27,7 @@
 
   .screen {
     width: 100%;
-    max-width: 720px;
+    max-width: 960px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -116,21 +116,21 @@
 
   #card-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
     width: 100%;
   }
 
   .karuta-card {
     background: white;
     border: 3px solid #f4ac92;
-    border-radius: 16px;
-    min-height: 88px;
+    border-radius: 14px;
+    min-height: 70px;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 6px;
+    padding: 5px;
     font-weight: bold;
     color: #333;
     cursor: pointer;
@@ -186,6 +186,7 @@
   <div id="feedback">🔊 きいてね...</div>
   <button id="btn-replay" onclick="replay()">🔊 もう一度きく</button>
   <div id="card-grid"></div>
+  <button class="home-btn" onclick="location.href='sumikko_karuta_select.html'">◀ シリーズにもどる</button>
 </div>
 
 <!-- Clear -->
@@ -202,7 +203,7 @@
 <script>
 const allWords = ["Family", "father", "dad", "mother", "mom", "brother", "sister", "grandfather", "grandpa", "grandmother", "grandma", "aunt", "boy", "girl", "man", "woman", "friend", "children", "people", "lady", "hand", "finger", "foot", "hair", "head", "leg", "mouth", "face", "shoulder", "teeth", "doctor", "pilot", "singer", "waiter", "artist", "dancer", "driver", "nurse", "baseball", "basketball", "game", "soccer", "sport", "tennis", "camping", "fishing", "player", "racket", "softball", "team", "volleyball", "hiking", "jogging", "practice", "piano", "flute", "guitar", "violin", "drum", "trumpet"];
 const totalCount = allWords.length;
-const ROUND_SIZE = 16;
+const ROUND_SIZE = 32;
 
 let deck = [];
 let roundWords = [];
@@ -247,7 +248,7 @@ function speak(text) {
 }
 
 function fitCardFont(el) {
-  let size = 19;
+  let size = 16;
   el.style.fontSize = size + 'px';
   while ((el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth) && size > 9) {
     size -= 1;
