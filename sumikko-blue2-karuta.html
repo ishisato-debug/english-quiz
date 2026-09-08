@@ -34,29 +34,38 @@
     gap: 14px;
   }
 
-  /* start */
+  /* start / deck select */
   .start-card {
     background: white;
     border-radius: 30px;
     box-shadow: 0 8px 30px rgba(0,0,0,0.12);
     width: 100%;
-    padding: 30px 24px;
+    padding: 26px 24px;
     text-align: center;
   }
   .start-card p { font-size: 1.1rem; color: #555; line-height: 1.8; }
 
+  #deck-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    max-width: 360px;
+  }
+
   .start-btn {
     background: #93c7f4;
     color: white;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     font-weight: bold;
-    padding: 18px 50px;
+    padding: 18px 30px;
     border: none;
     border-radius: 50px;
     cursor: pointer;
     box-shadow: 0 7px 0 #0d47a1;
     transition: 0.1s;
     font-family: inherit;
+    width: 100%;
   }
   .start-btn:active { transform: translateY(7px); box-shadow: none; }
 
@@ -170,23 +179,23 @@
 
 <h1>📘 えいたんごblue2 かるた</h1>
 
-<!-- Start -->
+<!-- Deck select -->
 <div class="screen" id="screen-start">
   <div class="start-card">
-    <p>ことばが きこえたら、<br>あう カードを タップしよう！</p>
+    <p>あそぶ セットを えらんでね！<br>ことばが きこえたら、あう カードを タップしよう！</p>
   </div>
-  <button class="start-btn" onclick="startGame()">🃏 スタート</button>
+  <div id="deck-buttons"></div>
   <button class="home-btn" onclick="location.href='sumikko_karuta_select.html'">◀ シリーズえらぶ</button>
 </div>
 
 <!-- Game -->
 <div class="screen" id="screen-game">
-  <div id="progress-wrap">のこり <span id="remaining">0</span> / 55 まい</div>
+  <div id="progress-wrap">のこり <span id="remaining">0</span> / <span id="total-count">0</span> まい</div>
   <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
   <div id="feedback">🔊 きいてね...</div>
   <button id="btn-replay" onclick="replay()">🔊 もう一度きく</button>
   <div id="card-grid"></div>
-  <button class="home-btn" onclick="location.href='sumikko_karuta_select.html'">◀ シリーズにもどる</button>
+  <button class="home-btn" onclick="resetAll()">◀ セットをえらびなおす</button>
 </div>
 
 <!-- Clear -->
@@ -194,23 +203,23 @@
   <div class="clear-card">
     <h2>🎉 ぜんぶ とれたよ！</h2>
     <div class="score-display" id="final-score">0</div>
-    <div class="score-label">/ 55 まい</div>
+    <div class="score-label">/ <span id="total-count-2">0</span> まい</div>
   </div>
-  <button class="start-btn" onclick="resetAll()">もう一度 🔄</button>
+  <button class="start-btn" onclick="resetAll()">セットをえらぶ 🔄</button>
   <button class="home-btn" onclick="location.href='sumikko_karuta_select.html'">◀ シリーズえらぶ</button>
 </div>
 
 <script>
-const allWords = ["book", "box", "class", "club", "homework", "idea", "lesson", "name", "page", "pan", "pool", "question", "school", "student", "teacher", "textbook", "cafeteria", "calendar", "chalk", "classroom", "dictionary", "eraser", "gym", "locker", "notebook", "pencil", "pencil case", "score", "song", "test", "bench", "junior high school", "clock", "high school", "teacher's room", "math", "music", "art", "history", "science", "PE", "English", "French", "Japanese", "Chinese", "Australia", "Brazil", "Canada", "country", "India", "Italy", "Japan", "Singapore", "London", "Sydney"];
-const totalCount = allWords.length;
+const decks = [["book", "box", "class", "club", "homework", "idea", "lesson", "name", "page", "pan", "pool", "question", "school", "student", "teacher", "textbook", "cafeteria", "calendar", "chalk", "classroom", "dictionary", "eraser", "gym", "locker", "notebook", "pencil", "pencil case", "score", "song", "test"], ["bench", "junior high school", "clock", "high school", "teacher's room", "math", "music", "art", "history", "science", "PE", "English", "French", "Japanese", "Chinese", "Australia", "Brazil", "Canada", "country", "India", "Italy", "Japan", "Singapore", "London", "Sydney"]];
 const ROUND_SIZE = 32;
 
-let deck = [];
+let pool = [];
 let roundWords = [];
 let takenIdx = new Set();
 let targetIdx = -1;
 let awaitingAnswer = false;
 let correctCount = 0;
+let totalCount = 0;
 
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -247,6 +256,18 @@ function speak(text) {
   window.speechSynthesis.speak(utter);
 }
 
+function playCorrectSound() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator(), gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(659.25, ctx.currentTime);
+  osc.frequency.setValueAtTime(880, ctx.currentTime + 0.12);
+  gain.gain.setValueAtTime(0.15, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.start(); osc.stop(ctx.currentTime + 0.5);
+}
+
 function fitCardFont(el) {
   let size = 16;
   el.style.fontSize = size + 'px';
@@ -254,6 +275,18 @@ function fitCardFont(el) {
     size -= 1;
     el.style.fontSize = size + 'px';
   }
+}
+
+function renderDeckButtons() {
+  const wrap = document.getElementById('deck-buttons');
+  wrap.innerHTML = '';
+  decks.forEach((words, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'start-btn';
+    btn.textContent = `🃏 セット${i + 1}（${words.length}まい）`;
+    btn.onclick = () => startGame(i);
+    wrap.appendChild(btn);
+  });
 }
 
 function renderGrid() {
@@ -274,11 +307,13 @@ function renderGrid() {
 
 function updateProgress() {
   document.getElementById('remaining').textContent = totalCount - correctCount;
+  document.getElementById('total-count').textContent = totalCount;
+  document.getElementById('total-count-2').textContent = totalCount;
   document.getElementById('progress-bar').style.width = (correctCount / totalCount * 100) + '%';
 }
 
 function startRound() {
-  roundWords = deck.splice(0, ROUND_SIZE);
+  roundWords = pool.splice(0, ROUND_SIZE);
   takenIdx = new Set();
   renderGrid();
   pickTarget();
@@ -287,7 +322,7 @@ function startRound() {
 function pickTarget() {
   const remainingIdx = roundWords.map((_, i) => i).filter(i => !takenIdx.has(i));
   if (remainingIdx.length === 0) {
-    if (deck.length === 0) { showClear(); return; }
+    if (pool.length === 0) { showClear(); return; }
     startRound();
     return;
   }
@@ -310,6 +345,7 @@ function onCardTap(i) {
     const el = document.getElementById('card-' + i);
     el.classList.add('correct-taken');
     document.getElementById('feedback').textContent = '⭕ せいかい！';
+    playCorrectSound();
     updateProgress();
     setTimeout(() => el.classList.add('gone'), 250);
     setTimeout(pickTarget, 750);
@@ -322,8 +358,9 @@ function onCardTap(i) {
   }
 }
 
-function startGame() {
-  deck = shuffle([...allWords]);
+function startGame(deckIndex) {
+  pool = shuffle([...decks[deckIndex]]);
+  totalCount = pool.length;
   correctCount = 0;
   document.getElementById('screen-start').style.display = 'none';
   document.getElementById('screen-clear').style.display = 'none';
@@ -344,6 +381,8 @@ function resetAll() {
   document.getElementById('screen-game').style.display = 'none';
   document.getElementById('screen-start').style.display = 'flex';
 }
+
+renderDeckButtons();
 </script>
 </body>
 </html>
