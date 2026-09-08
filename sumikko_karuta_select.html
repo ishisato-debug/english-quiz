@@ -81,6 +81,26 @@
             line-height: 1.3;
             display: block;
         }
+        .menu-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .karuta-chip {
+            display: block;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 8px 12px;
+            border-radius: 16px;
+            text-decoration: none;
+            color: #888;
+            background: #fff;
+            border: 2px dashed #ddd;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        .karuta-chip:active { transform: scale(0.97); }
         .btn-home {
             display: inline-block;
             margin-top: 36px;
@@ -101,38 +121,62 @@
     <h1>🃏 かるた</h1>
     <p class="lead">シリーズをえらんでね！</p>
     <div class="menu">
-        <a class="menu-btn btn-red2" href="sumikko-red.html">
-            🍎 red<br>
-            <span class="subtitle">かぞく・からだ・スポーツ</span>
-        </a>
-        <a class="menu-btn btn-blue1" href="sumikko-blue1.html">
-            🏠 blue1<br>
-            <span class="subtitle">いえ・もちもの(091-155)</span>
-        </a>
-        <a class="menu-btn btn-blue2" href="sumikko-blue2.html">
-            📘 blue2<br>
-            <span class="subtitle">がっこう・きょうか・くに(156-210)</span>
-        </a>
-        <a class="menu-btn btn-green" href="sumikko-green.html">
-            🌿 green<br>
-            <span class="subtitle">すうじ・じかん</span>
-        </a>
-        <a class="menu-btn btn-pink" href="sumikko-pink.html">
-            🌸 pink<br>
-            <span class="subtitle">ようすのことば</span>
-        </a>
-        <a class="menu-btn btn-navy" href="sumikko-navy.html">
-            ⚓ navy<br>
-            <span class="subtitle">だいめいし・ぎもんし</span>
-        </a>
-        <a class="menu-btn btn-lightgreen" href="sumikko-lightgreen.html">
-            🌳 lightgreen<br>
-            <span class="subtitle">まち・のりもの・どうぶつ</span>
-        </a>
-        <a class="menu-btn btn-orange" href="sumikko-orange.html">
-            🍊 orange<br>
-            <span class="subtitle">フレーズ</span>
-        </a>
+        <div class="menu-row">
+            <a class="menu-btn btn-red2" href="sumikko-red.html">
+                🍎 red<br>
+                <span class="subtitle">かぞく・からだ・スポーツ</span>
+            </a>
+            <a class="karuta-chip" href="sumikko-red-karuta.html">🎮 iPadでかるた</a>
+        </div>
+        <div class="menu-row">
+            <a class="menu-btn btn-blue1" href="sumikko-blue1.html">
+                🏠 blue1<br>
+                <span class="subtitle">いえ・もちもの(091-155)</span>
+            </a>
+            <a class="karuta-chip" href="sumikko-blue1-karuta.html">🎮 iPadでかるた</a>
+        </div>
+        <div class="menu-row">
+            <a class="menu-btn btn-blue2" href="sumikko-blue2.html">
+                📘 blue2<br>
+                <span class="subtitle">がっこう・きょうか・くに(156-210)</span>
+            </a>
+            <a class="karuta-chip" href="sumikko-blue2-karuta.html">🎮 iPadでかるた</a>
+        </div>
+        <div class="menu-row">
+            <a class="menu-btn btn-green" href="sumikko-green.html">
+                🌿 green<br>
+                <span class="subtitle">すうじ・じかん</span>
+            </a>
+            <a class="karuta-chip" href="sumikko-green-karuta.html">🎮 iPadでかるた</a>
+        </div>
+        <div class="menu-row">
+            <a class="menu-btn btn-pink" href="sumikko-pink.html">
+                🌸 pink<br>
+                <span class="subtitle">ようすのことば</span>
+            </a>
+            <a class="karuta-chip" href="sumikko-pink-karuta.html">🎮 iPadでかるた</a>
+        </div>
+        <div class="menu-row">
+            <a class="menu-btn btn-navy" href="sumikko-navy.html">
+                ⚓ navy<br>
+                <span class="subtitle">だいめいし・ぎもんし</span>
+            </a>
+            <a class="karuta-chip" href="sumikko-navy-karuta.html">🎮 iPadでかるた</a>
+        </div>
+        <div class="menu-row">
+            <a class="menu-btn btn-lightgreen" href="sumikko-lightgreen.html">
+                🌳 lightgreen<br>
+                <span class="subtitle">まち・のりもの・どうぶつ</span>
+            </a>
+            <a class="karuta-chip" href="sumikko-lightgreen-karuta.html">🎮 iPadでかるた</a>
+        </div>
+        <div class="menu-row">
+            <a class="menu-btn btn-orange" href="sumikko-orange.html">
+                🍊 orange<br>
+                <span class="subtitle">フレーズ</span>
+            </a>
+            <a class="karuta-chip" href="sumikko-orange-karuta.html">🎮 iPadでかるた</a>
+        </div>
     </div>
     <a class="btn-home" href="index.html">🏠 ホーム</a>
 </body>
