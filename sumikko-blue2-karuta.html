@@ -179,12 +179,12 @@
 
 <h1>📘 えいたんごblue2 かるた</h1>
 
-<!-- Deck select -->
+<!-- Start -->
 <div class="screen" id="screen-start">
   <div class="start-card">
-    <p>あそぶ セットを えらんでね！<br>ことばが きこえたら、あう カードを タップしよう！</p>
+    <p>ことばが きこえたら、<br>あう カードを タップしよう！</p>
   </div>
-  <div id="deck-buttons"></div>
+  <button class="start-btn" onclick="startGame()">🃏 Start</button>
   <button class="home-btn" onclick="location.href='sumikko_karuta_select.html'">◀ シリーズえらぶ</button>
 </div>
 
@@ -195,7 +195,7 @@
   <div id="feedback">🔊 きいてね...</div>
   <button id="btn-replay" onclick="replay()">🔊 もう一度きく</button>
   <div id="card-grid"></div>
-  <button class="home-btn" onclick="resetAll()">◀ セットをえらびなおす</button>
+  <button class="home-btn" onclick="location.href='sumikko_karuta_select.html'">◀ シリーズにもどる</button>
 </div>
 
 <!-- Clear -->
@@ -205,7 +205,7 @@
     <div class="score-display" id="final-score">0</div>
     <div class="score-label">/ <span id="total-count-2">0</span> まい</div>
   </div>
-  <button class="start-btn" onclick="resetAll()">セットをえらぶ 🔄</button>
+  <button class="start-btn" onclick="resetAll()">もう一度 🔄</button>
   <button class="home-btn" onclick="location.href='sumikko_karuta_select.html'">◀ シリーズえらぶ</button>
 </div>
 
@@ -277,18 +277,6 @@ function fitCardFont(el) {
   }
 }
 
-function renderDeckButtons() {
-  const wrap = document.getElementById('deck-buttons');
-  wrap.innerHTML = '';
-  decks.forEach((words, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'start-btn';
-    btn.textContent = `🃏 セット${i + 1}（${words.length}まい）`;
-    btn.onclick = () => startGame(i);
-    wrap.appendChild(btn);
-  });
-}
-
 function renderGrid() {
   const grid = document.getElementById('card-grid');
   grid.innerHTML = '';
@@ -322,7 +310,7 @@ function startRound() {
 function pickTarget() {
   const remainingIdx = roundWords.map((_, i) => i).filter(i => !takenIdx.has(i));
   if (remainingIdx.length === 0) {
-    if (pool.length === 0) { showClear(); return; }
+    if (pool.length === 0) { loadNextDeck(); return; }
     startRound();
     return;
   }
@@ -358,14 +346,23 @@ function onCardTap(i) {
   }
 }
 
-function startGame(deckIndex) {
-  pool = shuffle([...decks[deckIndex]]);
-  totalCount = pool.length;
+let deckIndex = 0;
+
+function startGame() {
+  deckIndex = 0;
   correctCount = 0;
+  totalCount = decks.reduce((sum, d) => sum + d.length, 0);
   document.getElementById('screen-start').style.display = 'none';
   document.getElementById('screen-clear').style.display = 'none';
   document.getElementById('screen-game').style.display = 'flex';
   updateProgress();
+  loadNextDeck();
+}
+
+function loadNextDeck() {
+  if (deckIndex >= decks.length) { showClear(); return; }
+  pool = shuffle([...decks[deckIndex]]);
+  deckIndex++;
   startRound();
 }
 
@@ -382,7 +379,6 @@ function resetAll() {
   document.getElementById('screen-start').style.display = 'flex';
 }
 
-renderDeckButtons();
 </script>
 </body>
 </html>
