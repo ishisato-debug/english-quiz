@@ -520,18 +520,41 @@ function drawParticles(ctx, now) {
 }
 
 // ─── Vehicle drawing ────────────────────────────────────────────────────────────
+const VEHICLE_BASE_H = 120;
+// チェイスの乗り物画像内でのパトランプの位置（画像サイズに対する比率）
+const CHASE_LIGHT_OFFSET = { x: 0.167, y: -0.172 };
+
+function vehicleDrawSize(idx, scale) {
+  const source = vehicleCanvases[idx] || vehicleImages[idx];
+  const naturalW = source && (source.width || source.naturalWidth);
+  const naturalH = source && (source.height || source.naturalHeight);
+  if (!naturalW || !naturalH) return null;
+  const h = VEHICLE_BASE_H * scale, w = h * (naturalW / naturalH);
+  return { w, h };
+}
+
 function drawVehicleImage(ctx, idx, cx, cy, rotation, scale, alpha) {
   const source = vehicleCanvases[idx] || vehicleImages[idx];
   if (!source || !(source.width || (source.complete && source.naturalWidth > 0))) return;
-  const naturalW = source.width || source.naturalWidth;
-  const naturalH = source.height || source.naturalHeight;
-  const h = 82 * scale, w = h * (naturalW / naturalH);
+  const size = vehicleDrawSize(idx, scale);
+  if (!size) return;
+  const { w, h } = size;
   ctx.save();
   ctx.globalAlpha = alpha;
   ctx.translate(cx, cy);
   ctx.rotate(rotation);
   ctx.drawImage(source, -w / 2, -h / 2, w, h);
   ctx.restore();
+}
+
+function chaseLightPos(cx, cy, rotation, scale) {
+  const size = vehicleDrawSize(0, scale);
+  if (!size) return { x: cx, y: cy };
+  const localX = CHASE_LIGHT_OFFSET.x * size.w, localY = CHASE_LIGHT_OFFSET.y * size.h;
+  return {
+    x: cx + localX * Math.cos(rotation) - localY * Math.sin(rotation),
+    y: cy + localX * Math.sin(rotation) + localY * Math.cos(rotation),
+  };
 }
 
 function drawSirenBlip(ctx, x, y, now) {
@@ -737,7 +760,10 @@ function drawScene(now = performance.now()) {
   drawCharactersOnPads(ctx, now);
   if (drivingState) {
     drawVehicleImage(ctx, drivingState.idx, drivingState.x, drivingState.y, drivingState.rotation, drivingState.scale, drivingState.alpha);
-    if (drivingState.siren) drawSirenBlip(ctx, drivingState.x, drivingState.y - 45, now);
+    if (drivingState.siren) {
+      const lp = chaseLightPos(drivingState.x, drivingState.y, drivingState.rotation, drivingState.scale);
+      drawSirenBlip(ctx, lp.x, lp.y, now);
+    }
   }
   drawParticles(ctx, now);
 }
