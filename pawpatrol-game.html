@@ -157,7 +157,7 @@
         }
         .char-btn:active { transform: translateY(4px); box-shadow: none !important; }
         .char-btn img { width: 48px; height: 48px; object-fit: contain; pointer-events: none; flex-shrink: 0; }
-        .char-btn .choice-text { font-size: clamp(14px, 3.5vw, 18px); text-align: center; line-height: 1.35; }
+        .char-btn .choice-text { font-size: clamp(18px, 3.5vw, 18px); text-align: center; line-height: 1.35; }
 
         .btn-chase    { background: #b8d9ff; color: #003d82; box-shadow: 0 5px 0 #4d94ff; }
         .btn-marshall { background: #ffb8b8; color: #880000; box-shadow: 0 5px 0 #ff6060; }
@@ -397,6 +397,21 @@ const vehicleCanvases = [null, null, null, null];
   vehicleImages[i] = img;
 });
 
+// ─── Lookout base ───────────────────────────────────────────────────────────────
+const baseImage = new Image();
+baseImage.src = 'paw_base.png';
+
+// ─── Kent (base前に立つキャラクター) ────────────────────────────────────────────
+const kentImage = new Image();
+kentImage.src = 'paw_kent.png';
+
+function drawKent(ctx) {
+  if (!kentImage.complete || kentImage.naturalWidth === 0) return;
+  const h = 135, w = h * (kentImage.naturalWidth / kentImage.naturalHeight);
+  const cx = TOWER_X + TOWER_W + 10, footY = GROUND_Y;
+  ctx.drawImage(kentImage, cx - w / 2, footY - h, w, h);
+}
+
 // ─── Game state ───────────────────────────────────────────────────────────────
 let quizList = [], qi = 0, score = 0, answered = false;
 
@@ -414,7 +429,7 @@ const GROUND_Y = 205;
 const CHAR_SIZE = 72;
 const CHAR_FOOT_Y = GROUND_Y;
 const PAD_XS = [250, 360, 470, 580];
-const TOWER_X = 15, TOWER_W = 175;
+const TOWER_X = 15, TOWER_H = GROUND_Y - 5, TOWER_W = TOWER_H * (382 / 687);
 const VEHICLE_COLORS = ['#0057b8', '#e60039', '#ff5fa8', '#ff9500'];
 
 // ─── Animation state ──────────────────────────────────────────────────────────
@@ -717,6 +732,7 @@ function drawScene(now = performance.now()) {
   drawBackground(ctx);
   drawRoad(ctx);
   drawTower(ctx);
+  drawKent(ctx);
   drawPads(ctx);
   drawCharactersOnPads(ctx, now);
   if (drivingState) {
@@ -727,14 +743,42 @@ function drawScene(now = performance.now()) {
 }
 
 function drawBackground(ctx) {
-  const sky = ctx.createLinearGradient(0, 0, 0, CH * 0.75);
-  sky.addColorStop(0, '#87ceeb'); sky.addColorStop(1, '#c8e8ff');
-  ctx.fillStyle = sky; ctx.fillRect(0, 0, CW, CH * 0.75);
-  ctx.fillStyle = '#8db87a'; ctx.fillRect(0, CH * 0.75, CW, CH * 0.25);
+  const sky = ctx.createLinearGradient(0, 0, 0, CH * 0.78);
+  sky.addColorStop(0, '#4fa8ea'); sky.addColorStop(0.55, '#8ed2f5'); sky.addColorStop(1, '#dcf3ff');
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, CW, CH * 0.78);
+
+  const sunX = CW - 60, sunY = 36;
+  const glow = ctx.createRadialGradient(sunX, sunY, 4, sunX, sunY, 55);
+  glow.addColorStop(0, 'rgba(255,250,205,0.9)'); glow.addColorStop(1, 'rgba(255,250,205,0)');
+  ctx.fillStyle = glow;
+  ctx.beginPath(); ctx.arc(sunX, sunY, 55, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#fff6c8';
+  ctx.beginPath(); ctx.arc(sunX, sunY, 17, 0, Math.PI * 2); ctx.fill();
+
+  drawCloud(ctx, 260, 42, 1);
+  drawCloud(ctx, 470, 68, 0.7);
+
+  const grass = ctx.createLinearGradient(0, CH * 0.78, 0, CH);
+  grass.addColorStop(0, '#a9dd88'); grass.addColorStop(1, '#7ab35c');
+  ctx.fillStyle = grass; ctx.fillRect(0, CH * 0.78, CW, CH * 0.22);
+}
+
+function drawCloud(ctx, x, y, scale) {
+  ctx.save();
+  ctx.globalAlpha = 0.92;
+  ctx.fillStyle = '#ffffff';
+  [[0, 0, 15], [15, -6, 12], [-15, -4, 11], [27, 3, 10], [-25, 4, 9]].forEach(([dx, dy, r]) => {
+    ctx.beginPath(); ctx.arc(x + dx * scale, y + dy * scale, r * scale, 0, Math.PI * 2); ctx.fill();
+  });
+  ctx.restore();
 }
 
 function drawRoad(ctx) {
-  ctx.fillStyle = '#5a5a5a'; ctx.fillRect(0, GROUND_Y, CW, CH - GROUND_Y);
+  ctx.fillStyle = '#d8d0ae';
+  ctx.fillRect(0, GROUND_Y - 4, CW, 4);
+  const roadGrad = ctx.createLinearGradient(0, GROUND_Y, 0, CH);
+  roadGrad.addColorStop(0, '#767676'); roadGrad.addColorStop(1, '#484848');
+  ctx.fillStyle = roadGrad; ctx.fillRect(0, GROUND_Y, CW, CH - GROUND_Y);
   ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.setLineDash([16, 12]);
   ctx.beginPath();
   ctx.moveTo(0, GROUND_Y + (CH - GROUND_Y) / 2);
@@ -744,25 +788,8 @@ function drawRoad(ctx) {
 }
 
 function drawTower(ctx) {
-  const x = TOWER_X, w = TOWER_W;
-  ctx.fillStyle = '#f0e4c8'; ctx.fillRect(x, 70, w, GROUND_Y - 70);
-  ctx.fillStyle = '#0057b8';
-  ctx.beginPath(); ctx.moveTo(x - 10, 70); ctx.lineTo(x + w / 2, 30); ctx.lineTo(x + w + 10, 70); ctx.closePath(); ctx.fill();
-  ctx.fillStyle = '#ffcc00';
-  ctx.beginPath(); ctx.arc(x + w / 2, 50, 16, 0, Math.PI * 2); ctx.fill();
-  ctx.font = '18px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText('🐾', x + w / 2, 57);
-  ctx.fillStyle = '#c8e4f8'; ctx.strokeStyle = '#0057b8'; ctx.lineWidth = 2;
-  const wPad = 14, winW = (w - wPad * 3) / 2, winH = 30;
-  [0, 1].forEach(row => {
-    [0, 1].forEach(col => {
-      const wx = x + wPad + col * (winW + wPad), wy = 84 + row * (winH + 14);
-      ctx.fillRect(wx, wy, winW, winH); ctx.strokeRect(wx, wy, winW, winH);
-    });
-  });
-  ctx.fillStyle = '#e60039'; roundRect(ctx, x + 10, GROUND_Y - 30, w - 20, 22, 5); ctx.fill();
-  ctx.fillStyle = 'white'; ctx.font = 'bold 12px sans-serif';
-  ctx.fillText('LOOKOUT', x + w / 2, GROUND_Y - 14);
+  if (!baseImage.complete || baseImage.naturalWidth === 0) return;
+  ctx.drawImage(baseImage, TOWER_X, GROUND_Y - TOWER_H, TOWER_W, TOWER_H);
 }
 
 function drawPads(ctx) {
@@ -926,18 +953,23 @@ function restartGame() {
 }
 
 // Initial idle canvas
-(function() {
+function drawIdleScreen() {
+  if (phase !== 'idle') return;
   const canvas = document.getElementById('train-canvas');
   const ctx = canvas.getContext('2d');
   drawBackground(ctx);
   drawRoad(ctx);
   drawTower(ctx);
+  drawKent(ctx);
   drawPads(ctx);
   ctx.textAlign = 'center';
   ctx.font = 'bold 18px sans-serif';
   ctx.fillStyle = '#003d82';
   ctx.fillText('「しゅつどう！」を おしてね 🚨', CW/2, CH/2 + 40);
-})();
+}
+kentImage.onload = drawIdleScreen;
+baseImage.onload = drawIdleScreen;
+drawIdleScreen();
 </script>
 </body>
 </html>
