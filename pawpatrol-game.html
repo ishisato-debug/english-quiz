@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAW Patrol Mission</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+            background-color: #eef6ff;
+            background-image: radial-gradient(#bcdcff 1px, transparent 1px);
+            background-size: 20px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 10px 30px;
+        }
+
+        h1 {
+            color: #003d82;
+            font-size: clamp(20px, 5vw, 28px);
+            margin: 8px 0 4px;
+            text-shadow: 1px 1px white;
+            text-align: center;
+        }
+
+        .screen {
+            width: 100%;
+            max-width: 660px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* ── Welcome ── */
+        .welcome-card {
+            background: white;
+            border: 5px solid #ffcc00;
+            border-radius: 30px;
+            padding: 28px 24px;
+            box-shadow: 0 8px 0 #ffcc00;
+            text-align: center;
+            width: 100%;
+        }
+        .welcome-card h2 { font-size: 22px; color: #003d82; margin-bottom: 16px; }
+        .welcome-card p  { font-size: 15px; color: #555; line-height: 1.7; }
+
+        .start-btn {
+            background: #e60039;
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+            padding: 18px 50px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 7px 0 #8c0022;
+            transition: 0.1s;
+        }
+        .start-btn:active { transform: translateY(7px); box-shadow: none; }
+
+        /* ── Quiz ── */
+        #screen-quiz { display: none; }
+
+        .progress-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            font-size: 14px;
+            color: #888;
+            gap: 16px;
+        }
+        #q-counter { text-align: center; }
+        #score-disp { white-space: nowrap; }
+
+        #progress-bar-wrap {
+            width: 100%;
+            height: 8px;
+            background: #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        #progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #003d82, #ffcc00);
+            border-radius: 4px;
+            transition: width 0.4s;
+            width: 0%;
+        }
+
+        .question-box {
+            background: white;
+            border: 4px solid #7ec4ff;
+            border-radius: 24px;
+            padding: 14px 18px 12px;
+            width: 100%;
+            box-shadow: 0 6px 0 #7ec4ff;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .q-text {
+            font-size: clamp(14px, 3.5vw, 19px);
+            font-weight: bold;
+            color: #333;
+            line-height: 1.85;
+            text-align: left;
+        }
+        .q-text .speaker { color: #999; font-size: 0.88em; }
+        .blank { color: #e60039; border-bottom: 2px solid #e60039; padding: 0 6px; }
+
+        .voice-btn {
+            background: #eef6ff;
+            border: 2px solid #ffcc00;
+            border-radius: 20px;
+            padding: 7px 18px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #003d82;
+        }
+        .voice-btn:active { background: #d8ecff; }
+
+        /* ── Canvas ── */
+        #train-canvas {
+            width: 100%;
+            max-width: 660px;
+            border-radius: 16px;
+            background: #e8f4e8;
+            display: block;
+        }
+
+        /* ── Character buttons ── */
+        .char-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+        }
+        .char-btn {
+            border: none;
+            border-radius: 20px;
+            padding: 10px 8px 10px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            transition: 0.1s;
+            min-height: 96px;
+        }
+        .char-btn:active { transform: translateY(4px); box-shadow: none !important; }
+        .char-btn img { width: 48px; height: 48px; object-fit: contain; pointer-events: none; flex-shrink: 0; }
+        .char-btn .choice-text { font-size: clamp(14px, 3.5vw, 18px); text-align: center; line-height: 1.35; }
+
+        .btn-chase    { background: #b8d9ff; color: #003d82; box-shadow: 0 5px 0 #4d94ff; }
+        .btn-marshall { background: #ffb8b8; color: #880000; box-shadow: 0 5px 0 #ff6060; }
+        .btn-skye     { background: #ffcce0; color: #b3005c; box-shadow: 0 5px 0 #ff85b3; }
+        .btn-zuma     { background: #ffe0b8; color: #995c00; box-shadow: 0 5px 0 #ffb84d; }
+
+        .char-btn.correct { background: #b8ffb8 !important; box-shadow: 0 5px 0 #60b860 !important; color: #006600 !important; }
+        .char-btn.wrong   { background: #ffb8b8 !important; box-shadow: 0 5px 0 #b86060 !important; color: #880000 !important; }
+        .char-btn:disabled { opacity: 0.6; cursor: default; }
+
+        #feedback-area {
+            font-size: 17px;
+            font-weight: bold;
+            color: #333;
+            min-height: 26px;
+            text-align: center;
+        }
+
+        .bottom-row {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .next-btn {
+            background: #003d82;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 12px 28px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #001f42;
+            transition: 0.1s;
+        }
+        .next-btn:active { transform: translateY(5px); box-shadow: none; }
+        .next-btn:disabled { opacity: 0.4; cursor: default; box-shadow: none; transform: none; }
+
+        /* ── Clear ── */
+        #screen-clear { display: none; gap: 20px; }
+        .clear-card {
+            background: white;
+            border: 5px solid #ffcc00;
+            border-radius: 30px;
+            padding: 30px 24px;
+            box-shadow: 0 8px 0 #ffcc00;
+            text-align: center;
+            width: 100%;
+        }
+        .clear-card h2 { font-size: 28px; color: #003d82; margin-bottom: 12px; }
+        .score-display { font-size: 48px; font-weight: bold; color: #003d82; }
+        .score-label   { font-size: 16px; color: #888; margin-top: 6px; }
+
+        .home-btn {
+            background: white;
+            color: #003d82;
+            border: 3px solid #ffcc00;
+            border-radius: 20px;
+            padding: 12px 28px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🚨 PAW Patrol しゅつどうゲーム</h1>
+
+<!-- Welcome -->
+<div class="screen" id="screen-welcome">
+    <div class="welcome-card">
+        <h2>🐾 アドベンチャーベイで じけん はっせい！</h2>
+        <p>ミッションが つぎつぎ とどくよ！<br>正しい答えを持っているパップを選んで<br>げんばへ しゅつどうさせよう🚨</p>
+    </div>
+    <button class="start-btn" onclick="startGame()">🚨 しゅつどう！</button>
+</div>
+
+<!-- Quiz -->
+<div class="screen" id="screen-quiz">
+    <div class="progress-row">
+        <span id="q-counter">1 / 10</span>
+        <span id="score-disp">🏅 0</span>
+    </div>
+    <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+
+    <div class="question-box">
+        <div class="q-text" id="q-text"></div>
+    </div>
+
+    <canvas id="train-canvas" width="660" height="250"></canvas>
+
+    <div class="char-buttons">
+        <button class="char-btn btn-chase"    id="btn0" onclick="answer(0)">
+            <img src="paw_chase.png" alt="チェイス">
+            <span class="choice-text" id="choice0"></span>
+        </button>
+        <button class="char-btn btn-marshall" id="btn1" onclick="answer(1)">
+            <img src="paw_marshal.png" alt="マーシャル">
+            <span class="choice-text" id="choice1"></span>
+        </button>
+        <button class="char-btn btn-skye"     id="btn2" onclick="answer(2)">
+            <img src="paw_sky.png" alt="スカイ">
+            <span class="choice-text" id="choice2"></span>
+        </button>
+        <button class="char-btn btn-zuma"     id="btn3" onclick="answer(3)">
+            <img src="paw_zuma.png" alt="ズーマ">
+            <span class="choice-text" id="choice3"></span>
+        </button>
+    </div>
+
+    <div id="feedback-area"></div>
+    <div class="bottom-row">
+        <button class="voice-btn" onclick="speakQuestion()">🔊 おんせい</button>
+        <button class="next-btn" id="next-btn" onclick="nextQuestion()" disabled>つぎのミッションへ ▶</button>
+    </div>
+    <button class="home-btn" onclick="location.href='index.html'" style="align-self:center; margin-top:4px;">🏠 ホーム</button>
+</div>
+
+<!-- Clear -->
+<div class="screen" id="screen-clear">
+    <div class="clear-card">
+        <h2>🎉 ぜんぶの ミッション かんりょう！</h2>
+        <div class="score-display" id="final-score">0</div>
+        <div class="score-label">/ 10 ミッション せいこう！</div>
+    </div>
+    <button class="start-btn" onclick="restartGame()">もう一度 🔄</button>
+    <button class="home-btn" onclick="location.href='index.html'">🏠 ホーム</button>
+</div>
+
+<script>
+// ─── Quiz data (英検4級ドリル / eiken4.html より) ────────────────
+const rawData = [
+    { s: ['My grandmother visited us at noon today.', 'My mother and I ( [BLANK] ) lunch for her.'], a: 1, c: ['made', 'said', 'saw', 'came'] },
+    { s: ['A: I enjoyed swimming last Sunday. What did you do?', 'B: I ( [BLANK] ) to the museum with my family.'], a: 4, c: ['go', 'goes', 'going', 'went'] },
+    { s: ['A: I ( [BLANK] ) have breakfast this morning.', 'B: Really? You can get some food at the cafeteria.'], a: 2, c: ["don't", "didn't", "wasn't", "can't"] },
+    { s: ['A: Did Marie bring these flowers?', 'B: Yes, she ( [BLANK] ). She likes growing flowers.'], a: 3, c: ['is', 'does', 'did', 'do'] },
+    { s: ['A: Do you know about Mike?', 'B: Yes. Mike and I ( [BLANK] ) in the same class last year.'], a: 4, c: ['is', 'are', 'was', 'were'] },
+    { s: ['A: Was the movie interesting?', "B: It was long, but it ( [BLANK] ) boring."], a: 2, c: ["isn't", "wasn't", "weren't", "didn't"] },
+    { s: ["A: I called you last night, but you didn't answer the phone.", 'B: Sorry, Josh. I ( [BLANK] ) taking a shower then.'], a: 2, c: ['am', 'was', 'are', 'were'] },
+    { s: ['When I left home at five yesterday, my parents were ( [BLANK] ).'], a: 3, c: ['sleep', 'slept', 'sleeping', 'to sleep'] },
+    { s: ['A: My friends are going ( [BLANK] ) to our school festival tomorrow.', 'B: Really? I want to see them.'], a: 4, c: ['come', 'coming', 'came', 'to come'] },
+    { s: ['A: ( [BLANK] ) he going to move to Brazil next month?', "B: That's right."], a: 3, c: ['Do', 'Does', 'Is', 'Can'] },
+    { s: ['A: Enjoy your summer vacation.', 'B: You too. I ( [BLANK] ) send an email to you.'], a: 1, c: ['will', 'am', 'have', 'could'] },
+    { s: ['A: Will Fred ( [BLANK] ) here tomorrow?', "B: Yes, he'll come by train."], a: 1, c: ['arrive', 'arrives', 'arrived', 'to arrive'] },
+    { s: ["Susan didn't do her homework.", 'She ( [BLANK] ) finish it by tomorrow.'], a: 3, c: ['has', 'have to', 'must', 'going to'] },
+    { s: ['A: The train was very crowded today.', 'B: Yes, I ( [BLANK] ) to stand for fifteen minutes.'], a: 2, c: ['have', 'had', 'going', 'must'] },
+    { s: ["A: Betty, was today's test difficult?", 'B: It was easy for me. There ( [BLANK] ) only ten questions.'], a: 1, c: ['were', 'are', 'was', 'is'] },
+    { s: ['A: ( [BLANK] ) open the window, Yuta. The wind is very strong.', 'B: OK, Mom.'], a: 4, c: ['Be', 'Please', "Let's", "Don't"] },
+    { s: ['A: This omelette is delicious!', 'B: Thanks. I used four eggs ( [BLANK] ) it.'], a: 2, c: ['make', 'to make', 'makes', 'made'] },
+    { s: ['A: Do you want something ( [BLANK] ), Mom?', 'B: Yes, please. Can I have some tea?'], a: 3, c: ['drink', 'drinking', 'to drink', 'drank'] },
+    { s: ['A: What does your brother do, Hana?', 'B: He likes ( [BLANK] ) vegetables, so he works on a farm.'], a: 2, c: ['grow', 'to grow', 'grew', 'grows'] },
+    { s: ['A: I heard you went to the mountains.', 'B: Yes, I enjoyed ( [BLANK] ) there.'], a: 4, c: ['to ski', 'ski', 'skied', 'skiing'] },
+    { s: ['A: How was the weather in Paris?', 'B: Today was ( [BLANK] ) than yesterday.'], a: 4, c: ['younger', 'smaller', 'busier', 'hotter'] },
+    { s: ["A: What's your favorite book?", 'B: I think this book is the ( [BLANK] ) of all.'], a: 1, c: ['most interesting', 'more famous', 'most careful', 'more exciting'] },
+    { s: ['A: Which do you like ( [BLANK] ), summer or winter?', "B: I like both seasons. I can't decide."], a: 1, c: ['better', 'best', 'most', 'good'] },
+    { s: ['A: Can Billy sing as well ( [BLANK] ) you?', 'B: Yes, he is good at singing.'], a: 2, c: ['so', 'as', 'than', 'of'] },
+    { s: ['A: Please call me ( [BLANK] ) you arrive at the station.', "B: OK. I'll call you later, Mom."], a: 2, c: ['because', 'when', 'so', 'that'] },
+    { s: ["A: Come to the event ( [BLANK] ) you're interested in anime.", "B: I'd love to. I love anime."], a: 4, c: ['after', 'than', 'but', 'if'] },
+    { s: ['A: Did you ( [BLANK] ) your mother flowers.', 'B: No, I sent her a card this year.'], a: 3, c: ['tell', 'look', 'give', 'make'] },
+    { s: ['A: I want to ( [BLANK] ) a police officer.', 'B: I hope your wish comes true.'], a: 2, c: ['look', 'become', 'give', 'get'] },
+    { s: ['A: ( [BLANK] ) do you want to study abroad?', 'B: To learn about American culture.'], a: 3, c: ['What', 'When', 'Why', 'Which'] },
+    { s: ["A: It's time for bed now. ( [BLANK] ) does the drama finish?", "B: In five minutes. I'll go to bed after that."], a: 1, c: ['When', 'Where', 'Why', 'Who'] },
+    { s: ['A: ( [BLANK] ) did you do yesterday?', 'B: I saw a magic show at the hall.'], a: 2, c: ['Why', 'What', 'When', 'Where'] },
+    { s: ['A: What ( [BLANK] ) of ice cream do you like?', 'B: I like strawberry ice cream.'], a: 4, c: ['color', 'size', 'fruit', 'kind'] },
+    { s: ['A: Excuse me Mr. Fox. ( [BLANK] ) I ask you a question?', 'B: Sure, please come in.'], a: 1, c: ['May', 'Will', 'Do', 'Shall'] },
+    { s: ['A: ( [BLANK] ) you tell me the way to the city hall?', 'B: Just around the corner.'], a: 1, c: ['Could', 'May', 'Should', 'Do'] },
+    { s: ['A: Do you ( [BLANK] ) another sandwich?', "B: No, thank you. I'm full."], a: 3, c: ['like', 'make', 'want', 'find'] },
+    { s: ['A: Do you want ( [BLANK] ) to the park after school?', "B: Sure. Let's play catch."], a: 2, c: ['go', 'to go', 'went', 'going'] },
+    { s: ['A: How did you ( [BLANK] ) your trip to France?', 'B: It was wonderful!'], a: 2, c: ['feel', 'like', 'want', 'have'] },
+    { s: ['A: ( [BLANK] ) do you feel today?', 'B: I feel great.'], a: 3, c: ['What', 'Why', 'How', 'Whose'] },
+    { s: ['A: This is Karen. Can I ( [BLANK] ) to Yuta?', 'B: Just a minute.'], a: 1, c: ['talk', 'say', 'call', 'write'] },
+    { s: ['A: May I help you?', "B: Yes. I'm ( [BLANK] ) for running shoes."], a: 4, c: ['speaking', 'watching', 'buying', 'looking'] },
+];
+
+const allData = rawData.map(r => ({
+  q: r.s.join('\n').replace(/\( \[BLANK\] \)/g, '___'),
+  choices: r.c,
+  a: r.a - 1
+}));
+
+function buildQuestion(raw) {
+  const correctText = raw.choices[raw.a];
+  const shuffled = [...raw.choices].sort(() => Math.random() - 0.5);
+  return { q: raw.q, choices: shuffled, a: shuffled.indexOf(correctText) };
+}
+
+// ─── Background removal ───────────────────────────────────────────────────────
+function removeBackground(img, threshold = 15) {
+  const c = document.createElement('canvas');
+  c.width = img.naturalWidth; c.height = img.naturalHeight;
+  const ctx = c.getContext('2d');
+  ctx.drawImage(img, 0, 0);
+  const d = ctx.getImageData(0, 0, c.width, c.height);
+  const px = d.data, w = c.width, h = c.height;
+  const corners = [0, w-1, w*(h-1), w*h-1];
+  const bgR = px[corners[0]*4], bgG = px[corners[0]*4+1], bgB = px[corners[0]*4+2];
+  const visited = new Uint8Array(w * h);
+  const stack = [...corners];
+  corners.forEach(i => { visited[i] = 1; });
+  while (stack.length) {
+    const i = stack.pop(), x = i % w, y = ~~(i / w), p = i * 4;
+    const dr = px[p]-bgR, dg = px[p+1]-bgG, db = px[p+2]-bgB;
+    if (Math.sqrt(dr*dr + dg*dg + db*db) > threshold) continue;
+    px[p+3] = 0;
+    for (const [nx, ny] of [[x-1,y],[x+1,y],[x,y-1],[x,y+1]]) {
+      if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+        const ni = ny*w+nx;
+        if (!visited[ni]) { visited[ni] = 1; stack.push(ni); }
+      }
+    }
+  }
+  ctx.putImageData(d, 0, 0);
+  return c;
+}
+
+// ─── Character images ─────────────────────────────────────────────────────────
+const charImages = [];
+const charCanvases = [null, null, null, null];
+['paw_chase.png', 'paw_marshal.png', 'paw_sky.png', 'paw_zuma.png'].forEach((src, i) => {
+  const img = new Image();
+  img.onload = () => { charCanvases[i] = removeBackground(img); };
+  img.src = src;
+  charImages[i] = img;
+});
+
+// ─── Vehicle images ───────────────────────────────────────────────────────────
+const vehicleImages = [];
+const vehicleCanvases = [null, null, null, null];
+['paw_chase_vehicle.png', 'paw_marshal_vehicle.png', 'paw_sky_vehicle.png', 'paw_zuma_vehicle.png'].forEach((src, i) => {
+  const img = new Image();
+  img.onload = () => { vehicleCanvases[i] = removeBackground(img, 26); };
+  img.src = src;
+  vehicleImages[i] = img;
+});
+
+// ─── Game state ───────────────────────────────────────────────────────────────
+let quizList = [], qi = 0, score = 0, answered = false;
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ─── Canvas layout ────────────────────────────────────────────────────────────
+const CW = 660, CH = 250;
+const GROUND_Y = 205;
+const CHAR_SIZE = 72;
+const CHAR_FOOT_Y = GROUND_Y;
+const PAD_XS = [250, 360, 470, 580];
+const TOWER_X = 15, TOWER_W = 175;
+const VEHICLE_COLORS = ['#0057b8', '#e60039', '#ff5fa8', '#ff9500'];
+
+// ─── Animation state ──────────────────────────────────────────────────────────
+let animFrame = null;
+let phase = 'idle'; // idle | alert | ready | jump | driving | shaking | complete
+let wrongIdx = -1;
+let jumpingCharIdx = -1;
+let jumpOffset = 0;
+let shakeIdx = -1;
+let shakeOffset = 0;
+let drivingState = null; // {idx, x, y, rotation, scale, alpha, siren}
+let departedIdx = -1;
+let particles = [];
+
+function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+function easeIn(t)  { return Math.pow(t, 3); }
+
+function startJump(idx, onDone) {
+  jumpingCharIdx = idx;
+  phase = 'jump';
+  const dur = 600, bounces = 2, jumpH = 24, t0 = performance.now();
+  if (animFrame) cancelAnimationFrame(animFrame);
+  function tick(now) {
+    const p = Math.min((now - t0) / dur, 1);
+    jumpOffset = -Math.abs(Math.sin(p * Math.PI * bounces)) * jumpH;
+    drawScene(now);
+    if (p < 1) { animFrame = requestAnimationFrame(tick); }
+    else { jumpOffset = 0; jumpingCharIdx = -1; onDone(); }
+  }
+  animFrame = requestAnimationFrame(tick);
+}
+
+function startShake(idx) {
+  shakeIdx = idx;
+  phase = 'shaking';
+  const dur = 500, t0 = performance.now();
+  if (animFrame) cancelAnimationFrame(animFrame);
+  function tick(now) {
+    const p = Math.min((now - t0) / dur, 1);
+    shakeOffset = Math.sin(p * Math.PI * 6) * 6 * (1 - p);
+    drawScene(now);
+    if (p < 1) { animFrame = requestAnimationFrame(tick); }
+    else { shakeOffset = 0; drawScene(now); }
+  }
+  animFrame = requestAnimationFrame(tick);
+}
+
+function startDrive(idx) {
+  phase = 'driving';
+  departedIdx = idx;
+  disableButtons();
+  playSiren();
+  [driveChase, driveMarshall, driveSkye, driveZuma][idx](idx);
+}
+
+function finishDrive() {
+  drivingState = null;
+  phase = 'ready';
+  drawScene(performance.now());
+  showNextBtn();
+}
+
+// ─── Particle effects ──────────────────────────────────────────────────────────
+function spawnParticle(p) { particles.push(p); }
+
+function drawParticles(ctx, now) {
+  particles = particles.filter(p => now - p.spawnTime < p.life);
+  particles.forEach(p => {
+    if (now < p.spawnTime) return;
+    const t = (now - p.spawnTime) / 1000;
+    const x = p.x0 + (p.vx || 0) * t;
+    const y = p.y0 + (p.vy || 0) * t;
+    const alpha = Math.max(0, 1 - t / (p.life / 1000));
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    if (p.type === 'water') {
+      ctx.fillStyle = '#3fa9ff';
+      ctx.beginPath(); ctx.arc(x, y, p.size, 0, Math.PI * 2); ctx.fill();
+    } else if (p.type === 'glyph') {
+      ctx.font = `${p.size}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(p.glyph, x, y);
+    } else if (p.type === 'ring') {
+      ctx.strokeStyle = p.color; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(x, y, p.size + t * 70, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.restore();
+  });
+}
+
+// ─── Vehicle drawing ────────────────────────────────────────────────────────────
+function drawVehicleImage(ctx, idx, cx, cy, rotation, scale, alpha) {
+  const source = vehicleCanvases[idx] || vehicleImages[idx];
+  if (!source || !(source.width || (source.complete && source.naturalWidth > 0))) return;
+  const naturalW = source.width || source.naturalWidth;
+  const naturalH = source.height || source.naturalHeight;
+  const h = 82 * scale, w = h * (naturalW / naturalH);
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.translate(cx, cy);
+  ctx.rotate(rotation);
+  ctx.drawImage(source, -w / 2, -h / 2, w, h);
+  ctx.restore();
+}
+
+function drawSirenBlip(ctx, x, y, now) {
+  const on = Math.floor(now / 120) % 2 === 0;
+  ctx.save();
+  ctx.fillStyle = on ? '#ff2b2b' : '#2b7bff';
+  ctx.beginPath(); ctx.ellipse(x, y, 9, 5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+// ─── Character-specific mission-out animations ─────────────────────────────────
+function driveChase(idx) {
+  const padX = PAD_XS[idx], groundCy = GROUND_Y - 35, centerX = CW / 2;
+  const t0 = performance.now();
+  const D_RUN = 650, D_POSE = 450, D_RING = 450, D_EXIT = 550;
+  const T1 = D_RUN, T2 = T1 + D_POSE, T3 = T2 + D_RING, T4 = T3 + D_EXIT;
+  let ringsSpawned = false;
+  if (animFrame) cancelAnimationFrame(animFrame);
+  function tick(now) {
+    const el = now - t0;
+    let x = centerX, y = groundCy, rot = 0, scale = 1, siren = true;
+    if (el <= T1) {
+      x = padX + (centerX - padX) * easeOut(el / D_RUN);
+    } else if (el <= T2) {
+      const p = (el - T1) / D_POSE;
+      scale = 1 + Math.sin(p * Math.PI) * 0.2;
+    } else if (el <= T3) {
+      if (!ringsSpawned) {
+        ringsSpawned = true;
+        for (let k = 0; k < 3; k++) {
+          spawnParticle({ spawnTime: now + k * 130, x0: centerX + 38, y0: groundCy - 6, life: 480, type: 'ring', size: 5, color: 'rgba(140,200,255,0.9)' });
+        }
+      }
+    } else {
+      const p = easeIn(Math.min(1, (el - T3) / D_EXIT));
+      x = centerX + (CW + 80 - centerX) * p;
+      siren = p < 0.5;
+    }
+    drivingState = { idx, x, y, rotation: rot, scale, alpha: 1, siren };
+    drawScene(now);
+    if (el < T4) { animFrame = requestAnimationFrame(tick); } else { finishDrive(); }
+  }
+  animFrame = requestAnimationFrame(tick);
+}
+
+function driveMarshall(idx) {
+  const padX = PAD_XS[idx], groundCy = GROUND_Y - 35, centerX = CW / 2;
+  const t0 = performance.now();
+  const D_RUN = 650, D_POSE = 450, D_BURST = 350, D_EXIT = 600;
+  const T1 = D_RUN, T2 = T1 + D_POSE, T3 = T2 + D_BURST, T4 = T3 + D_EXIT;
+  let burstSpawned = false;
+  if (animFrame) cancelAnimationFrame(animFrame);
+  function tick(now) {
+    const el = now - t0;
+    let x = centerX, y = groundCy, rot = 0, scale = 1;
+    if (el <= T1) {
+      x = padX + (centerX - padX) * easeOut(el / D_RUN);
+    } else if (el <= T2) {
+      const p = (el - T1) / D_POSE;
+      scale = 1 + Math.sin(p * Math.PI) * 0.2;
+    } else if (el <= T3) {
+      if (!burstSpawned) {
+        burstSpawned = true;
+        for (let k = 0; k < 14; k++) {
+          spawnParticle({ spawnTime: now, x0: centerX - 30, y0: groundCy, vx: -(80 + Math.random() * 100), vy: (Math.random() - 0.5) * 160, life: 450, type: 'water', size: 4 + Math.random() * 3 });
+        }
+      }
+    } else {
+      const p = easeIn(Math.min(1, (el - T3) / D_EXIT));
+      x = centerX + (CW + 80 - centerX) * p;
+    }
+    drivingState = { idx, x, y, rotation: rot, scale, alpha: 1 };
+    drawScene(now);
+    if (el < T4) { animFrame = requestAnimationFrame(tick); } else { finishDrive(); }
+  }
+  animFrame = requestAnimationFrame(tick);
+}
+
+function driveSkye(idx) {
+  const padX = PAD_XS[idx], groundCy = GROUND_Y - 35, centerX = CW / 2, endCy = -80;
+  const t0 = performance.now();
+  const D_RUN = 650, D_POSE = 450, D_RISE = 1300;
+  const T1 = D_RUN, T2 = T1 + D_POSE, T3 = T2 + D_RISE;
+  let lastSparkleTime = 0;
+  const glyphs = ['⭐', '💗', '✨'];
+  if (animFrame) cancelAnimationFrame(animFrame);
+  function tick(now) {
+    const el = now - t0;
+    let x = centerX, y = groundCy, rot = 0, scale = 1;
+    if (el <= T1) {
+      x = padX + (centerX - padX) * easeOut(el / D_RUN);
+    } else if (el <= T2) {
+      const p = (el - T1) / D_POSE;
+      scale = 1 + Math.sin(p * Math.PI) * 0.2;
+    } else {
+      const p = Math.min(1, (el - T2) / D_RISE);
+      x = centerX + 150 * easeOut(p);
+      y = groundCy + (endCy - groundCy) * easeIn(p);
+      rot = p < 0.6 ? (p / 0.6) * Math.PI * 2 : Math.PI * 2;
+      if (now - lastSparkleTime > 90) {
+        lastSparkleTime = now;
+        spawnParticle({ spawnTime: now, x0: x + (Math.random() - 0.5) * 20, y0: y + 20 + (Math.random() - 0.5) * 10, vx: (Math.random() - 0.5) * 30, vy: 40 + Math.random() * 30, life: 500, type: 'glyph', glyph: glyphs[Math.floor(Math.random() * glyphs.length)], size: 14 + Math.random() * 6 });
+      }
+    }
+    drivingState = { idx, x, y, rotation: rot, scale, alpha: 1 };
+    drawScene(now);
+    if (el < T3) { animFrame = requestAnimationFrame(tick); } else { finishDrive(); }
+  }
+  animFrame = requestAnimationFrame(tick);
+}
+
+function driveZuma(idx) {
+  const padX = PAD_XS[idx], groundCy = GROUND_Y - 30, centerX = CW / 2;
+  const t0 = performance.now();
+  const D_RUN = 650, D_POSE = 450, D_GLIDE = 900, D_SPIN = 500;
+  const T1 = D_RUN, T2 = T1 + D_POSE, T3 = T2 + D_GLIDE, T4 = T3 + D_SPIN;
+  let splashSpawned = false;
+  if (animFrame) cancelAnimationFrame(animFrame);
+  function tick(now) {
+    const el = now - t0;
+    let x = centerX, y = groundCy, rot = 0, scale = 1;
+    if (el <= T1) {
+      x = padX + (centerX - padX) * easeOut(el / D_RUN);
+    } else if (el <= T2) {
+      const p = (el - T1) / D_POSE;
+      scale = 1 + Math.sin(p * Math.PI) * 0.2;
+      if (!splashSpawned && p > 0.5) {
+        splashSpawned = true;
+        for (let k = 0; k < 3; k++) {
+          spawnParticle({ spawnTime: now + k * 100, x0: centerX, y0: groundCy + 15, life: 450, type: 'ring', size: 6, color: 'rgba(255,255,255,0.85)' });
+        }
+      }
+    } else if (el <= T3) {
+      const p = (el - T2) / D_GLIDE;
+      x = centerX + 260 * p;
+      y = groundCy + Math.sin(el * 0.012) * 14;
+      rot = Math.sin(el * 0.012) * 0.1;
+    } else {
+      const p = Math.min(1, (el - T3) / D_SPIN);
+      x = (centerX + 260) + (CW + 80 - (centerX + 260)) * easeIn(p);
+      rot = p * Math.PI * 2;
+    }
+    drivingState = { idx, x, y, rotation: rot, scale, alpha: 1 };
+    drawScene(now);
+    if (el < T4) { animFrame = requestAnimationFrame(tick); } else { finishDrive(); }
+  }
+  animFrame = requestAnimationFrame(tick);
+}
+
+// ─── Sound ────────────────────────────────────────────────────────────────────
+function playDingDong() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator(), gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(659.25, ctx.currentTime);
+  osc.frequency.setValueAtTime(523.25, ctx.currentTime + 0.15);
+  gain.gain.setValueAtTime(0.12, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.55);
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.start(); osc.stop(ctx.currentTime + 0.55);
+}
+
+function playSiren() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator(), gain = ctx.createGain();
+  osc.type = 'sine';
+  const t0 = ctx.currentTime;
+  osc.frequency.setValueAtTime(880, t0);
+  osc.frequency.setValueAtTime(660, t0 + 0.15);
+  osc.frequency.setValueAtTime(880, t0 + 0.3);
+  osc.frequency.setValueAtTime(660, t0 + 0.45);
+  gain.gain.setValueAtTime(0.08, t0);
+  gain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.6);
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.start(t0); osc.stop(t0 + 0.6);
+}
+
+function speakQuestion() {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const q = quizList[qi];
+  const correct = q.choices[q.a];
+  const text = q.q
+    .replace(/___/g, correct)
+    .split('\n')
+    .map(line => line.replace(/^[A-Za-z][A-Za-z0-9 .]*:\s/, ''))
+    .join('. ');
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; u.rate = 0.85;
+  window.speechSynthesis.speak(u);
+}
+
+// ─── Drawing ──────────────────────────────────────────────────────────────────
+function drawScene(now = performance.now()) {
+  const canvas = document.getElementById('train-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, CW, CH);
+  drawBackground(ctx);
+  drawRoad(ctx);
+  drawTower(ctx);
+  drawPads(ctx);
+  drawCharactersOnPads(ctx, now);
+  if (drivingState) {
+    drawVehicleImage(ctx, drivingState.idx, drivingState.x, drivingState.y, drivingState.rotation, drivingState.scale, drivingState.alpha);
+    if (drivingState.siren) drawSirenBlip(ctx, drivingState.x, drivingState.y - 45, now);
+  }
+  drawParticles(ctx, now);
+}
+
+function drawBackground(ctx) {
+  const sky = ctx.createLinearGradient(0, 0, 0, CH * 0.75);
+  sky.addColorStop(0, '#87ceeb'); sky.addColorStop(1, '#c8e8ff');
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, CW, CH * 0.75);
+  ctx.fillStyle = '#8db87a'; ctx.fillRect(0, CH * 0.75, CW, CH * 0.25);
+}
+
+function drawRoad(ctx) {
+  ctx.fillStyle = '#5a5a5a'; ctx.fillRect(0, GROUND_Y, CW, CH - GROUND_Y);
+  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.setLineDash([16, 12]);
+  ctx.beginPath();
+  ctx.moveTo(0, GROUND_Y + (CH - GROUND_Y) / 2);
+  ctx.lineTo(CW, GROUND_Y + (CH - GROUND_Y) / 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function drawTower(ctx) {
+  const x = TOWER_X, w = TOWER_W;
+  ctx.fillStyle = '#f0e4c8'; ctx.fillRect(x, 70, w, GROUND_Y - 70);
+  ctx.fillStyle = '#0057b8';
+  ctx.beginPath(); ctx.moveTo(x - 10, 70); ctx.lineTo(x + w / 2, 30); ctx.lineTo(x + w + 10, 70); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#ffcc00';
+  ctx.beginPath(); ctx.arc(x + w / 2, 50, 16, 0, Math.PI * 2); ctx.fill();
+  ctx.font = '18px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('🐾', x + w / 2, 57);
+  ctx.fillStyle = '#c8e4f8'; ctx.strokeStyle = '#0057b8'; ctx.lineWidth = 2;
+  const wPad = 14, winW = (w - wPad * 3) / 2, winH = 30;
+  [0, 1].forEach(row => {
+    [0, 1].forEach(col => {
+      const wx = x + wPad + col * (winW + wPad), wy = 84 + row * (winH + 14);
+      ctx.fillRect(wx, wy, winW, winH); ctx.strokeRect(wx, wy, winW, winH);
+    });
+  });
+  ctx.fillStyle = '#e60039'; roundRect(ctx, x + 10, GROUND_Y - 30, w - 20, 22, 5); ctx.fill();
+  ctx.fillStyle = 'white'; ctx.font = 'bold 12px sans-serif';
+  ctx.fillText('LOOKOUT', x + w / 2, GROUND_Y - 14);
+}
+
+function drawPads(ctx) {
+  PAD_XS.forEach((px, i) => {
+    ctx.fillStyle = VEHICLE_COLORS[i] + '40';
+    ctx.beginPath(); ctx.ellipse(px, GROUND_Y + 6, 34, 10, 0, 0, Math.PI * 2); ctx.fill();
+  });
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y);
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r);
+  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h);
+  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r);
+  ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+}
+
+function drawCharactersOnPads(ctx, now) {
+  if (phase === 'idle') return;
+  const q = quizList[qi];
+  const showBubble = true;
+  for (let i = 0; i < 4; i++) {
+    if (i === departedIdx) continue;
+    let footY = CHAR_FOOT_Y;
+    if (i === jumpingCharIdx) footY += jumpOffset;
+    let cx = PAD_XS[i];
+    if (i === shakeIdx) cx += shakeOffset;
+    drawCharImage(ctx, i, cx, footY, q.choices[i], showBubble);
+    if (i === wrongIdx) drawWrongMark(ctx, cx, footY - CHAR_SIZE / 2);
+  }
+}
+
+function drawWrongMark(ctx, cx, cy) {
+  ctx.save();
+  ctx.strokeStyle = 'red'; ctx.lineWidth = 5; ctx.globalAlpha = 0.85;
+  ctx.beginPath(); ctx.moveTo(cx-14, cy-14); ctx.lineTo(cx+14, cy+14); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx+14, cy-14); ctx.lineTo(cx-14, cy+14); ctx.stroke();
+  ctx.restore();
+}
+
+function drawCharImage(ctx, idx, cx, footY, label, showBubble) {
+  const source = charCanvases[idx] || charImages[idx];
+  if (source && (source.width || (source.complete && source.naturalWidth > 0))) {
+    const aspect = (source.width || source.naturalWidth) / (source.height || source.naturalHeight);
+    const h = CHAR_SIZE, w = h * aspect;
+    ctx.drawImage(source, cx - w/2, footY - h, w, h);
+  }
+  if (showBubble) drawSpeechBubble(ctx, cx, footY - CHAR_SIZE - 4, label);
+}
+
+function drawSpeechBubble(ctx, cx, bottomY, text) {
+  const display = text.length > 13 ? text.slice(0, 12) + '…' : text;
+  ctx.save();
+  ctx.font = 'bold 10px sans-serif';
+  const tw = ctx.measureText(display).width;
+  const bw = Math.max(36, tw + 12), bh = 18;
+  const bx = Math.max(10, Math.min(CW - bw - 10, cx - bw/2));
+  const by = bottomY - bh;
+  ctx.fillStyle = 'white'; ctx.strokeStyle = '#555'; ctx.lineWidth = 1.5;
+  roundRect(ctx, bx, by, bw, bh, 5); ctx.fill(); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx-4, by+bh); ctx.lineTo(cx+4, by+bh); ctx.lineTo(cx, by+bh+7);
+  ctx.fill();
+  ctx.fillStyle = '#222'; ctx.textAlign = 'center';
+  ctx.fillText(display, bx + bw/2, by + bh - 4);
+  ctx.restore();
+}
+
+// ─── Question rendering ───────────────────────────────────────────────────────
+function renderQuestion(raw) {
+  return raw.q.split('\n').map(line => {
+    const withBlank = line.replace(/___/g, '<span class="blank">　　　　</span>');
+    const m = withBlank.match(/^([A-Za-z][A-Za-z0-9 .]*:\s)([\s\S]*)$/);
+    if (m) return `<span class="speaker">${m[1]}</span>${m[2]}`;
+    return withBlank;
+  }).join('<br>');
+}
+
+// ─── Game flow ────────────────────────────────────────────────────────────────
+function startGame() {
+  quizList = shuffle([...allData]).slice(0, 10).map(buildQuestion);
+  qi = 0; score = 0; answered = false;
+  document.getElementById('screen-welcome').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'flex';
+  loadQuestion();
+}
+
+function loadQuestion() {
+  answered = false; wrongIdx = -1; jumpingCharIdx = -1; jumpOffset = 0;
+  shakeIdx = -1; shakeOffset = 0; drivingState = null; departedIdx = -1; particles = [];
+  const q = quizList[qi];
+  document.getElementById('q-counter').textContent = `${qi+1} / ${quizList.length}`;
+  document.getElementById('score-disp').textContent = `🏅 ${score}`;
+  document.getElementById('progress-bar').style.width = (qi / quizList.length * 100) + '%';
+  document.getElementById('q-text').innerHTML = renderQuestion(q);
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('choice' + i).textContent = q.choices[i];
+    const btn = document.getElementById('btn' + i);
+    btn.disabled = false; btn.classList.remove('correct', 'wrong');
+  }
+  document.getElementById('feedback-area').textContent = '';
+  document.getElementById('next-btn').disabled = true;
+  phase = 'ready';
+  drawScene();
+  enableButtons();
+}
+
+function answer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = quizList[qi];
+  const correct = (idx === q.a);
+  document.getElementById('btn' + idx).classList.add(correct ? 'correct' : 'wrong');
+  if (correct) {
+    playDingDong();
+    score++;
+    document.getElementById('feedback-area').textContent = '🚨 ミッションせいこう！';
+    document.getElementById('score-disp').textContent = `🏅 ${score}`;
+    disableButtons();
+    setTimeout(() => startJump(idx, () => startDrive(idx)), 150);
+  } else {
+    wrongIdx = idx;
+    document.getElementById('btn' + q.a).classList.add('correct');
+    document.getElementById('feedback-area').textContent = `❌ ざんねん！せいかいは「${q.choices[q.a]}」だよ！`;
+    disableButtons();
+    startShake(idx);
+    setTimeout(() => showNextBtn(), 900);
+  }
+}
+
+function disableButtons() {
+  for (let i = 0; i < 4; i++) document.getElementById('btn' + i).disabled = true;
+}
+function enableButtons() {
+  for (let i = 0; i < 4; i++) document.getElementById('btn' + i).disabled = false;
+}
+function showNextBtn() {
+  document.getElementById('next-btn').disabled = false;
+}
+
+function nextQuestion() {
+  qi++;
+  if (qi >= quizList.length) showClear(); else loadQuestion();
+}
+
+function showClear() {
+  document.getElementById('screen-quiz').style.display = 'none';
+  document.getElementById('screen-clear').style.display = 'flex';
+  document.getElementById('final-score').textContent = score;
+  document.getElementById('progress-bar').style.width = '100%';
+}
+
+function restartGame() {
+  document.getElementById('screen-clear').style.display = 'none';
+  document.getElementById('screen-welcome').style.display = 'flex';
+}
+
+// Initial idle canvas
+(function() {
+  const canvas = document.getElementById('train-canvas');
+  const ctx = canvas.getContext('2d');
+  drawBackground(ctx);
+  drawRoad(ctx);
+  drawTower(ctx);
+  drawPads(ctx);
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 18px sans-serif';
+  ctx.fillStyle = '#003d82';
+  ctx.fillText('「しゅつどう！」を おしてね 🚨', CW/2, CH/2 + 40);
+})();
+</script>
+</body>
+</html>
