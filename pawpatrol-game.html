@@ -334,6 +334,28 @@ const rawData = [
     { s: ['A: ( [BLANK] ) do you feel today?', 'B: I feel great.'], a: 3, c: ['What', 'Why', 'How', 'Whose'] },
     { s: ['A: This is Karen. Can I ( [BLANK] ) to Yuta?', 'B: Just a minute.'], a: 1, c: ['talk', 'say', 'call', 'write'] },
     { s: ['A: May I help you?', "B: Yes. I'm ( [BLANK] ) for running shoes."], a: 4, c: ['speaking', 'watching', 'buying', 'looking'] },
+    // 02:会話選択
+    { s: ['Boy: You have a new ball. Is that a present?', 'Girl: No. ( [BLANK] )'], a: 2, c: ['I like soccer very much.', 'I bought it yesterday.', 'My father gave it to me.', 'Thank you.'] },
+    { s: ["Mother: You don't look well, Jack. What's wrong?", 'Son: I stayed up late yesterday. So ( [BLANK] )'], a: 2, c: ["I didn't have a watch.", "I didn't sleep well.", 'I like math very much.', "I didn't watch TV."] },
+    { s: ["Girl: Hi, Jack. I didn't see you at school yesterday.", "Boy: ( [BLANK] ) but I'm better now."], a: 2, c: ['I walked to school,', 'I was sick in bed,', 'I have a lot of homework,', "I didn't know that,"] },
+    { s: ['Father: I knocked on the door many times. ( [BLANK] )', 'Daughter: Well, I was listening to music.'], a: 3, c: ['Which is your room?', 'Why were you there?', 'What were you doing?', 'Where is your CD?'] },
+    { s: ['Man: Hi, Anna. ( [BLANK] ) My bus stopped for 20 minutes.', "Woman: Hi, Tom. That's OK. I'll wait in a cafe."], a: 3, c: ['I have to go now.', "I'm going to study.", "I'm going to be late.", 'I took the wrong train.'] },
+    { s: ['Girl 1: Your birthday is coming, Nancy. ( [BLANK] )', 'Girl 2: Next Sunday at my home. Can you come?'], a: 2, c: ['What do you want?', 'When will you have a party?', 'How do you go there?', 'Where is your house?'] },
+    { s: ['Daughter: Dad, can we go to the park on Saturday or Sunday?', 'Dad: Sorry, Asha. ( [BLANK] )'], a: 1, c: ['I have to go to work this weekend.', 'I had to go to the park.', 'You should play tennis there.', "That's a good idea."] },
+    { s: ['Man: There is snow on the road. ( [BLANK] )', "Woman: Thanks, Eddie. I'll be careful."], a: 1, c: ['Please drive slowly.', "Don't be late.", 'You should clean there.', "Let's take a bus."] },
+    { s: ['Boy: You look sleepy. Did you go to bed late last night?', 'Girl: No. ( [BLANK] )'], a: 3, c: ['I went to bed late yesterday.', 'I feel better now.', 'I got up early to do my homework.', 'I usually watch TV after dinner.'] },
+    { s: ["Boy: This is my grandfather. He'll be ninety next month.", 'Girl: Really? ( [BLANK] )'], a: 3, c: ['You have a nice camera.', "She's my best friend.", 'He looks younger than that.', "I'm not sure."] },
+    { s: ['Girl: Tennis is my favorite sport. How about you?', "Boy: ( [BLANK] ) It's exciting."], a: 2, c: ["I don't think so.", 'I like basketball the best.', 'I have a racket.', "I don't like sports."] },
+    { s: ['Son: Mom, can I eat this pizza?', 'Mother: Sure. ( [BLANK] )', 'Son: OK.'], a: 1, c: ['Wash your hands before you eat it.', 'Be quiet when you enter the room.', "I'm happy to see you.", 'I like pizza the best.'] },
+    { s: ['Teacher: Are you all right? ( [BLANK] )', "Student: Well, I have a fever. I'm going to the doctor."], a: 1, c: ["You don't look well.", 'I feel better now.', "It's near the hospital.", 'You like cats.'] },
+    { s: ['Teacher: Aya, ( [BLANK] )', "Student: I'm sorry, Mr. Smith. My train was late."], a: 4, c: ['how do you come to school?', 'when is your English?', 'where is your textbook?', 'why are you late for the class?'] },
+    { s: ['Wife: Is this your scarf?', "Husband: Yes, it's mine. ( [BLANK] )", 'Wife: On the chair.'], a: 2, c: ['Whose scarf is it?', 'Where was it?', 'Did you buy it?', 'How much is it?'] },
+    { s: ['Boy: I saw koalas in Australia. ( [BLANK] )', 'Girl: Dogs. I have three dogs at home.'], a: 3, c: ['Where did you see them?', 'What do you think?', 'What animal do you like?', 'Where do you go there?'] },
+    { s: ['Son: Can I use your computer, Dad?', 'Dad: Sorry, ( [BLANK] )'], a: 4, c: ['I bought it last month.', 'Here you are.', 'Go ahead.', 'I am using it now.'] },
+    { s: ['Girl 1: Are you ready to go?', 'Girl 2: Not yet. ( [BLANK] )', 'Girl 1: OK, take your time.'], a: 2, c: ['Can I open the door?', 'Can you wait for 10 minutes?', 'Where do you want to go?', 'How long will it take?'] },
+    { s: ['Boy 1: What do you want to do today?', 'Boy 2: ( [BLANK] ) I love anime.', 'Boy 1: Sounds good.'], a: 4, c: ['How are you?', 'What are you looking for?', 'Where are you going?', 'How about watching a movie?'] },
+    { s: ['Man: Excuse me. This shirt is a little small for me.', "Salesclerk: I see. ( [BLANK] ) It's large.", "Man: That's fine. I'll take it."], a: 3, c: ["We don't have a red one.", 'Do you need a smaller one?', 'How about this one?', 'Do you like it?'] },
+    { s: ['Boy: Hello. Is Paul there?', "Woman: He's at his friend's house. ( [BLANK] )", 'Boy: This is Dan.'], a: 3, c: ['Speaking.', 'Where are you?', 'Who is calling, please?', 'Just a moment.'] },
 ];
 
 const allData = rawData.map(r => ({
