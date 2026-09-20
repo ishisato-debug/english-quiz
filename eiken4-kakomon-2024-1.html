@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英検4級 過去問 2024-1</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #111;
+    --paper: #ffffff;
+    --bg: #d9d9d9;
+    --sidebar: #b8b8b8;
+    --muted: #555;
+  }
+  body {
+    font-family: 'Hiragino Mincho ProN', 'Yu Mincho', 'Hiragino Kaku Gothic Pro', serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 10px 40px;
+  }
+  .screen { width: 100%; max-width: 720px; }
+  #screen-quiz, #screen-toc, #screen-section, #screen-end { display: none; }
+
+  .paper {
+    background: var(--paper);
+    box-shadow: 0 2px 14px rgba(0,0,0,0.25);
+    position: relative;
+  }
+
+  /* ── Ink (handwriting) ── */
+  #ink-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    touch-action: none;
+  }
+  #ink-canvas.drawable { pointer-events: auto; }
+  .ink-toolbar {
+    position: sticky;
+    bottom: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 14px;
+    z-index: 5;
+  }
+  .ink-btn {
+    background: #fff;
+    border: 1.5px solid var(--ink);
+    color: var(--ink);
+    font-size: 12.5px;
+    font-weight: bold;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+  .ink-btn.active { background: var(--ink); color: #fff; }
+
+  /* ── Start ── */
+  .booklet-head {
+    padding: 18px 22px 14px;
+    border-bottom: 3px solid var(--ink);
+  }
+  .grade-tag { font-family: 'Times New Roman', serif; font-size: 13px; letter-spacing: 0.05em; }
+  .booklet-title { font-size: clamp(18px, 4.6vw, 24px); font-weight: bold; margin-top: 4px; letter-spacing: 0.06em; }
+
+  .howto-box {
+    margin: 18px 22px;
+    border: 1px solid var(--ink);
+    padding: 14px 16px;
+  }
+  .howto-box .howto-title { font-weight: bold; font-size: 14px; margin-bottom: 8px; }
+  .howto-box p { font-size: 12.5px; line-height: 1.8; color: var(--muted); }
+  .howto-example { margin-top: 12px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .howto-example .ex-label { font-size: 12px; color: var(--muted); }
+  .mini-sheet { border-collapse: collapse; font-size: 12px; }
+  .mini-sheet th, .mini-sheet td { border: 1px solid var(--ink); padding: 4px 8px; text-align: center; }
+  .mini-sheet th { background: #eee; }
+  .mini-mark { display: inline-flex; width: 18px; height: 18px; align-items: center; justify-content: center; }
+  .mini-mark.filled { background: var(--ink); color: #fff; border-radius: 50%; }
+
+  .start-cta { padding: 20px 22px 26px; text-align: center; }
+
+  .toc-list { padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+  .toc-btn {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #fff;
+    border: 1px solid var(--ink);
+    padding: 14px 16px;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+  }
+  .toc-btn:active { background: #eee; }
+  .toc-badge {
+    flex-shrink: 0;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Times New Roman', serif;
+    font-style: italic;
+    font-weight: bold;
+    font-size: 19px;
+  }
+  .toc-name { font-size: 15px; font-weight: bold; }
+  .toc-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .start-btn {
+    display: inline-block;
+    min-width: 220px;
+    background: var(--ink);
+    color: #fff;
+    font-size: 17px;
+    letter-spacing: 0.2em;
+    padding: 15px 20px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .start-btn:active { opacity: 0.7; }
+  .home-row { text-align: center; margin-top: 16px; }
+  .home-btn {
+    background: transparent;
+    border: 1px solid var(--muted);
+    color: var(--muted);
+    font-size: 12.5px;
+    padding: 7px 18px;
+    cursor: pointer;
+    font-family: inherit;
+    margin: 0 4px;
+  }
+
+  /* ── Section intro ── */
+  .section-intro-body { padding: 34px 22px 40px; display: flex; align-items: flex-start; gap: 18px; }
+  .badge {
+    flex-shrink: 0;
+    width: 68px; height: 68px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #333, #000 70%);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Times New Roman', serif;
+    font-style: italic;
+    font-size: 32px;
+    font-weight: bold;
+  }
+  .badge-label { font-size: 13px; }
+  .section-instruction { font-size: 15px; line-height: 2; padding-top: 4px; }
+  .section-cta { text-align: center; padding: 0 22px 30px; }
+
+  /* ── Quiz header ── */
+  .quiz-topbar {
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--ink);
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+  }
+  #progress-bar-wrap { height: 3px; background: #ddd; }
+  #progress-bar { height: 100%; background: var(--ink); width: 0%; transition: width 0.3s; }
+
+  .quiz-body { display: flex; }
+  .sidebar { width: 14px; background: var(--sidebar); flex-shrink: 0; }
+  .content { flex: 1; padding: 22px 20px 20px; min-width: 0; }
+
+  .passage-box {
+    border: 1px solid var(--ink);
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    font-size: 13.5px;
+    line-height: 1.85;
+    background: #fdfdfb;
+  }
+  .passage-box .p-title { font-weight: bold; text-align: center; border-bottom: 1px solid var(--ink); padding-bottom: 6px; margin-bottom: 8px; letter-spacing: 0.04em; }
+  .passage-box .p-meta { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 6px; border-bottom: 1px dashed #999; padding-bottom: 6px; }
+  .passage-box .p-email + .p-email { margin-top: 14px; padding-top: 12px; border-top: 1px dashed #999; }
+  .passage-speak { display: block; margin-bottom: 10px; }
+
+  .q-row { display: flex; gap: 10px; margin-bottom: 4px; }
+  .q-no { font-family: 'Times New Roman', serif; font-style: italic; font-weight: bold; font-size: 18px; flex-shrink: 0; width: 40px; }
+  .stem { font-size: clamp(15px, 3.8vw, 17.5px); line-height: 2; text-align: justify; }
+  .stem .speaker { font-weight: bold; font-style: italic; }
+  .blank { display: inline-block; border-bottom: 2px solid var(--ink); min-width: 56px; text-align: center; }
+
+  .jp-line { font-size: 15px; margin-bottom: 6px; }
+  .tile-row { margin: 8px 0; line-height: 2.6; }
+  .tile { display: inline-block; border: 1px solid var(--ink); padding: 2px 9px; margin: 2px 4px 2px 0; font-size: 13.5px; }
+  .reorder-line { line-height: 2.6; font-size: 15.5px; }
+  .blank-box { display: inline-block; width: 28px; height: 28px; border: 1.5px solid var(--ink); vertical-align: middle; margin: 0 3px; }
+  .blank-box.highlight { border: 2.5px solid #d32f2f; }
+  .note-line { font-size: 12px; color: var(--muted); margin: 8px 0 2px; }
+
+  .speak-btn {
+    display: inline-block;
+    background: #fff;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    font-size: 12.5px;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-family: inherit;
+    margin: 8px 0 4px 50px;
+  }
+  .speak-btn:active { background: #eee; }
+
+  .choices {
+    margin: 14px 0 4px 50px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 6px 16px;
+  }
+  .choice-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 4px;
+    cursor: pointer;
+  }
+  .mark {
+    flex-shrink: 0;
+    width: 28px; height: 28px;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 13px;
+  }
+  .choice-text { font-size: 14.5px; }
+  .choice-row.marked .mark { background: var(--ink); color: var(--ink); }
+  .choice-row.correct-reveal .mark { box-shadow: 0 0 0 2px #fff inset, 0 0 0 4px var(--ink) inset; }
+  .choice-row.wrong-marked .mark { position: relative; background: #fff; }
+  .choice-row.wrong-marked .mark::before, .choice-row.wrong-marked .mark::after {
+    content: ''; position: absolute; width: 20px; height: 2px; background: var(--ink); top: 50%; left: 50%;
+  }
+  .choice-row.wrong-marked .mark::before { transform: translate(-50%, -50%) rotate(45deg); }
+  .choice-row.wrong-marked .mark::after { transform: translate(-50%, -50%) rotate(-45deg); }
+  .choice-row.disabled { cursor: default; }
+
+  #feedback { min-height: 20px; font-size: 13.5px; font-weight: bold; margin: 10px 0 0 50px; letter-spacing: 0.03em; }
+
+  .quiz-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--ink);
+    padding: 8px 20px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .next-btn {
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    padding: 9px 24px;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .next-btn:disabled { background: #aaa; cursor: default; }
+
+  /* ── End ── */
+  .end-body { padding: 40px 22px; text-align: center; }
+  .end-body h2 { font-size: 17px; letter-spacing: 0.1em; margin-bottom: 18px; }
+  .score-display { font-size: 46px; font-weight: bold; font-family: 'Times New Roman', serif; }
+  .score-label { font-size: 12.5px; color: var(--muted); margin-top: 4px; margin-bottom: 22px; }
+</style>
+</head>
+<body>
+
+<!-- Start -->
+<div class="screen" id="screen-start">
+  <div class="paper">
+    <div class="booklet-head">
+      <div class="grade-tag">Grade 4</div>
+      <div class="booklet-title">英検4級　過去問　2024年度</div>
+    </div>
+    <div class="howto-box">
+      <div class="howto-title">答えの選び方</div>
+      <p>各問題には四つの答えがあります。1, 2, 3, 4 の中から最も適切なものを一つ選び、その番号のマーク欄をタップしてください。</p>
+      <div class="howto-example">
+        <span class="ex-label">（例）答えが 3 の場合</span>
+        <table class="mini-sheet">
+          <tr><th>問題番号</th><th>1</th><th>2</th><th>3</th><th>4</th></tr>
+          <tr><td>(1)</td><td><span class="mini-mark">①</span></td><td><span class="mini-mark">②</span></td><td><span class="mini-mark filled">●</span></td><td><span class="mini-mark">④</span></td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="start-cta">
+      <button class="start-btn" onclick="showToc()">第1回</button>
+    </div>
+  </div>
+  <div class="home-row"><button class="home-btn" onclick="location.href='index.html'">◀ ホームにもどる</button></div>
+</div>
+
+<!-- 大問 select -->
+<div class="screen" id="screen-toc">
+  <div class="paper">
+    <div class="booklet-head">
+      <div class="grade-tag">Grade 4</div>
+      <div class="booklet-title">2024年度 第1回</div>
+    </div>
+    <div class="toc-list" id="toc-list"></div>
+  </div>
+  <div class="home-row"><button class="home-btn" onclick="location.href='index.html'">◀ ホームにもどる</button></div>
+</div>
+
+<!-- Section intro -->
+<div class="screen" id="screen-section">
+  <div class="paper">
+    <div class="booklet-head">
+      <div class="grade-tag">Grade 4</div>
+      <div class="booklet-title" id="section-title"></div>
+    </div>
+    <div class="section-intro-body">
+      <div class="badge"><span id="section-num"></span></div>
+      <div class="section-instruction" id="section-instruction"></div>
+    </div>
+    <div class="section-cta">
+      <button class="start-btn" onclick="enterSection()">つ ぎ へ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz -->
+<div class="screen" id="screen-quiz">
+  <div class="paper" id="quiz-paper">
+    <div class="quiz-topbar">
+      <span id="q-counter">1 / 35</span>
+      <span id="section-label">大問1</span>
+    </div>
+    <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+    <div class="quiz-body">
+      <div class="sidebar"></div>
+      <div class="content">
+        <div id="passage-slot"></div>
+        <div class="q-row">
+          <div class="q-no" id="q-no"></div>
+          <div class="stem" id="stem"></div>
+        </div>
+        <button class="speak-btn" id="speak-btn" onclick="speakCurrent()">🔊 きく</button>
+        <div class="choices" id="choices"></div>
+        <div id="feedback"></div>
+      </div>
+    </div>
+    <div class="quiz-footer">
+      <span>2024年度 第1回検定一次試験（4級）</span>
+      <button class="next-btn" id="next-btn" onclick="nextQuestion()" disabled>つぎへ ▶</button>
+    </div>
+    <canvas id="ink-canvas"></canvas>
+  </div>
+  <div class="ink-toolbar">
+    <button class="ink-btn active" id="ink-mode-answer" onclick="setInkMode('answer')">👉 こたえる</button>
+    <button class="ink-btn" id="ink-mode-pen" onclick="setInkMode('pen')">✏️ かく</button>
+    <button class="ink-btn" id="ink-mode-eraser" onclick="setInkMode('eraser')">🧹 けす</button>
+    <button class="ink-btn" onclick="clearInk()">🗑️ クリア</button>
+  </div>
+  <div class="home-row"><button class="home-btn" onclick="location.href='index.html'">◀ ホームにもどる</button></div>
+</div>
+
+<!-- End -->
+<div class="screen" id="screen-end">
+  <div class="paper">
+    <div class="booklet-head">
+      <div class="grade-tag">Grade 4</div>
+      <div class="booklet-title">試験終了</div>
+    </div>
+    <div class="end-body">
+      <div class="score-display" id="final-score">0</div>
+      <div class="score-label">/ <span id="end-total">0</span> もん せいかい</div>
+      <button class="start-btn" onclick="retrySection()">この大問をもう一度</button>
+    </div>
+  </div>
+  <div class="home-row">
+    <button class="home-btn" onclick="showToc()">大問をえらびなおす</button>
+    <button class="home-btn" onclick="location.href='index.html'">◀ ホームにもどる</button>
+  </div>
+</div>
+
+<script>
+// ─── Passages ───────────────────────────────────────────────────────────────
+const passageA = `
+  <div class="passage-box">
+    <div class="p-title">Is it your umbrella?</div>
+    <div>Miss Johnson found an umbrella on December 12. It was in the library by Paul White's books.<br><br>
+    To get it back, send an email to Miss Johnson and visit her in her office. She will work until December 22 this year. After the winter vacation, she will take the umbrella to the school office.</div>
+  </div>`;
+const passageASpeak = "Miss Johnson found an umbrella on December 12. It was in the library by Paul White's books. To get it back, send an email to Miss Johnson and visit her in her office. She will work until December 22 this year. After the winter vacation, she will take the umbrella to the school office.";
+
+const passageB = `
+  <div class="passage-box">
+    <div class="p-email">
+      <div class="p-meta">From: Nancy Parker&nbsp;&nbsp;/&nbsp;&nbsp;To: Jason Lee<br>Date: November 2&nbsp;&nbsp;/&nbsp;&nbsp;Subject: Free tickets</div>
+      <div>Hi Jason,<br>I went to a food festival yesterday. All the food looked delicious. I ate some pizza, sandwiches, and cheese. I bought a pumpkin pie for my family. At the festival, I got free movie tickets. Let's go to see <i>The Great Ocean</i>. I am busy on Saturday. Is Friday evening or Sunday OK for you?<br>Your friend,<br>Nancy</div>
+    </div>
+    <div class="p-email">
+      <div class="p-meta">From: Jason Lee&nbsp;&nbsp;/&nbsp;&nbsp;To: Nancy Parker<br>Date: November 2&nbsp;&nbsp;/&nbsp;&nbsp;Subject: Movie</div>
+      <div>Hi Nancy,<br>Sorry, I can't come on Friday evening because I have a piano lesson. I'm going to play the piano at an event on Sunday morning, so I need to practice. We can see <i>The Great Ocean</i> on Sunday afternoon. Let's meet in front of the bookstore. I want to have snacks after the movie.<br>See you soon,<br>Jason</div>
+    </div>
+  </div>`;
+const passageBSpeak = "Hi Jason, I went to a food festival yesterday. All the food looked delicious. I ate some pizza, sandwiches, and cheese. I bought a pumpkin pie for my family. At the festival, I got free movie tickets. Let's go to see The Great Ocean. I am busy on Saturday. Is Friday evening or Sunday OK for you? Your friend, Nancy. Hi Nancy, Sorry, I can't come on Friday evening because I have a piano lesson. I'm going to play the piano at an event on Sunday morning, so I need to practice. We can see The Great Ocean on Sunday afternoon. Let's meet in front of the bookstore. I want to have snacks after the movie. See you soon, Jason.";
+
+const passageC = `
+  <div class="passage-box">
+    <div class="p-title">Enjoying Sports</div>
+    <div>Taku loves sports. When he was in elementary school, he played soccer and basketball. He also took swimming lessons at a sports club with his sister. When his sister became a junior high school student, she stopped taking swimming lessons and joined the volleyball team.<br><br>
+    When Taku entered junior high school, he told his parents, "I want to join the tennis team." They were surprised. Taku said, "When I was an elementary school student, I enjoyed soccer, basketball, and swimming, but I want to try a different sport in junior high school." His mother said, "OK. Your sister did that, too."<br><br>
+    Now, Taku practices tennis hard. One day, his mother asked, "What do you like about sports?" He said, "I make many friends, teammates, and coaches." Taku wants to try more sports in the future. In high school, he wants to join the badminton team.</div>
+  </div>`;
+const passageCSpeak = "Taku loves sports. When he was in elementary school, he played soccer and basketball. He also took swimming lessons at a sports club with his sister. When his sister became a junior high school student, she stopped taking swimming lessons and joined the volleyball team. When Taku entered junior high school, he told his parents, I want to join the tennis team. They were surprised. Taku said, When I was an elementary school student, I enjoyed soccer, basketball, and swimming, but I want to try a different sport in junior high school. His mother said, OK. Your sister did that, too. Now, Taku practices tennis hard. One day, his mother asked, What do you like about sports? He said, I make many friends, teammates, and coaches. Taku wants to try more sports in the future. In high school, he wants to join the badminton team.";
+
+// ─── Questions ────────────────────────────────────────────────────────────────
+const section1 = [
+  { s: ['A: What does Mac look like?', 'B: She has ( [BLANK] ), black hair.'], a: 1, c: ['short', 'windy', 'quiet', 'busy'] },
+  { s: ['Tony plays the trumpet. He wants to play it in a professional ( [BLANK] ) in the future.'], a: 3, c: ['soccer', 'photo', 'band', 'doctor'] },
+  { s: ['A: I feel sick, Mom. Can you take me to the ( [BLANK] )?', "B: OK. Let's go now."], a: 1, c: ['hospital', 'album', 'birthday', 'month'] },
+  { s: ['Harry ( [BLANK] ) does his homework before dinner. But today he did it late at night.'], a: 3, c: ['out', 'again', 'usually', 'hard'] },
+  { s: ['A: Excuse me. Where is the post office?', "B: ( [BLANK] ) left at that bookstore. You'll find it soon."], a: 2, c: ['Draw', 'Turn', 'Have', 'Arrive'] },
+  { s: ['A: Did your grandfather ( [BLANK] ) these old stamps?', 'B: Yes. He got them many years ago.'], a: 3, c: ['ride', 'close', 'collect', 'work'] },
+  { s: ['A: How many times can you visit us next month, Grandma?', "B: Sorry, Tommy. ( [BLANK] ) once."], a: 1, c: ['Only', 'Each', 'Toll', 'Away'] },
+  { s: ['A: Mom, why did you ( [BLANK] ) up early this morning?', 'B: I went for a run in the park before breakfast.'], a: 1, c: ['wake', 'visit', 'stop', 'ask'] },
+  { s: ['Linda likes to ( [BLANK] ) to music with our friend. They like rock music the best.'], a: 3, c: ['borrow', 'ask', 'listen', 'decide'] },
+  { s: ['Mike likes baseball. He often ( [BLANK] ) catch with his friends in the park after school.'], a: 4, c: ['works', 'runs', 'kicks', 'plays'] },
+  { s: ["Every year Hitomi's family goes on a ( [BLANK] ) in summer. This year they will visit New York."], a: 4, c: ['shop', 'hotel', 'beach', 'trip'] },
+  { s: ['A: Welcome back, Bob. You were at the library ( [BLANK] ) a long time.', 'B: Yeah, I had a lot of homework.'], a: 1, c: ['for', 'at', 'into', 'on'] },
+  { s: ['A: Guess what! We have no class tomorrow.', "B: I ( [BLANK] ) that, too. Let's go to the park together."], a: 2, c: ['to hear', 'heard', 'hearing', 'hears'] },
+  { s: ['A: It was warm today.', 'B: Yes. It will ( [BLANK] ) much colder tomorrow.'], a: 1, c: ['be', 'is', 'have', 'has'] },
+  { s: ['The weather is nice today, so ( [BLANK] ) are many people in the park.'], a: 1, c: ['there', 'they', 'that', 'this'] },
+];
+
+const section2 = [
+  { s: ["Student 1: I don't understand this math question. ( [BLANK] )", 'Student 2: Of course.'], a: 4, c: ['How are you?', 'Can you close it?', 'Who is it?', 'Can you help me?'] },
+  { s: ['Boy 1: David, do you want to play computer games at my house today?', 'Boy 2: Sorry, ( [BLANK] )', 'Boy 1: OK. See you tomorrow.'], a: 4, c: ['I want to go, too.', 'You can have one.', "You'll like them.", 'I have to visit my grandma.'] },
+  { s: ['Father: Do you like English, Akira?', 'Son: ( [BLANK] ) My teacher is very nice, too.'], a: 3, c: ["It's not interesting.", "I didn't do it.", "It's my favorite subject.", "I can't remember."] },
+  { s: ['Man: Hello, this is Tom. I arrived at the movie theater. Where are you?', "Woman: ( [BLANK] ) so I'll be a little late. Sorry."], a: 1, c: ['I am at the station,', "I'm there now,", 'I enjoy movies,', 'I want to see it,'] },
+  { s: ['Boy: Hi, Mr. Morgan. Is Daniel home?', "Woman: ( [BLANK] ) I'll get him."], a: 3, c: ["You're very kind.", "I'll see you.", 'Just a moment.', 'Be careful.'] },
+];
+
+const section3 = [
+  { jp: '私は父とサッカーについて話していました。', tiles: ['①soccer', '②about', '③was', '④talking', '⑤with'], prefix: 'I', suffix: 'my father.', full: 'I was talking about soccer with my father.', c: ['③ー②', '④ー③', '④ー①', '⑤ー③'], a: 3 },
+  { jp: 'ジェニファーはお茶とコーヒーの両方とも好きですか？', tiles: ['①both', '②like', '③and coffee', '④Jennifer', '⑤tea'], prefix: 'Does', suffix: '?', full: 'Does Jennifer like both tea and coffee?', c: ['②ー⑤', '①ー⑤', '①ー②', '④ー①'], a: 1 },
+  { jp: '毎週末、私たちは買い物に行くために車を使います。', tiles: ['①our car', '②we', '③use', '④go shopping', '⑤to'], prefix: '', suffix: 'on weekends.', full: 'We use our car to go shopping on weekends.', c: ['①ー⑤', '②ー①', '①ー④', '③ー⑤'], a: 4 },
+  { jp: '私は6時に夕食を作り始めました。', tiles: ['①to', '②began', '③at', '④dinner', '⑤make'], prefix: 'I', suffix: "six o'clock.", full: "I began to make dinner at six o'clock.", c: ['①ー④', '②ー⑤', '①ー③', '②ー③'], a: 1 },
+  { jp: '私の兄は、父と同じくらいゴルフがじょうずです。', tiles: ['①well', '②golf', '③as', '④can', '⑤play'], prefix: 'My brother', suffix: 'as my father.', full: 'My brother can play golf as well as my father.', c: ['④ー①', '④ー⑤', '②ー③', '⑤ー③'], a: 4 },
+];
+
+const section4a = [
+  { passage: passageA, speak: passageASpeak, q: 'When did Miss Johnson find the umbrella?', c: ['On December 12.', 'On December 13.', 'On December 22.', 'On December 23.'], a: 1 },
+  { passage: passageA, speak: passageASpeak, q: 'What will Miss Johnson do after the winter vacation?', c: ['Change her office.', 'Send an email to students.', 'Take the umbrella to the school office.', "Read Paul White's books."], a: 3 },
+];
+
+const section4b = [
+  { passage: passageB, speak: passageBSpeak, q: 'What did Nancy buy for her family yesterday?', c: ['Sandwiches.', 'A pumpkin pie.', 'Cheese.', 'A pizza.'], a: 2 },
+  { passage: passageB, speak: passageBSpeak, q: 'When will Nancy and Jason go to a movie?', c: ['On Friday evening.', 'On Saturday afternoon.', 'On Sunday morning.', 'On Sunday afternoon.'], a: 4 },
+  { passage: passageB, speak: passageBSpeak, q: 'What does Jason want to do after the movie?', c: ['Take a piano lesson.', 'Buy a book.', 'Have snacks.', 'See another movie.'], a: 3 },
+];
+
+const section4c = [
+  { passage: passageC, speak: passageCSpeak, q: 'Who took swimming lessons with Taku?', c: ['His best friend.', 'His mother.', 'His brother.', 'His sister.'], a: 4 },
+  { passage: passageC, speak: passageCSpeak, q: "When did Taku's sister join the volleyball team?", c: ['In elementary school.', 'In junior high school.', 'In high school.', 'In college.'], a: 2 },
+  { passage: passageC, speak: passageCSpeak, q: 'What did Taku say to his parents when he entered junior high school?', c: ['He wanted to join the tennis team.', "He didn't like sports.", 'He needed a new friend.', "He couldn't swim well."], a: 1 },
+  { passage: passageC, speak: passageCSpeak, q: 'When Taku joins a sports team, he', c: ['never practices hard.', 'makes many friends.', "doesn't talk to his coach.", 'always wins every game.'], a: 2 },
+  { passage: passageC, speak: passageCSpeak, q: 'What does Taku want to do in high school?', c: ['Become a sports coach.', 'Study to be a teacher.', 'Learn a new subject.', 'Join the badminton team.'], a: 4 },
+];
+
+// ─── Sections (with official-style instruction text) ───────────────────────────
+const SECTIONS = [
+  {
+    key: '大問1', num: '1', desc: '穴埋め問題・15問',
+    instruction: '次の (1) から (15) までの ( ) に入れるのに最も適切なものを 1, 2, 3, 4 の中から一つ選び、その番号のマーク欄をタップしなさい。',
+    items: section1.map(q => ({ type: 'blank', stem: q.s, c: q.c, a: q.a, speak: q.s.map(l => l.replace('( [BLANK] )', q.c[q.a - 1])).map(l => l.replace(/^[A-Za-z][A-Za-z0-9 .]*:\s/, '')).join('. ') })),
+  },
+  {
+    key: '大問2', num: '2', desc: '会話選択・5問',
+    instruction: '次の (16) から (20) までの会話について、( ) に入れるのに最も適切なものを 1, 2, 3, 4 の中から一つ選び、その番号のマーク欄をタップしなさい。',
+    items: section2.map(q => ({ type: 'blank', stem: q.s, c: q.c, a: q.a, speak: q.s.map(l => l.replace('( [BLANK] )', q.c[q.a - 1])).map(l => l.replace(/^[A-Za-z][A-Za-z0-9 .]*:\s/, '')).join('. ') })),
+  },
+  {
+    key: '大問3', num: '3', desc: '並べかえ・5問',
+    instruction: '次の (21) から (25) までの日本文の意味を表すように①から⑤までを並べかえて文を完成させなさい。そして、2番目と4番目にくる語句の最も適切な組み合わせを 1, 2, 3, 4 の中から一つ選び、その番号のマーク欄をタップしなさい。',
+    items: section3.map(q => ({ type: 'reorder', jp: q.jp, tiles: q.tiles, prefix: q.prefix, suffix: q.suffix, c: q.c, a: q.a, speak: q.full })),
+  },
+  {
+    key: '大問4', num: '4', desc: '長文読解・10問',
+    instruction: '次の掲示・Eメール・説明文の内容に関する質問に対する答えとして、または文を完成させるのに最も適切なものを 1, 2, 3, 4 の中から一つ選び、その番号のマーク欄をタップしなさい。',
+    items: [
+      ...section4a.map(q => ({ type: 'reading', passage: q.passage, speak: q.speak, stem: [q.q], c: q.c, a: q.a })),
+      ...section4b.map(q => ({ type: 'reading', passage: q.passage, speak: q.speak, stem: [q.q], c: q.c, a: q.a })),
+      ...section4c.map(q => ({ type: 'reading', passage: q.passage, speak: q.speak, stem: [q.q], c: q.c, a: q.a })),
+    ],
+  },
+];
+
+// flatten with running question number + section label; also record each
+// section's [start, end) range within the flat `questions` array
+const questions = [];
+const SECTION_RANGES = [];
+SECTIONS.forEach(sec => {
+  const start = questions.length;
+  sec.items.forEach(item => questions.push({ ...item, section: sec.key }));
+  SECTION_RANGES.push({ start, end: questions.length });
+});
+const TOTAL = questions.length;
+
+// ─── State ──────────────────────────────────────────────────────────────────
+let qi = 0;
+let score = 0;
+let answered = false;
+let pendingSectionIdx = 0; // which SECTIONS index is currently active
+
+// ─── Voice ──────────────────────────────────────────────────────────────────
+let preferredVoice = null;
+function pickPreferredVoice() {
+  if (!window.speechSynthesis) return null;
+  const voices = window.speechSynthesis.getVoices();
+  if (!voices.length) return null;
+  return voices.find(v => /en-US/i.test(v.lang) && /Samantha|Google US English|Female|Zira|Karen|Susan/i.test(v.name))
+    || voices.find(v => /en-US/i.test(v.lang))
+    || voices.find(v => /^en/i.test(v.lang))
+    || null;
+}
+if (window.speechSynthesis) {
+  preferredVoice = pickPreferredVoice();
+  window.speechSynthesis.onvoiceschanged = () => { preferredVoice = pickPreferredVoice(); };
+}
+function speakText(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; u.rate = 0.88;
+  if (!preferredVoice) preferredVoice = pickPreferredVoice();
+  if (preferredVoice) u.voice = preferredVoice;
+  window.speechSynthesis.speak(u);
+}
+function speakCurrent() {
+  const q = questions[qi];
+  if (q.speak) speakText(q.speak);
+}
+
+// ─── Sound ──────────────────────────────────────────────────────────────────
+function playClick(freq) {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator(), gain = ctx.createGain();
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(freq, ctx.currentTime);
+  gain.gain.setValueAtTime(0.05, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.start(); osc.stop(ctx.currentTime + 0.15);
+}
+
+// ─── Ink (handwriting overlay) ─────────────────────────────────────────────────
+const inkCanvas = document.getElementById('ink-canvas');
+const inkCtx = inkCanvas.getContext('2d');
+let inkMode = 'answer'; // 'answer' | 'pen' | 'eraser'
+let drawing = false;
+let lastX = 0, lastY = 0;
+
+function resizeInkCanvas() {
+  const paper = document.getElementById('quiz-paper');
+  const dpr = window.devicePixelRatio || 1;
+  const w = paper.scrollWidth, h = paper.scrollHeight;
+  // preserve existing strokes across a resize (e.g. passage height changes between questions is fine since we clear anyway)
+  inkCanvas.width = w * dpr;
+  inkCanvas.height = h * dpr;
+  inkCanvas.style.width = w + 'px';
+  inkCanvas.style.height = h + 'px';
+  inkCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  inkCtx.lineCap = 'round';
+  inkCtx.lineJoin = 'round';
+}
+
+function clearInk() {
+  inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+}
+
+function setInkMode(mode) {
+  inkMode = mode;
+  inkCanvas.classList.toggle('drawable', mode !== 'answer');
+  ['answer', 'pen', 'eraser'].forEach(m => {
+    document.getElementById('ink-mode-' + m).classList.toggle('active', m === mode);
+  });
+}
+
+function inkPointFromEvent(e) {
+  const rect = inkCanvas.getBoundingClientRect();
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+inkCanvas.addEventListener('pointerdown', (e) => {
+  if (inkMode === 'answer') return;
+  drawing = true;
+  inkCanvas.setPointerCapture(e.pointerId);
+  const p = inkPointFromEvent(e);
+  lastX = p.x; lastY = p.y;
+  e.preventDefault();
+});
+inkCanvas.addEventListener('pointermove', (e) => {
+  if (!drawing || inkMode === 'answer') return;
+  const p = inkPointFromEvent(e);
+  inkCtx.globalCompositeOperation = inkMode === 'eraser' ? 'destination-out' : 'source-over';
+  inkCtx.strokeStyle = '#111';
+  inkCtx.lineWidth = inkMode === 'eraser' ? 22 : (e.pointerType === 'pen' ? 1.5 + (e.pressure || 0.5) * 2.5 : 2.5);
+  inkCtx.beginPath();
+  inkCtx.moveTo(lastX, lastY);
+  inkCtx.lineTo(p.x, p.y);
+  inkCtx.stroke();
+  lastX = p.x; lastY = p.y;
+  e.preventDefault();
+});
+function endInkStroke(e) {
+  drawing = false;
+}
+inkCanvas.addEventListener('pointerup', endInkStroke);
+inkCanvas.addEventListener('pointercancel', endInkStroke);
+inkCanvas.addEventListener('pointerleave', endInkStroke);
+window.addEventListener('resize', () => {
+  if (document.getElementById('screen-quiz').style.display === 'block') resizeInkCanvas();
+});
+
+// ─── Rendering ────────────────────────────────────────────────────────────────
+function renderLine(line) {
+  const blankHtml = '<span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span>';
+  let rendered = line.replace('( [BLANK] )', blankHtml);
+  const m = rendered.match(/^([A-Za-z][A-Za-z0-9 .]*:\s)([\s\S]*)$/);
+  if (m) return `<span class="speaker">${m[1]}</span>${m[2]}`;
+  return rendered;
+}
+
+function renderToc() {
+  const wrap = document.getElementById('toc-list');
+  wrap.innerHTML = '';
+  SECTIONS.forEach((sec, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'toc-btn';
+    btn.innerHTML = `<span class="toc-badge">${sec.num}</span>` +
+      `<span><span class="toc-name">${sec.key}</span><span class="toc-desc">${sec.desc}</span></span>`;
+    btn.onclick = () => chooseSection(idx);
+    wrap.appendChild(btn);
+  });
+}
+
+function showToc() {
+  document.getElementById('screen-start').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'none';
+  document.getElementById('screen-section').style.display = 'none';
+  document.getElementById('screen-end').style.display = 'none';
+  renderToc();
+  document.getElementById('screen-toc').style.display = 'block';
+}
+
+function chooseSection(idx) {
+  score = 0;
+  document.getElementById('screen-toc').style.display = 'none';
+  showSectionIntro(idx);
+}
+
+function showSectionIntro(idx) {
+  pendingSectionIdx = idx;
+  const sec = SECTIONS[idx];
+  document.getElementById('screen-start').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'none';
+  document.getElementById('screen-end').style.display = 'none';
+  document.getElementById('screen-section').style.display = 'block';
+  document.getElementById('section-title').textContent = sec.key;
+  document.getElementById('section-num').textContent = sec.num;
+  document.getElementById('section-instruction').textContent = sec.instruction;
+}
+
+function enterSection() {
+  qi = SECTION_RANGES[pendingSectionIdx].start;
+  document.getElementById('screen-section').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'block';
+  loadQuestion();
+}
+
+function loadQuestion() {
+  answered = false;
+  const q = questions[qi];
+  const range = SECTION_RANGES[pendingSectionIdx];
+  const localIdx = qi - range.start;
+  const localTotal = range.end - range.start;
+
+  document.getElementById('q-counter').textContent = `${localIdx + 1} / ${localTotal}`;
+  document.getElementById('section-label').textContent = q.section;
+  document.getElementById('progress-bar').style.width = (localIdx / localTotal * 100) + '%';
+  document.getElementById('q-no').textContent = `(${qi + 1})`;
+
+  document.getElementById('passage-slot').innerHTML = q.passage || '';
+
+  const stemEl = document.getElementById('stem');
+  if (q.type === 'reorder') {
+    const boxes = [0, 1, 2, 3, 4].map(i =>
+      `<span class="blank-box${(i === 1 || i === 3) ? ' highlight' : ''}"></span>`
+    ).join('');
+    stemEl.innerHTML =
+      `<div class="jp-line">${q.jp}</div>` +
+      `<div class="tile-row">${q.tiles.map(t => `<span class="tile">${t}</span>`).join('')}</div>` +
+      `<div class="reorder-line">${q.prefix ? q.prefix + ' ' : ''}${boxes} ${q.suffix}</div>` +
+      `<div class="note-line">※ 赤い枠の2番目・4番目にくる語句の組み合わせとして正しいものを選びましょう。</div>`;
+  } else {
+    stemEl.innerHTML = q.stem.map(l => `<div>${renderLine(l)}</div>`).join('');
+  }
+
+  document.getElementById('speak-btn').style.display = q.speak ? 'inline-block' : 'none';
+
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  q.c.forEach((choice, i) => {
+    const row = document.createElement('div');
+    row.className = 'choice-row';
+    row.id = 'choice-' + i;
+    row.innerHTML = `<span class="mark">${i + 1}</span><span class="choice-text">${choice}</span>`;
+    row.onclick = () => answerChoice(i);
+    choicesEl.appendChild(row);
+  });
+
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('next-btn').disabled = true;
+
+  setInkMode('answer');
+  clearInk();
+  requestAnimationFrame(resizeInkCanvas);
+}
+
+function answerChoice(i) {
+  if (answered) return;
+  answered = true;
+  const q = questions[qi];
+  const correctIdx = q.a - 1;
+  document.querySelectorAll('.choice-row').forEach(r => r.classList.add('disabled'));
+
+  if (i === correctIdx) {
+    score++;
+    document.getElementById('choice-' + i).classList.add('marked');
+    document.getElementById('feedback').textContent = '○ せいかい';
+    playClick(700);
+  } else {
+    document.getElementById('choice-' + i).classList.add('wrong-marked');
+    document.getElementById('choice-' + correctIdx).classList.add('correct-reveal');
+    document.getElementById('feedback').textContent = `✕ ふせいかい　正解は ${correctIdx + 1}`;
+    playClick(180);
+  }
+  document.getElementById('next-btn').disabled = false;
+}
+
+function nextQuestion() {
+  qi++;
+  const range = SECTION_RANGES[pendingSectionIdx];
+  if (qi >= range.end) { showEnd(); return; }
+  loadQuestion();
+}
+
+function showEnd() {
+  const range = SECTION_RANGES[pendingSectionIdx];
+  const localTotal = range.end - range.start;
+  document.getElementById('screen-quiz').style.display = 'none';
+  document.getElementById('screen-end').style.display = 'block';
+  document.getElementById('final-score').textContent = score;
+  document.getElementById('end-total').textContent = localTotal;
+}
+
+function retrySection() {
+  chooseSection(pendingSectionIdx);
+}
+</script>
+</body>
+</html>
