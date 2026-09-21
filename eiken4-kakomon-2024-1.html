@@ -86,8 +86,6 @@
   .mini-mark { display: inline-flex; width: 18px; height: 18px; align-items: center; justify-content: center; }
   .mini-mark.filled { background: var(--ink); color: #fff; border-radius: 50%; }
 
-  .start-cta { padding: 20px 22px 26px; text-align: center; }
-
   .toc-list { padding: 22px; display: flex; flex-direction: column; gap: 14px; }
   .toc-btn {
     display: flex;
@@ -296,9 +294,7 @@
         </table>
       </div>
     </div>
-    <div class="start-cta">
-      <button class="start-btn" onclick="showToc()">第1回</button>
-    </div>
+    <div class="toc-list" id="exam-list"></div>
   </div>
   <div class="home-row"><button class="home-btn" onclick="location.href='index.html'">◀ ホームにもどる</button></div>
 </div>
@@ -308,11 +304,14 @@
   <div class="paper">
     <div class="booklet-head">
       <div class="grade-tag">Grade 4</div>
-      <div class="booklet-title">2024年度 第1回</div>
+      <div class="booklet-title" id="toc-exam-title">2024年度 第1回</div>
     </div>
     <div class="toc-list" id="toc-list"></div>
   </div>
-  <div class="home-row"><button class="home-btn" onclick="location.href='index.html'">◀ ホームにもどる</button></div>
+  <div class="home-row">
+    <button class="home-btn" onclick="showExamSelect()">かいをえらびなおす</button>
+    <button class="home-btn" onclick="location.href='index.html'">◀ ホームにもどる</button>
+  </div>
 </div>
 
 <!-- Section intro -->
@@ -354,7 +353,7 @@
       </div>
     </div>
     <div class="quiz-footer">
-      <span>2024年度 第1回検定一次試験（4級）</span>
+      <span id="footer-exam-label">2024年度 第1回検定一次試験（4級）</span>
       <button class="next-btn" id="next-btn" onclick="nextQuestion()" disabled>つぎへ ▶</button>
     </div>
     <canvas id="ink-canvas"></canvas>
@@ -473,44 +472,156 @@ const section4c = [
   { passage: passageC, speak: passageCSpeak, q: 'What does Taku want to do in high school?', c: ['Become a sports coach.', 'Study to be a teacher.', 'Learn a new subject.', 'Join the badminton team.'], a: 4 },
 ];
 
-// ─── Sections (with official-style instruction text) ───────────────────────────
-const SECTIONS = [
-  {
-    key: '大問1', num: '1', desc: '穴埋め問題・15問',
-    instruction: '次の (1) から (15) までの ( ) に入れるのに最も適切なものを 1, 2, 3, 4 の中から一つ選び、その番号のマーク欄をタップしなさい。',
-    items: section1.map(q => ({ type: 'blank', stem: q.s, c: q.c, a: q.a, speak: q.s.map(l => l.replace('( [BLANK] )', q.c[q.a - 1])).map(l => l.replace(/^[A-Za-z][A-Za-z0-9 .]*:\s/, '')).join('. ') })),
-  },
-  {
-    key: '大問2', num: '2', desc: '会話選択・5問',
-    instruction: '次の (16) から (20) までの会話について、( ) に入れるのに最も適切なものを 1, 2, 3, 4 の中から一つ選び、その番号のマーク欄をタップしなさい。',
-    items: section2.map(q => ({ type: 'blank', stem: q.s, c: q.c, a: q.a, speak: q.s.map(l => l.replace('( [BLANK] )', q.c[q.a - 1])).map(l => l.replace(/^[A-Za-z][A-Za-z0-9 .]*:\s/, '')).join('. ') })),
-  },
-  {
-    key: '大問3', num: '3', desc: '並べかえ・5問',
-    instruction: '次の (21) から (25) までの日本文の意味を表すように①から⑤までを並べかえて文を完成させなさい。そして、2番目と4番目にくる語句の最も適切な組み合わせを 1, 2, 3, 4 の中から一つ選び、その番号のマーク欄をタップしなさい。',
-    items: section3.map(q => ({ type: 'reorder', jp: q.jp, tiles: q.tiles, prefix: q.prefix, suffix: q.suffix, c: q.c, a: q.a, speak: q.full })),
-  },
-  {
-    key: '大問4', num: '4', desc: '長文読解・10問',
-    instruction: '次の掲示・Eメール・説明文の内容に関する質問に対する答えとして、または文を完成させるのに最も適切なものを 1, 2, 3, 4 の中から一つ選び、その番号のマーク欄をタップしなさい。',
-    items: [
-      ...section4a.map(q => ({ type: 'reading', passage: q.passage, speak: q.speak, stem: [q.q], c: q.c, a: q.a })),
-      ...section4b.map(q => ({ type: 'reading', passage: q.passage, speak: q.speak, stem: [q.q], c: q.c, a: q.a })),
-      ...section4c.map(q => ({ type: 'reading', passage: q.passage, speak: q.speak, stem: [q.q], c: q.c, a: q.a })),
-    ],
-  },
+// ═══════════════════════════════════════════════════════════════════════════
+// 2024年度 第2回
+// ═══════════════════════════════════════════════════════════════════════════
+const passageA2 = `
+  <div class="passage-box">
+    <div class="p-title">Meet a Famous Basketball Player</div>
+    <div>Tommy Brown will visit our school on October 15. Tommy was a student here 10 years ago. Now, he plays for the famous team Greentown Strikers.<br><br>
+    At 10 a.m., Tommy will talk about basketball.<br>
+    At 11 a.m., students can ask Tommy questions.<br>
+    In the afternoon, students can play basketball with Tommy in the gym.</div>
+  </div>`;
+const passageA2Speak = "Tommy Brown will visit our school on October 15. Tommy was a student here 10 years ago. Now, he plays for the famous team Greentown Strikers. At 10 a.m., Tommy will talk about basketball. At 11 a.m., students can ask Tommy questions. In the afternoon, students can play basketball with Tommy in the gym.";
+
+const passageB2 = `
+  <div class="passage-box">
+    <div class="p-email">
+      <div class="p-meta">From: Maggie Devlin&nbsp;&nbsp;/&nbsp;&nbsp;To: Isabella Corbin<br>Date: December 14&nbsp;&nbsp;/&nbsp;&nbsp;Subject: Lost gloves</div>
+      <div>Hi Isabella,<br>I found some gloves at my house after your piano lesson today. They are blue. They were under the chair next to the door. If they are yours, please come and get them tomorrow. I'll be here from 10:00 a.m. until 11:00 a.m. and from 2:00 p.m. until 4:00 p.m.<br>Your piano teacher,<br>Ms. Devlin</div>
+    </div>
+    <div class="p-email">
+      <div class="p-meta">From: Isabella Corbin&nbsp;&nbsp;/&nbsp;&nbsp;To: Maggie Devlin<br>Date: December 15&nbsp;&nbsp;/&nbsp;&nbsp;Subject: Thank you!</div>
+      <div>Hello Ms. Devlin,<br>Yes, they're my gloves. I was worried because they weren't in my coat pocket when I got home. But I'm busy tomorrow. I have a basketball game in the morning and a ballet class in the afternoon. My ballet class finishes at 5:00 p.m. My mother will come and get the gloves instead.<br>Thank you!<br>Isabella</div>
+    </div>
+  </div>`;
+const passageB2Speak = "Hi Isabella, I found some gloves at my house after your piano lesson today. They are blue. They were under the chair next to the door. If they are yours, please come and get them tomorrow. I'll be here from 10:00 a.m. until 11:00 a.m. and from 2:00 p.m. until 4:00 p.m. Your piano teacher, Ms. Devlin. Hello Ms. Devlin, Yes, they're my gloves. I was worried because they weren't in my coat pocket when I got home. But I'm busy tomorrow. I have a basketball game in the morning and a ballet class in the afternoon. My ballet class finishes at 5:00 p.m. My mother will come and get the gloves instead. Thank you! Isabella.";
+
+const passageC2 = `
+  <div class="passage-box">
+    <div class="p-title">Horse Riding</div>
+    <div>Rebecca lived in a small town until she was eight years old. When she was eight, her family moved to the city. Rebecca likes the city, but she misses the mountains near her hometown and her friends from her old elementary school.<br><br>
+    Last summer, Rebecca visited her hometown. She stayed at her grandfather's house. It took four hours to get there. One day, Rebecca's grandfather took Rebecca to a farm. He said, "You can learn to ride a horse here. Horse riding is fun!" Rebecca took a lesson for two hours. The horse was very big, but it was friendly. Rebecca enjoyed the lesson.<br><br>
+    When Rebecca returned to the city, she told her mother about it. Her mother said, "I can ride a horse, too." Rebecca's mother called a farm in the city. Now, Rebecca and her mother go riding together there once a month. Rebecca is happy because she has a new hobby.</div>
+  </div>`;
+const passageC2Speak = "Rebecca lived in a small town until she was eight years old. When she was eight, her family moved to the city. Rebecca likes the city, but she misses the mountains near her hometown and her friends from her old elementary school. Last summer, Rebecca visited her hometown. She stayed at her grandfather's house. It took four hours to get there. One day, Rebecca's grandfather took Rebecca to a farm. He said, You can learn to ride a horse here. Horse riding is fun! Rebecca took a lesson for two hours. The horse was very big, but it was friendly. Rebecca enjoyed the lesson. When Rebecca returned to the city, she told her mother about it. Her mother said, I can ride a horse, too. Rebecca's mother called a farm in the city. Now, Rebecca and her mother go riding together there once a month. Rebecca is happy because she has a new hobby.";
+
+const section1_2 = [
+  { s: ['Kevin painted a picture of a dog for an art ( [BLANK] ) at school. He won first prize!'], a: 3, c: ['flower', 'window', 'contest', 'paper'] },
+  { s: ['Clare wore a new dress to the party. She looked very ( [BLANK] ).'], a: 4, c: ['lazy', 'crowded', 'snowy', 'pretty'] },
+  { s: ['A: What are your ( [BLANK] ) for the summer vacation, Yuki?', "B: I'll go camping with my friends."], a: 2, c: ['seats', 'plans', 'showers', 'sales'] },
+  { s: ["Oliver couldn't ( [BLANK] ) a computer well, so he took some lessons."], a: 1, c: ['use', 'meet', 'end', 'mark'] },
+  { s: ['A: What are you cooking, Jun? It ( [BLANK] ) really good!', 'B: An apple pie.'], a: 2, c: ['waits', 'smells', 'cuts', 'burns'] },
+  { s: ['A: Please finish your homework ( [BLANK] ) you play video games, Ethan.', "B: OK, Mom. I'll do it now."], a: 2, c: ['than', 'before', 'but', 'that'] },
+  { s: ["Steve's ( [BLANK] ) was not big enough for two people, so Steve moved to a bigger one when he got married."], a: 2, c: ['animal', 'apartment', 'race', 'sky'] },
+  { s: ['Danielle likes reading books. She wants to be a writer in the ( [BLANK] ).'], a: 4, c: ['time', 'box', 'way', 'future'] },
+  { s: ['The new Chinese restaurant has many kinds ( [BLANK] ) dishes on the menu. They are all great.'], a: 3, c: ['from', 'to', 'of', 'by'] },
+  { s: ["Helen was ( [BLANK] ) in bed yesterday, so she couldn't go to her ballet class. She took some medicine, so she feels much better today."], a: 3, c: ['tall', 'thin', 'sick', 'angry'] },
+  { s: ["When Harry moved to a new city, he was sad because he didn't have any friends. But he soon ( [BLANK] ) new friends at school."], a: 1, c: ['made', 'said', 'fell', 'swam'] },
+  { s: ['The students practiced the song again ( [BLANK] ) again until they could remember all of the words.'], a: 2, c: ['or', 'and', 'than', 'but'] },
+  { s: ["A: Is this black bag Leon's?", 'B: No. The brown one is ( [BLANK] ).'], a: 3, c: ['he', 'him', 'his', "he's"] },
+  { s: ['A: Ella, ( [BLANK] ) do you want with your breakfast, apple juice or orange juice?', 'B: I want apple juice, please.'], a: 1, c: ['which', 'how', 'why', 'where'] },
+  { s: ['Yesterday, Sarah and her brother ( [BLANK] ) swimming at the pool near their house.'], a: 4, c: ['are going', 'to go', 'goes', 'went'] },
 ];
+
+const section2_2 = [
+  { s: ['Boy: Can your sister speak French?', 'Girl: Yes. ( [BLANK] ) and she goes to a music school there.'], a: 1, c: ['She lives in Paris,', "I'll see her tomorrow,", "You'll like the food,", 'It rains a lot,'] },
+  { s: ['Girl: I met a famous soccer player yesterday. I took a picture with him.', 'Boy: Really? ( [BLANK] )'], a: 4, c: ['I think so.', "You're welcome.", 'I have a camera.', "You're very lucky."] },
+  { s: ['Brother: Are these your socks?', 'Sister: Yes. ( [BLANK] )', 'Brother: Under the sofa.'], a: 4, c: ['Did you wear them?', 'Can you wash them?', 'Whose are they?', 'Where were they?'] },
+  { s: ['Son: Mom, I finished washing the dishes.', 'Mother: ( [BLANK] ) You can play video games now.', 'Son: Thanks!'], a: 4, c: ["I'm here.", 'Take care.', 'Why not?', 'Good work.'] },
+  { s: ['Girl 1: Can I borrow your textbook? ( [BLANK] )', 'Girl 2: No problem. Here you are.'], a: 3, c: ['Mine is right here.', 'I read it.', 'I forgot mine.', 'They are not here.'] },
+];
+
+const section3_2 = [
+  { jp: '私はパリからあなたにメールを送ります。', tiles: ['①an e-mail', '②Paris', '③from', '④send', '⑤you'], prefix: 'I will', suffix: '.', full: 'I will send you an e-mail from Paris.', c: ['②ー①', '⑤ー④', '④ー②', '⑤ー③'], a: 4 },
+  { jp: 'ジェイクは11歳の時、バスケットボールを始めました。', tiles: ['①basketball', '②he', '③started', '④when', '⑤playing'], prefix: 'Jake', suffix: 'was 11.', full: 'Jake started playing basketball when he was 11.', c: ['②ー①', '①ー②', '⑤ー④', '④ー②'], a: 3 },
+  { jp: 'これが私の町で一番人気のあるレストランです。', tiles: ['①popular', '②the', '③this', '④is', '⑤most'], prefix: '', suffix: 'restaurant in my town.', full: 'This is the most popular restaurant in my town.', c: ['④ー⑤', '⑤ー④', '①ー④', '②ー④'], a: 1 },
+  { jp: 'この辺りにはスーパーマーケットはありません。', tiles: ['①any', "②aren't", '③there', '④around', '⑤supermarkets'], prefix: '', suffix: 'here.', full: "There aren't any supermarkets around here.", c: ['②ー④', '②ー⑤', '④ー①', '④ー②'], a: 2 },
+  { jp: 'パーティーに自分の飲み物を持ってきなさい。', tiles: ['①your', '②drinks', '③bring', '④own', '⑤to'], prefix: '', suffix: 'the party.', full: 'Bring your own drinks to the party.', c: ['①ー②', '②ー④', '③ー④', '④ー③'], a: 1 },
+];
+
+const section4a_2 = [
+  { passage: passageA2, speak: passageA2Speak, q: 'Tommy Brown was a student at the school', c: ['10 years ago.', '11 years ago.', '12 years ago.', '15 years ago.'], a: 1 },
+  { passage: passageA2, speak: passageA2Speak, q: 'What will students be able to do in the afternoon?', c: ['Watch a Greentown Strikers game.', 'Have lunch together with Tommy.', 'Ask Tommy questions.', 'Play basketball with Tommy.'], a: 4 },
+];
+
+const section4b_2 = [
+  { passage: passageB2, speak: passageB2Speak, q: 'Where did Ms. Devlin find the gloves?', c: ['Next to the piano.', 'Under the piano.', 'Next to the chair.', 'Under the chair.'], a: 4 },
+  { passage: passageB2, speak: passageB2Speak, q: "Isabella's ballet class finishes at", c: ['10:00 a.m.', '11:00 a.m.', '2:00 p.m.', '5:00 p.m.'], a: 4 },
+  { passage: passageB2, speak: passageB2Speak, q: "What will Isabella's mother do tomorrow?", c: ["Watch Isabella's basketball game.", "Go and get Isabella's gloves.", 'Have a piano lesson.', "Take Isabella to Ms. Devlin's house."], a: 2 },
+];
+
+const section4c_2 = [
+  { passage: passageC2, speak: passageC2Speak, q: 'How old was Rebecca when she moved to the city?', c: ['Two years old.', 'Four years old.', 'Five years old.', 'Eight years old.'], a: 4 },
+  { passage: passageC2, speak: passageC2Speak, q: 'When did Rebecca go last summer?', c: ["To her grandfather's house.", "To her friend's house.", 'To the mountains near her hometown.', "To her old elementary school."], a: 1 },
+  { passage: passageC2, speak: passageC2Speak, q: "What did Rebecca's grandfather say to Rebecca?", c: ['Horse riding is difficult.', 'Horse riding is fun.', 'Horses are very big.', "Horses aren't friendly."], a: 2 },
+  { passage: passageC2, speak: passageC2Speak, q: 'What do Rebecca and her mother do once a month?', c: ['They go shopping together.', 'They go sightseeing in the city.', "They visit Rebecca's grandfather.", 'They go horse riding together.'], a: 4 },
+  { passage: passageC2, speak: passageC2Speak, q: 'Why is Rebecca happy?', c: ['She got a picture of a horse.', 'She has a new hobby.', 'Her family will move back to her hometown.', 'Her grandfather will visit her.'], a: 2 },
+];
+
+// ─── Sections (with official-style instruction text) ───────────────────────────
+// Builds the 4 大問 for one exam session from its raw question arrays.
+// Question numbers in the instruction text are computed from actual counts,
+// so this works for exams whose section sizes may differ in the future.
+function buildSections(s1, s2, s3, s4a, s4b, s4c) {
+  const s4 = [...s4a, ...s4b, ...s4c];
+  let n = 0;
+  const r1 = [n + 1, n += s1.length];
+  const r2 = [n + 1, n += s2.length];
+  const r3 = [n + 1, n += s3.length];
+  const r4 = [n + 1, n += s4.length];
+  const speakOf = q => q.s.map(l => l.replace('( [BLANK] )', q.c[q.a - 1])).map(l => l.replace(/^[A-Za-z][A-Za-z0-9 .]*:\s/, '')).join('. ');
+  return [
+    {
+      key: '大問1', num: '1', desc: `穴埋め問題・${s1.length}問`,
+      instruction: `次の (${r1[0]}) から (${r1[1]}) までの ( ) に入れるのに最も適切なものを 1, 2, 3, 4 の中から一つ選び、その番号のマーク欄をタップしなさい。`,
+      items: s1.map(q => ({ type: 'blank', stem: q.s, c: q.c, a: q.a, speak: speakOf(q) })),
+    },
+    {
+      key: '大問2', num: '2', desc: `会話選択・${s2.length}問`,
+      instruction: `次の (${r2[0]}) から (${r2[1]}) までの会話について、( ) に入れるのに最も適切なものを 1, 2, 3, 4 の中から一つ選び、その番号のマーク欄をタップしなさい。`,
+      items: s2.map(q => ({ type: 'blank', stem: q.s, c: q.c, a: q.a, speak: speakOf(q) })),
+    },
+    {
+      key: '大問3', num: '3', desc: `並べかえ・${s3.length}問`,
+      instruction: `次の (${r3[0]}) から (${r3[1]}) までの日本文の意味を表すように①から⑤までを並べかえて文を完成させなさい。そして、2番目と4番目にくる語句の最も適切な組み合わせを 1, 2, 3, 4 の中から一つ選び、その番号のマーク欄をタップしなさい。`,
+      items: s3.map(q => ({ type: 'reorder', jp: q.jp, tiles: q.tiles, prefix: q.prefix, suffix: q.suffix, c: q.c, a: q.a, speak: q.full })),
+    },
+    {
+      key: '大問4', num: '4', desc: `長文読解・${s4.length}問`,
+      instruction: `次の掲示・Eメール・説明文の内容に関する質問に対する答えとして、または文を完成させるのに最も適切なものを 1, 2, 3, 4 の中から一つ選び、その番号のマーク欄をタップしなさい。`,
+      items: s4.map(q => ({ type: 'reading', passage: q.passage, speak: q.speak, stem: [q.q], c: q.c, a: q.a })),
+    },
+  ];
+}
+
+const SECTIONS_R1 = buildSections(section1, section2, section3, section4a, section4b, section4c);
+const SECTIONS_R2 = buildSections(section1_2, section2_2, section3_2, section4a_2, section4b_2, section4c_2);
+
+const EXAMS = [
+  { name: '2024年度 第1回', sections: SECTIONS_R1 },
+  { name: '2024年度 第2回', sections: SECTIONS_R2 },
+];
+
+// ─── Active exam / question state ──────────────────────────────────────────────
+let activeExamIdx = 0;
+let SECTIONS = EXAMS[0].sections;
+const questions = [];
+const SECTION_RANGES = [];
 
 // flatten with running question number + section label; also record each
 // section's [start, end) range within the flat `questions` array
-const questions = [];
-const SECTION_RANGES = [];
-SECTIONS.forEach(sec => {
-  const start = questions.length;
-  sec.items.forEach(item => questions.push({ ...item, section: sec.key }));
-  SECTION_RANGES.push({ start, end: questions.length });
-});
-const TOTAL = questions.length;
+function buildQuestions() {
+  questions.length = 0;
+  SECTION_RANGES.length = 0;
+  SECTIONS.forEach(sec => {
+    const start = questions.length;
+    sec.items.forEach(item => questions.push({ ...item, section: sec.key }));
+    SECTION_RANGES.push({ start, end: questions.length });
+  });
+}
+buildQuestions();
 
 // ─── State ──────────────────────────────────────────────────────────────────
 let qi = 0;
@@ -637,6 +748,36 @@ function renderLine(line) {
   return rendered;
 }
 
+function renderExamList() {
+  const wrap = document.getElementById('exam-list');
+  wrap.innerHTML = '';
+  EXAMS.forEach((exam, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'toc-btn';
+    btn.innerHTML = `<span class="toc-badge">${idx + 1}</span>` +
+      `<span><span class="toc-name">${exam.name}</span><span class="toc-desc">大問1〜4・全${exam.sections.reduce((n, s) => n + s.items.length, 0)}問</span></span>`;
+    btn.onclick = () => chooseExam(idx);
+    wrap.appendChild(btn);
+  });
+}
+renderExamList();
+
+function showExamSelect() {
+  document.getElementById('screen-quiz').style.display = 'none';
+  document.getElementById('screen-section').style.display = 'none';
+  document.getElementById('screen-toc').style.display = 'none';
+  document.getElementById('screen-end').style.display = 'none';
+  document.getElementById('screen-start').style.display = 'block';
+}
+
+function chooseExam(idx) {
+  activeExamIdx = idx;
+  SECTIONS = EXAMS[idx].sections;
+  buildQuestions();
+  document.getElementById('screen-start').style.display = 'none';
+  showToc();
+}
+
 function renderToc() {
   const wrap = document.getElementById('toc-list');
   wrap.innerHTML = '';
@@ -655,6 +796,7 @@ function showToc() {
   document.getElementById('screen-quiz').style.display = 'none';
   document.getElementById('screen-section').style.display = 'none';
   document.getElementById('screen-end').style.display = 'none';
+  document.getElementById('toc-exam-title').textContent = EXAMS[activeExamIdx].name;
   renderToc();
   document.getElementById('screen-toc').style.display = 'block';
 }
@@ -695,6 +837,7 @@ function loadQuestion() {
   document.getElementById('section-label').textContent = q.section;
   document.getElementById('progress-bar').style.width = (localIdx / localTotal * 100) + '%';
   document.getElementById('q-no').textContent = `(${qi + 1})`;
+  document.getElementById('footer-exam-label').textContent = `${EXAMS[activeExamIdx].name}検定一次試験（4級）`;
 
   document.getElementById('passage-slot').innerHTML = q.passage || '';
 
@@ -706,7 +849,7 @@ function loadQuestion() {
     stemEl.innerHTML =
       `<div class="jp-line">${q.jp}</div>` +
       `<div class="tile-row">${q.tiles.map(t => `<span class="tile">${t}</span>`).join('')}</div>` +
-      `<div class="reorder-line">${q.prefix ? q.prefix + ' ' : ''}${boxes} ${q.suffix}</div>` +
+      `<div class="reorder-line">${q.prefix ? q.prefix + ' ' : ''}${boxes}${/^[.?!]/.test(q.suffix) ? '' : ' '}${q.suffix}</div>` +
       `<div class="note-line">※ 赤い枠の2番目・4番目にくる語句の組み合わせとして正しいものを選びましょう。</div>`;
   } else {
     stemEl.innerHTML = q.stem.map(l => `<div>${renderLine(l)}</div>`).join('');
