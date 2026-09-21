@@ -358,7 +358,7 @@
     </div>
     <canvas id="ink-canvas"></canvas>
   </div>
-  <div class="ink-toolbar">
+  <div class="ink-toolbar" id="ink-toolbar">
     <button class="ink-btn active" id="ink-mode-answer" onclick="setInkMode('answer')">👉 こたえる</button>
     <button class="ink-btn" id="ink-mode-pen" onclick="setInkMode('pen')">✏️ かく</button>
     <button class="ink-btn" id="ink-mode-eraser" onclick="setInkMode('eraser')">🧹 けす</button>
@@ -399,11 +399,11 @@ const passageASpeak = "Miss Johnson found an umbrella on December 12. It was in 
 const passageB = `
   <div class="passage-box">
     <div class="p-email">
-      <div class="p-meta">From: Nancy Parker&nbsp;&nbsp;/&nbsp;&nbsp;To: Jason Lee<br>Date: November 2&nbsp;&nbsp;/&nbsp;&nbsp;Subject: Free tickets</div>
+      <div class="p-meta">From: Nancy Parker<br>To: Jason Lee<br>Date: November 2<br>Subject: Free tickets</div>
       <div>Hi Jason,<br>I went to a food festival yesterday. All the food looked delicious. I ate some pizza, sandwiches, and cheese. I bought a pumpkin pie for my family. At the festival, I got free movie tickets. Let's go to see <i>The Great Ocean</i>. I am busy on Saturday. Is Friday evening or Sunday OK for you?<br>Your friend,<br>Nancy</div>
     </div>
     <div class="p-email">
-      <div class="p-meta">From: Jason Lee&nbsp;&nbsp;/&nbsp;&nbsp;To: Nancy Parker<br>Date: November 2&nbsp;&nbsp;/&nbsp;&nbsp;Subject: Movie</div>
+      <div class="p-meta">From: Jason Lee<br>To: Nancy Parker<br>Date: November 2<br>Subject: Movie</div>
       <div>Hi Nancy,<br>Sorry, I can't come on Friday evening because I have a piano lesson. I'm going to play the piano at an event on Sunday morning, so I need to practice. We can see <i>The Great Ocean</i> on Sunday afternoon. Let's meet in front of the bookstore. I want to have snacks after the movie.<br>See you soon,<br>Jason</div>
     </div>
   </div>`;
@@ -488,11 +488,11 @@ const passageA2Speak = "Tommy Brown will visit our school on October 15. Tommy w
 const passageB2 = `
   <div class="passage-box">
     <div class="p-email">
-      <div class="p-meta">From: Maggie Devlin&nbsp;&nbsp;/&nbsp;&nbsp;To: Isabella Corbin<br>Date: December 14&nbsp;&nbsp;/&nbsp;&nbsp;Subject: Lost gloves</div>
+      <div class="p-meta">From: Maggie Devlin<br>To: Isabella Corbin<br>Date: December 14<br>Subject: Lost gloves</div>
       <div>Hi Isabella,<br>I found some gloves at my house after your piano lesson today. They are blue. They were under the chair next to the door. If they are yours, please come and get them tomorrow. I'll be here from 10:00 a.m. until 11:00 a.m. and from 2:00 p.m. until 4:00 p.m.<br>Your piano teacher,<br>Ms. Devlin</div>
     </div>
     <div class="p-email">
-      <div class="p-meta">From: Isabella Corbin&nbsp;&nbsp;/&nbsp;&nbsp;To: Maggie Devlin<br>Date: December 15&nbsp;&nbsp;/&nbsp;&nbsp;Subject: Thank you!</div>
+      <div class="p-meta">From: Isabella Corbin<br>To: Maggie Devlin<br>Date: December 15<br>Subject: Thank you!</div>
       <div>Hello Ms. Devlin,<br>Yes, they're my gloves. I was worried because they weren't in my coat pocket when I got home. But I'm busy tomorrow. I have a basketball game in the morning and a ballet class in the afternoon. My ballet class finishes at 5:00 p.m. My mother will come and get the gloves instead.<br>Thank you!<br>Isabella</div>
     </div>
   </div>`;
@@ -873,7 +873,10 @@ function loadQuestion() {
 
   setInkMode('answer');
   clearInk();
-  requestAnimationFrame(resizeInkCanvas);
+  const inkEnabled = pendingSectionIdx >= 2; // 大問3・大問4のみ
+  inkCanvas.style.display = inkEnabled ? 'block' : 'none';
+  document.getElementById('ink-toolbar').style.display = inkEnabled ? 'flex' : 'none';
+  if (inkEnabled) requestAnimationFrame(resizeInkCanvas);
 }
 
 function answerChoice(i) {
